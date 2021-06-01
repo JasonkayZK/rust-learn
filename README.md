@@ -1,62 +1,8 @@
-## Rust Learn
+## Guessing Game
 
-A repo to learn rust.
+Create random number x between 1~100, let player guess;
 
+The supplementary information will be prompted to info you whether the guess number is bigger or not;
 
-
-### Learning Resource
-
-Learn Rust with book：
-
--   [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)；
-
-Gitbook Url：
-
--   https://www.gitbook.com/book/kaisery/trpl-zh-cn/details
-
-
-
-### Create Project
-
-Use Cargo to create a project:
-
-```bash
-cargo new hello_rust --bin
-```
-
-build:
-
-```bash
-cd hello_rust && cargo build --release
-```
-
-run:
-
-```bash
-./target/release/hello_rust
-Hello, world!
-```
-
->   Or just run program with:
->
->   ```bash
->   cargo run
->   ```
-
-
-
-### Now Finished
-
-| Project | Date | Note |
-| ------- | ---- | ---- |
-|         |      |      |
-|         |      |      |
-|         |      |      |
-
-
-
-### More Info
-
--   https://rust.cc/
--   https://wiki.rust-china.org/
+The congratulation info will be prompted if your guessing number is correct;
 
