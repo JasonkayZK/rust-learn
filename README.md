@@ -6,3 +6,18 @@ The supplementary information will be prompted to info you whether the guess num
 
 The congratulation info will be prompted if your guessing number is correct;
 
+
+
+### To Use
+
+Run the game:
+
+```bash
+cargo run
+```
+
+
+
+### More Info
+
+-   A guessing game from [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)
