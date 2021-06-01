@@ -47,11 +47,11 @@ Hello, world!
 
 ### Now Finished
 
-| Project | Date | Note |
-| ------- | ---- | ---- |
-|         |      |      |
-|         |      |      |
-|         |      |      |
+| Project                                                      | Date       | Note                                                         |
+| ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
+| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01 | A guessing game from [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)； |
+|                                                              |            |                                                              |
+|                                                              |            |                                                              |
 
 
 
