@@ -1,63 +1,36 @@
-## Rust Learn
+## Multiple Main
 
-A repo to learn rust.
+Sometimes we need to run multiple demos in different main functions;
 
+Here is how it works in Rust;
 
+### Create `examples` folder
 
-### Learning Resource
+First, create `examples` folder in the same directory as `src`;
 
-Learn Rust with book：
-
--   [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)；
-
-Gitbook Url：
-
--   https://www.gitbook.com/book/kaisery/trpl-zh-cn/details
-
-
-
-### Create Project
-
-Use Cargo to create a project:
-
-```bash
-cargo new hello_rust --bin
+```shell
+mkdir "examples"
 ```
 
-build:
+### Create demo in `examples` folder
 
-```bash
-cd hello_rust && cargo build --release
+```shell
+vi examples/main1.rs
 ```
 
-run:
+write rust code:
 
-```bash
-./target/release/hello_rust
-Hello, world!
+```rust
+fn main() {
+    println!("Hello World in main1!");
+}
 ```
 
->   Or just run program with:
->
->   ```bash
->   cargo run
->   ```
+### Run the examples
 
-
-
-### Now Finished
-
-| Project                                                      | Date       | Note                                                         |
-| ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
-| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01 | A guessing game from [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn) |
-| [chapter3-variables](https://github.com/JasonkayZK/rust-learn/tree/chapter3-variables) | 2021-06-02 | Variable & Type in Rust                                      |
-|                                                              |            |                                                              |
-|                                                              |            |                                                              |
-
-
-
-### More Info
-
--   https://rust.cc/
--   https://wiki.rust-china.org/
-
+```shell
+cargo run --color=always --package multiple_main --example main1
+    Finished dev [unoptimized + debuginfo] target(s) in 0.00s
+     Running `target\debug\examples\main1.exe`
+Hello World in main1!
+```
