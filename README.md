@@ -1,10 +1,10 @@
-## Rust Learn
+# Rust Learn
 
 A repo to learn rust.
 
+<br/>
 
-
-### Learning Resource
+## Learning Resource
 
 Learn Rust with book：
 
@@ -14,9 +14,9 @@ Gitbook Url：
 
 -   https://www.gitbook.com/book/kaisery/trpl-zh-cn/details
 
+<br/>
 
-
-### Create Project
+## Create Project
 
 Use Cargo to create a project:
 
@@ -43,9 +43,9 @@ Hello, world!
 >   cargo run
 >   ```
 
+<br/>
 
-
-### Now Finished
+## Now Finished
 
 | Project                                                      | Date       | Note                                                         |
 | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
@@ -54,9 +54,9 @@ Hello, world!
 | [multiple-main-demo](https://github.com/JasonkayZK/rust-learn/tree/multiple-main-demo) | 2021-06-02 | A demo to show how to run multiple main in Rust              |
 |                                                              |            |                                                              |
 
+<br/>
 
-
-### More Info
+## More Info
 
 -   https://rust.cc/
 -   https://wiki.rust-china.org/
