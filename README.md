@@ -1,66 +1,10 @@
-# Rust Learn
+# Struct
 
-A repo to learn rust.
-
-<br/>
-
-## Learning Resource
-
-Learn Rust with book：
-
--   [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)；
-
-Gitbook Url：
-
--   https://www.gitbook.com/book/kaisery/trpl-zh-cn/details
-
-<br/>
-
-## Create Project
-
-Use Cargo to create a project:
-
-```bash
-cargo new hello_rust --bin
-```
-
-build:
-
-```bash
-cd hello_rust && cargo build --release
-```
-
-run:
-
-```bash
-./target/release/hello_rust
-Hello, world!
-```
-
->   Or just run program with:
->
->   ```bash
->   cargo run
->   ```
-
-<br/>
-
-## Now Finished
-
-| Project                                                      | Date       | Note                                                         |
-| ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
-| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01 | A guessing game from [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn) |
-| [chapter3-variables](https://github.com/JasonkayZK/rust-learn/tree/chapter3-variables) | 2021-06-02 | Variable & Type in Rust                                      |
-| [multiple-main-demo](https://github.com/JasonkayZK/rust-learn/tree/multiple-main-demo) | 2021-06-02 | A demo to show how to run multiple main in Rust              |
-| [chapter4-function](https://github.com/JasonkayZK/rust-learn/tree/chapter4-function) | 2021-06-02 | Function in Rust                                             |
-| [chapter5-control-flow](https://github.com/JasonkayZK/rust-learn/tree/chapter5-control-flow) | 2021-06-02 | Control flow(if/loop/while/for) in Rust                      |
-| [chapter6-ownership](https://github.com/JasonkayZK/rust-learn/tree/chapter6-ownership) | 2021-06-03 | Ownership(also string/slice) in Rust                         |
-|                                                              |            |                                                              |
-
-<br/>
-
-## More Info
-
--   https://rust.cc/
--   https://wiki.rust-china.org/
-
+-   Define
+-   Init
+-   Structed tuple
+-   Reference element in struct
+-   Print struct (`derive` trait)
+-   Define methods
+-   Auto refer and derefer
+-   Associated method
