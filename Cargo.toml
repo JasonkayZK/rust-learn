@@ -1,5 +1,5 @@
 [package]
-name = "hello_rust"
+name = "enum_and_match"
 version = "0.1.0"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
