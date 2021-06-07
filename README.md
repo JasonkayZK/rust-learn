@@ -49,7 +49,7 @@ Hello, world!
 
 | Project                                                      | Date       | Note                                                         |
 | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
-| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01 | A guessing game from [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn) |
+| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01 | A guessing game |
 | [chapter3-variables](https://github.com/JasonkayZK/rust-learn/tree/chapter3-variables) | 2021-06-02 | Variable & Type in Rust                                      |
 | [multiple-main-demo](https://github.com/JasonkayZK/rust-learn/tree/multiple-main-demo) | 2021-06-02 | A demo to show how to run multiple main in Rust              |
 | [chapter4-function](https://github.com/JasonkayZK/rust-learn/tree/chapter4-function) | 2021-06-02 | Function in Rust                                             |
