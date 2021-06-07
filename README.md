@@ -56,6 +56,7 @@ Hello, world!
 | [chapter5-control-flow](https://github.com/JasonkayZK/rust-learn/tree/chapter5-control-flow) | 2021-06-02 | Control flow(if/loop/while/for) in Rust                      |
 | [chapter6-ownership](https://github.com/JasonkayZK/rust-learn/tree/chapter6-ownership) | 2021-06-03 | Ownership(also string/slice) in Rust                         |
 | [chapter7-struct](https://github.com/JasonkayZK/rust-learn/tree/chapter7-struct) | 2021-06-04 | Struct in Rust                                               |
+| [chapter8-enum-and-match](https://github.com/JasonkayZK/rust-learn/tree/chapter8-enum-and-match) | 2021-06-07 | Enum & Match in Rust                                         |
 |                                                              |            |                                                              |
 
 <br/>
