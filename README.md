@@ -59,7 +59,7 @@ Hello, world!
 | [chapter8-enum-and-match](https://github.com/JasonkayZK/rust-learn/tree/chapter8-enum-and-match) | 2021-06-07 | Enum & Match in Rust                            |
 | [chapter9-modules](https://github.com/JasonkayZK/rust-learn/tree/chapter9-modules) | 2021-06-07 | Modules(mod/pub/use/super) in Rust              |
 | [chapter10-collections](https://github.com/JasonkayZK/rust-learn/tree/chapter10-collections) | 2021-06-09 | Vector & String & Map in Rust                   |
-|                                                              |            |                                                 |
+| [chapter11-error-handling](https://github.com/JasonkayZK/rust-learn/tree/chapter11-error-handling) | 2021-06-09 | Error handling in Rust (Panic! & Result)        |
 |                                                              |            |                                                 |
 
 <br/>
