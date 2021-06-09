@@ -1,6 +1,10 @@
 [package]
-name = "hello_rust"
+name = "error_handling"
 version = "0.1.0"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+
+
+#[profile.release]
+#panic = 'abort'
