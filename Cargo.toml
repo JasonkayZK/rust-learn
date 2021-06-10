@@ -1,6 +1,8 @@
 [package]
-name = "hello_rust"
+name = "generic_trait_lifetime"
 version = "0.1.0"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+
+rand = "0.8.3"
