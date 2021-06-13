@@ -62,6 +62,7 @@ Hello, world!
 | [chapter11-error-handling](https://github.com/JasonkayZK/rust-learn/tree/chapter11-error-handling) | 2021-06-09 | Error handling in Rust (Panic! & Result)        |
 | [chapter12-generic-trait-lifetime](https://github.com/JasonkayZK/rust-learn/tree/chapter12-generic-trait-lifetime) | 2021-06-10 | Generic & Trait & Lifetime in Rust              |
 | [chapter13-testing](https://github.com/JasonkayZK/rust-learn/tree/chapter13-testing) | 2021-06-12 | Testing(Write, Run & Organize) in Rust          |
+| [chapter14-io-project-grep](https://github.com/JasonkayZK/rust-learn/tree/chapter14-io-project-grep) | 2021-06-13 | A io project: `mini-grep` written in rust.      |
 |                                                              |            |                                                 |
 
 <br/>
