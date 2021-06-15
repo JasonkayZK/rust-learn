@@ -1,0 +1,2 @@
+# Install
+cargo install ripgrep
