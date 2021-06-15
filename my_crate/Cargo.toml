@@ -1,0 +1,13 @@
+[package]
+name = "my_crate"
+version = "0.1.0"
+authors = ["JasonkayZK <271226192@qq.com>"]
+edition = "2018"
+description = "Jasonkay's crate"
+license = "MIT"
+license-file = "LICENSE"
+homepage = "https://github.com/JasonkayZK/rust-learn/tree/chapter16-cargo/my_crate"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
