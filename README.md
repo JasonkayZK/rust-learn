@@ -65,6 +65,7 @@ Hello, world!
 | [chapter14-io-project-grep](https://github.com/JasonkayZK/rust-learn/tree/chapter14-io-project-grep) | 2021-06-13 | A io project: `mini-grep` written in rust.                   |
 | [chapter15-functional-features](https://github.com/JasonkayZK/rust-learn/tree/chapter15-functional-features) | 2021-06-14 | Functional features(Closure & Iterator) in rust.             |
 | [chapter16-cargo](https://github.com/JasonkayZK/rust-learn/tree/chapter16-cargo) | 2021-06-15 | Cargo(Config, Publish, Install & Extend) & Workspace in rust. |
+| [chapter17-smart-pointer](https://github.com/JasonkayZK/rust-learn/tree/chapter17-smart-pointer) | 2021-09-29 | Smart Pointer in Rust.                                       |
 |                                                              |            |                                                              |
 
 <br/>
