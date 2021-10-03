@@ -1,3 +1,5 @@
+use my_libs::hello::say_hello;
+
 fn main() {
-    println!("Hello World!");
+    assert_eq!(say_hello("jasonkay").unwrap(), true);
 }
