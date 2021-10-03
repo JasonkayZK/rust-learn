@@ -53,13 +53,13 @@ jobs:
           override: true
       - name: Cache
         uses: Swatinem/rust-cache@v1
-      - name: Run cargo test --no-run
-        uses: actions-rs/cargo@v1
-        with:
-          command: test --no-run
+#      - name: Run cargo test --no-run
+#        uses: actions-rs/cargo@v1
+#        with:
+#          command: test --no-run
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         env:
-          RUST_TEST_THREADS: 1
+          RUST_TEST_THREADS: 8
         with:
           command: test
