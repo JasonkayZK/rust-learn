@@ -1,5 +1,9 @@
 # Rust Learn
 
+<a href="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml">
+  <img src="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml/badge.svg"/>
+</a>
+
 A repo to learn rust.
 
 This main branch is a standard template for new rust project! 
