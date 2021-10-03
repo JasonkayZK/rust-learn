@@ -55,10 +55,10 @@ jobs:
       - name: Run cargo test --no-run
         uses: actions-rs/cargo@v1
         with:
-          command: cargo test --no-run
+          command: test --no-run
       - name: Run cargo test
         uses: actions-rs/cargo@v1
         env:
           RUST_TEST_THREADS: 1
         with:
-          command: cargo test
+          command: test
