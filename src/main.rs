@@ -1,3 +1,7 @@
+extern crate my_lib;
+
+use my_lib::MyLinkedList;
+
 fn main() {
-    println!("Hello World!");
+    MyLinkedList
 }
