@@ -6,7 +6,7 @@
 
 A repo to learn rust.
 
-This main branch is a standard template for new rust project! 
+This main branch is a standard template for new rust project!
 
 <br/>
 
@@ -71,7 +71,9 @@ Hello, world!
 | [chapter14-io-project-grep](https://github.com/JasonkayZK/rust-learn/tree/chapter14-io-project-grep) | 2021-06-13 | A io project: `mini-grep` written in rust.                   |
 | [chapter15-functional-features](https://github.com/JasonkayZK/rust-learn/tree/chapter15-functional-features) | 2021-06-14 | Functional features(Closure & Iterator) in rust.             |
 | [chapter16-cargo](https://github.com/JasonkayZK/rust-learn/tree/chapter16-cargo) | 2021-06-15 | Cargo(Config, Publish, Install & Extend) & Workspace in rust. |
-| [chapter17-smart-pointer](https://github.com/JasonkayZK/rust-learn/tree/chapter17-smart-pointer) | 2021-09-29 | Smart Pointer in Rust(Within double-linked-list accomplishment).                                       |
+| [chapter17-smart-pointer](https://github.com/JasonkayZK/rust-learn/tree/chapter17-smart-pointer) | 2021-09-29 | Smart Pointer in Rust(Within double-linked-list accomplishment). |
+| [chapter18-concurrency](https://github.com/JasonkayZK/rust-learn/tree/chapter18-concurrency) | 2021-10-03 | Concurrency in Rust.                                         |
+| [actix-web-demo](https://github.com/JasonkayZK/rust-learn/tree/actix-web-demo) | 2021-10-04 | RESTful API accomplished by [actix-web](https://github.com/actix/actix-web) framework. |
 |                                                              |            |                                                              |
 
 <br/>
@@ -80,4 +82,3 @@ Hello, world!
 
 -   https://rust.cc/
 -   https://wiki.rust-china.org/
-
