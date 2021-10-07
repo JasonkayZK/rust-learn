@@ -1,12 +1,3 @@
-# Rbatis Demo
-
-A branch to show how [rbatis](https://github.com/rbatis/rbatis) is working.
-
-## How to use
-
-1. start and init your mysql database with script `./sql/schema.sql`:
-
-```mysql
 USE `test`;
 
 DROP TABLE IF EXISTS `pets`;
@@ -28,10 +19,3 @@ INSERT INTO `pets` (ID, NAME, AGE)
 VALUES (2, 'dog', '2');
 INSERT INTO `pets` (ID, NAME, AGE)
 VALUES (3, 'mouse', '3');
-```
-
-2. change `RB.link("mysql://root:123456@localhost:3306/test"` to user own MySQL config;
-
-3. run test in `./dao/src/pet`;
-
-> change `#[cfg(not(test))]` to `#[cfg(test)]`;

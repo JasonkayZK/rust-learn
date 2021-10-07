@@ -1,0 +1,31 @@
+[package]
+name = "dao"
+version = "0.1.0"
+authors = ["JasonkayZK <271226192@qq.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# json (required)
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+# Date time (required)
+chrono = { version = "0.4", features = ["serde"] }
+
+# logging lib(required)
+log = "0.4"
+fast_log="1.3"
+
+# BigDecimal lib(optional)
+bigdecimal = "0.2"
+
+# rbatis lib(required)
+rbatis =  { version = "2.0" }
+
+# static
+lazy_static = "1.4.0"
+
+# test
+tokio = { version = "1.12.0", features = ["full"] }
