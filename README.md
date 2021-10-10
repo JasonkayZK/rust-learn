@@ -19,3 +19,10 @@ run command:
 ```shell
 cargo generate --git https://github.com/rustwasm/wasm-pack-template
 ```
+
+## Read More
+
+-   https://llever.com/rustwasm-book/introduction.zh.html
+-   https://zhuanlan.zhihu.com/p/104299612
+-   https://www.modb.pro/db/46512
+-   https://developer.mozilla.org/zh-CN/docs/WebAssembly/Rust_to_wasm
