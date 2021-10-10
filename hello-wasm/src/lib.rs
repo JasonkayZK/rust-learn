@@ -1,6 +1,7 @@
 mod utils;
 
 use wasm_bindgen::prelude::*;
+use crate::utils::set_panic_hook;
 
 // When the `wee_alloc` feature is enabled, use `wee_alloc` as the global
 // allocator.
@@ -9,11 +10,12 @@ use wasm_bindgen::prelude::*;
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
-extern "C" {
+extern {
     fn alert(s: &str);
 }
 
 #[wasm_bindgen]
 pub fn greet() {
-    alert("Hello, hello-wasm from local!");
+    set_panic_hook();
+    alert("Hello, hello-wasm in local again!");
 }

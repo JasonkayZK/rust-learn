@@ -1,3 +1,3 @@
-import * as wasm from "hello_wasm";
+import * as wasm from "hello-wasm";
 
 wasm.greet();
