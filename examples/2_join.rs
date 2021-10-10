@@ -2,7 +2,7 @@ use std::thread;
 use std::time::Duration;
 
 fn main() {
-    thread::spawn(|| {
+    let handle = thread::spawn(|| {
         for i in 1..10 {
             println!("hi number {} from the spawned thread!", i);
             thread::sleep(Duration::from_millis(1));
@@ -14,5 +14,5 @@ fn main() {
         thread::sleep(Duration::from_millis(1));
     }
 
-    // spawned thread will exit, when main is end!
+    handle.join().unwrap();
 }
