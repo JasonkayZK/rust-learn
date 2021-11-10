@@ -20,3 +20,5 @@ Cargo.lock
 **/*.rs.bk
 
 !/*/Cargo.lock
+
+.ipynb_checkpoints/
