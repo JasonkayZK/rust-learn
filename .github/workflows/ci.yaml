@@ -5,9 +5,13 @@ on:
   push:
     paths-ignore:
       - '**.md'
+    branches-ignore:
+      - jupyter
   pull_request:
     paths-ignore:
       - '**.md'
+    branches-ignore:
+      - jupyter
 
 env:
   RUST_TOOLCHAIN: stable
