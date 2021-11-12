@@ -1,4 +1,4 @@
-# Rust Learn
+# **Rust Learn**
 
 <a href="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml">
   <img src="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml/badge.svg"/>
@@ -10,7 +10,7 @@ This main branch is a standard template for new rust project!
 
 <br/>
 
-## Learning Resource
+## **Learning Resource**
 
 Learn Rust with book：
 
@@ -22,7 +22,19 @@ Gitbook Url：
 
 <br/>
 
-## Create Project
+## **Jupyter**
+
+**The Jupyter branch is shown below (Which helps you run Rust as script!)：**
+
+-   https://github.com/JasonkayZK/rust-learn/tree/jupyter
+
+Which depend on jupyter kernal：
+
+-   https://github.com/google/evcxr/tree/main/evcxr_jupyter
+
+<br/>
+
+## **Create Project**
 
 Use Cargo to create a project:
 
@@ -51,7 +63,7 @@ Hello, world!
 
 <br/>
 
-## Now Finished
+## **Now Finished**
 
 | Project                                                      | Date       | Note                                                         |
 | ------------------------------------------------------------ | ---------- | ------------------------------------------------------------ |
@@ -81,7 +93,7 @@ Hello, world!
 
 <br/>
 
-## More Info
+## **More Info**
 
 -   https://rust.cc/
 -   https://wiki.rust-china.org/
