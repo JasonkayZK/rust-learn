@@ -85,6 +85,7 @@ Hello, world!
 | [chapter16-cargo](https://github.com/JasonkayZK/rust-learn/tree/chapter16-cargo) | 2021-06-15 | Cargo(Config, Publish, Install & Extend) & Workspace in rust. |
 | [chapter17-smart-pointer](https://github.com/JasonkayZK/rust-learn/tree/chapter17-smart-pointer) | 2021-09-29 | Smart Pointer in Rust(Within double-linked-list accomplishment). |
 | [chapter18-concurrency](https://github.com/JasonkayZK/rust-learn/tree/chapter18-concurrency) | 2021-10-03 | Concurrency in Rust.                                         |
+| [chapter19-oop](https://github.com/JasonkayZK/rust-learn/tree/chapter19-oop) | 2021-11-14 | Object-Oriented-Programming in Rust.                         |
 | [actix-web-demo](https://github.com/JasonkayZK/rust-learn/tree/actix-web-demo) | 2021-10-04 | RESTful API accomplished by [actix-web](https://github.com/actix/actix-web) framework. |
 | [rbatis-demo](https://github.com/JasonkayZK/rust-learn/tree/rbatis-demo) | 2021-10-07 | A demo to show how to use ORM framework: [rbatis](https://github.com/rbatis/rbatis) |
 | [wasm-hello](https://github.com/JasonkayZK/rust-learn/tree/wasm-hello) | 2021-10-09 | A simple rust-wasm demo.[Use template: [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template)]<br />Linked Blog: [Rust实现WebAssembly初窥](https://jasonkayzk.github.io/2021/10/10/Rust实现WebAssembly初窥/) |
