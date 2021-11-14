@@ -10,4 +10,4 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
-my-libs = { path = "libs", version = "0.1.0" }
+blog = { path = "blog", version = "0.1.0" }

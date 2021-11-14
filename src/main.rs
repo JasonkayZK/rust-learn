@@ -1,14 +1,14 @@
-use my_libs::hello::say_hello;
+use blog::blog::Post;
 
 fn main() {
-    match say_hello("jasonkay") {
-        Ok(res) => {
-            if res {
-                println!("let's rust-up!")
-            }
-        }
-        Err(e) => {
-            println!("error occurred: {:?}", e)
-        }
-    }
+    let mut post = Post::new();
+
+    post.add_text("I ate a salad today");
+    assert_eq!("", post.content());
+
+    post.request_review();
+    assert_eq!("", post.content());
+
+    post.approve();
+    assert_eq!("I ate a salad today", post.content());
 }
