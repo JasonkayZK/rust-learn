@@ -87,6 +87,7 @@ Hello, world!
 | [chapter18-concurrency](https://github.com/JasonkayZK/rust-learn/tree/chapter18-concurrency) | 2021-10-03 | Concurrency in Rust.                                         |
 | [chapter19-oop](https://github.com/JasonkayZK/rust-learn/tree/chapter19-oop) | 2021-11-14 | Object-Oriented-Programming in Rust.                         |
 | [chapter20-match-patterns](https://github.com/JasonkayZK/rust-learn/tree/chapter20-match-patterns) | 2021-11-14 | The Match Patterns in Rust.                                  |
+| [chapter21-advanced-features](https://github.com/JasonkayZK/rust-learn/tree/chapter21-advanced-features) | 2021-11-14 | The advanced features in Rust:<br />Unsafe、Lifetime、Trait、Type、Function & Closure |
 | [actix-web-demo](https://github.com/JasonkayZK/rust-learn/tree/actix-web-demo) | 2021-10-04 | RESTful API accomplished by [actix-web](https://github.com/actix/actix-web) framework. |
 | [rbatis-demo](https://github.com/JasonkayZK/rust-learn/tree/rbatis-demo) | 2021-10-07 | A demo to show how to use ORM framework: [rbatis](https://github.com/rbatis/rbatis) |
 | [wasm-hello](https://github.com/JasonkayZK/rust-learn/tree/wasm-hello) | 2021-10-09 | A simple rust-wasm demo.[Use template: [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template)]<br />Linked Blog: [Rust实现WebAssembly初窥](https://jasonkayzk.github.io/2021/10/10/Rust实现WebAssembly初窥/) |
