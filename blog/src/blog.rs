@@ -12,7 +12,9 @@ impl Post {
     }
 
     pub fn add_text(&mut self, text: &str) {
-        self.content.push_str(text);
+        if let Some(s) = self.state.take() {
+            self.state = Some(s.add_text(self, text));
+        }
     }
 
     pub fn content(&self) -> &str {
@@ -28,6 +30,12 @@ impl Post {
         }
     }
 
+    pub fn reject(&mut self) {
+        if let Some(s) = self.state.take() {
+            self.state = Some(s.reject());
+        }
+    }
+
     pub fn approve(&mut self) {
         if let Some(s) = self.state.take() {
             self.state = Some(s.approve());
@@ -36,11 +44,15 @@ impl Post {
 }
 
 trait State {
+    fn add_text(self: Box<Self>, _post: &mut Post, _text: &str) -> Box<dyn State>;
+
     fn request_review(self: Box<Self>) -> Box<dyn State>;
+
+    fn reject(self: Box<Self>) -> Box<dyn State>;
 
     fn approve(self: Box<Self>) -> Box<dyn State>;
 
-    fn content<'a>(&self, _: &'a Post) -> &'a str {
+    fn content<'a>(&self, _post: &'a Post) -> &'a str {
         ""
     }
 }
@@ -48,8 +60,17 @@ trait State {
 struct Draft {}
 
 impl State for Draft {
+    fn add_text(self: Box<Self>, post: &mut Post, text: &str) -> Box<dyn State> {
+        post.content.push_str(text);
+        self
+    }
+
     fn request_review(self: Box<Self>) -> Box<dyn State> {
         Box::new(PendingReview {})
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        self
     }
 
     fn approve(self: Box<Self>) -> Box<dyn State> {
@@ -60,8 +81,16 @@ impl State for Draft {
 struct PendingReview {}
 
 impl State for PendingReview {
+    fn add_text(self: Box<Self>, _post: &mut Post, _text: &str) -> Box<dyn State> {
+        self
+    }
+
     fn request_review(self: Box<Self>) -> Box<dyn State> {
         self
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
+        Box::new(Draft {})
     }
 
     fn approve(self: Box<Self>) -> Box<dyn State> {
@@ -72,7 +101,15 @@ impl State for PendingReview {
 struct Published {}
 
 impl State for Published {
+    fn add_text(self: Box<Self>, _post: &mut Post, _text: &str) -> Box<dyn State> {
+        self
+    }
+
     fn request_review(self: Box<Self>) -> Box<dyn State> {
+        self
+    }
+
+    fn reject(self: Box<Self>) -> Box<dyn State> {
         self
     }
 

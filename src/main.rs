@@ -9,6 +9,18 @@ fn main() {
     post.request_review();
     assert_eq!("", post.content());
 
+    post.add_text("No way for this phase!");
+    assert_eq!("", post.content());
+
+    post.reject();
+    assert_eq!("", post.content());
+
+    post.add_text(", add after rejected!");
+    assert_eq!("", post.content());
+
+    post.request_review();
+    assert_eq!("", post.content());
+
     post.approve();
-    assert_eq!("I ate a salad today", post.content());
+    assert_eq!("I ate a salad today, add after rejected!", post.content());
 }
