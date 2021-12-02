@@ -14,7 +14,7 @@ trait OutlinePrint: fmt::Display {
     }
 }
 
-struct Point{
+struct Point {
     x: i32,
     y: i32,
 }
@@ -25,9 +25,8 @@ impl Display for Point {
     }
 }
 
-impl OutlinePrint for Point {
-}
+impl OutlinePrint for Point {}
 
 fn main() {
-    println!("{:?}", Point{x: 100, y: 100}.outline_print());
+    println!("{:?}", Point { x: 100, y: 100 }.outline_print());
 }

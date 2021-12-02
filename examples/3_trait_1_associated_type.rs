@@ -37,7 +37,8 @@ struct AnotherCounter<T> {
     list: Vec<T>,
 }
 
-impl GenericIterator<i64> for AnotherCounter<i64> { // explict announce type!
+impl GenericIterator<i64> for AnotherCounter<i64> {
+    // explict announce type!
 
     fn next(&mut self) -> Option<i64> {
         self.list.pop()
@@ -53,9 +54,30 @@ impl GenericIterator<f64> for AnotherCounter<f64> {
 }
 
 fn main() {
-    println!("{}", Counter { list: vec![1, 2, 3] }.next().unwrap());
-    println!("{}", AnotherCounter { list: vec![1, 2, 3] }.next().unwrap());
-    println!("{}", AnotherCounter { list: vec![1.1, 2.2, 3.3] }.next().unwrap());
+    println!(
+        "{}",
+        Counter {
+            list: vec![1, 2, 3]
+        }
+        .next()
+        .unwrap()
+    );
+    println!(
+        "{}",
+        AnotherCounter {
+            list: vec![1, 2, 3]
+        }
+        .next()
+        .unwrap()
+    );
+    println!(
+        "{}",
+        AnotherCounter {
+            list: vec![1.1, 2.2, 3.3]
+        }
+        .next()
+        .unwrap()
+    );
 
     // Compiling err: method `next` not found for this!
     // println!("{}", AnotherCounter { list: vec!["1", "2", "3"] }.next().unwrap());
