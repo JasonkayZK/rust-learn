@@ -1,6 +1,6 @@
-use crate::conf::conf::CONFIG;
+use crate::configs::conf::CONFIG;
 
-mod conf;
+mod configs;
 
 fn main() {
     println!("{:?}", CONFIG);

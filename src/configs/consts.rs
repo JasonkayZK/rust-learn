@@ -1,6 +1,6 @@
 use std::path::MAIN_SEPARATOR;
 
-pub const CONFIG_PATH_PREFIX: &str = "conf";
+pub const CONFIG_PATH_PREFIX: &str = "configs";
 pub const DEFAULT_CONFIG: &str = "default";
 
 pub const ENV_DEVELOPMENT: &str = "Development";

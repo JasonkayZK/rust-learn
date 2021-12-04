@@ -16,8 +16,3 @@ repos:
         entry: cargo fmt --
         language: rust
         types: [ rust ]
-      - id: cargo-clippy
-        name: cargo clippy
-        entry: cargo clippy -- -D warnings
-        language: rust
-        types: [ rust ]
