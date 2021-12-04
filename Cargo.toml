@@ -1,5 +1,5 @@
 [package]
-name = "rust-learn"
+name = "url-mapper-rs"
 version = "0.1.0"
 edition = "2018"
 license-file = "LICENSE"
@@ -10,4 +10,7 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
-my-libs = { path = "libs", version = "0.1.0" }
+anyhow = "1.0.41"
+config = { version = "0.11.0", features = ["json"] }
+lazy_static = "1.4.0"
+serde = { version = "1.0.126", features = ["derive"] }
