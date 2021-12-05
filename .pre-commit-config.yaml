@@ -11,8 +11,7 @@ repos:
 
   - repo: local
     hooks:
-      - id: cargo-fmt
-        name: cargo fmt
-        entry: cargo fmt --
-        language: rust
-        types: [ rust ]
+      - id: make-ci
+        name: make ci
+        entry: make ci
+        language: system
