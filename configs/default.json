@@ -2,6 +2,7 @@
   "host": "127.0.0.1",
   "port": 9527,
   "database": {
-    "url": "postgres:///testdb?sslmode=disable"
+    "url": "postgres://username:passwd@host:port/db_name",
+    "max_connections": 16
   }
 }
