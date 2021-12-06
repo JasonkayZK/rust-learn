@@ -8,6 +8,7 @@ type Responder<T> = Sender<Result<T, sqlx::Error>>;
 pub type BaseConnection = PoolConnection<Postgres>;
 
 #[derive(Debug)]
+#[allow(dead_code)]
 pub enum BaseMapperEnum<I, T> {
     ReadDataList { resp: Responder<Vec<T>> },
     ReadDataById { id: I, resp: Responder<T> },
@@ -21,7 +22,7 @@ macro_rules! resp_failed {
     ($m: expr, $f: tt) => {
         match $m {
             Ok(_) => {}
-            Err(e) => eprintln!("Resp failed for {}, error: {:?}", $f, e),
+            Err(e) => tracing::error!("Resp failed for {}, error: {:?}", $f, e),
         }
     };
 }
