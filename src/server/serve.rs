@@ -1,17 +1,28 @@
 use crate::server::router::router;
 use crate::CONFIG;
 use anyhow::Result;
-use hyper::Server;
+use hyper::Server as HyperServer;
 use routerify::RouterService;
+use tokio::sync::mpsc::Sender;
 use tracing::info;
 
-pub async fn listen() -> Result<()> {
-    let router = router();
-    let service = RouterService::new(router).unwrap();
-    let address = format!("{}:{}", CONFIG.host, CONFIG.port).parse()?;
+pub struct Server<T: Send + Sync + 'static> {
+    db_sender: Sender<T>,
+}
 
-    let server = Server::bind(&address).serve(service);
-    info!("Server started listening on {}", address);
-    server.await?;
-    Ok(())
+impl<T: Send + Sync + 'static> Server<T> {
+    pub fn new(db_sender: Sender<T>) -> Self {
+        Self { db_sender }
+    }
+
+    pub async fn listen(&self) -> Result<()> {
+        let router = router().data(self.db_sender.clone()).build().unwrap();
+        let service = RouterService::new(router).unwrap();
+
+        let address = format!("{}:{}", CONFIG.host, CONFIG.port).parse()?;
+        let server = HyperServer::bind(&address).serve(service);
+        info!("Server started listening on {}", address);
+        server.await?;
+        Ok(())
+    }
 }
