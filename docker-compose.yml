@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:14.1
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./dbschema/schema.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=123456
+  url-mapper-rs:
+    image: jasonkay/url-mapper-rs:v1
+    build: .
+    ports:
+      - "9527:9527"
+    environment:
+      - DATABASE_URL=postgres://postgres:123456@db:5432/postgres?sslmode=disable
+    depends_on:
+      - db
+volumes:
+  pgdata:
