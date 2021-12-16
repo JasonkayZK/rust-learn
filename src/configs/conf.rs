@@ -12,6 +12,7 @@ pub struct Conf {
     pub host: String,
     pub port: i32,
     pub database: Database,
+    pub auth_token: String,
 }
 
 impl Conf {
@@ -49,6 +50,7 @@ impl Debug for CONFIG {
             .field("host", &self.host)
             .field("port", &self.port)
             .field("database", &self.database)
+            .field("auth_token", &self.auth_token)
             .finish()
     }
 }

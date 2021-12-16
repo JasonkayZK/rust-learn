@@ -4,5 +4,6 @@
   "database": {
     "url": "postgres://username:passwd@host:port/db_name",
     "max_connections": 16
-  }
+  },
+  "auth_token": "123456"
 }

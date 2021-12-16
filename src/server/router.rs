@@ -1,9 +1,11 @@
 use crate::dao::url_map_dao::UrlMap;
 use crate::service::url_maps_router;
-use crate::BaseMapperEnum;
-use anyhow::{Error, Result};
-use hyper::{Body, Request, Response, StatusCode};
+use crate::{BaseMapperEnum, CONFIG};
+use anyhow::{anyhow, Error, Result};
+use base64::decode;
+use hyper::{Body, Request, Response};
 use routerify::{ext::RequestExt, Middleware, RequestInfo, Router, RouterBuilder};
+use std::str::from_utf8;
 use tokio::sync::mpsc::Sender;
 use tracing::{error, info};
 
@@ -49,8 +51,12 @@ async fn logger(req: Request<Body>) -> Result<Request<Body>> {
 
 async fn error_handler(err: routerify::RouteError, _: RequestInfo) -> Response<Body> {
     error!("{}", err);
+    let status = match err.to_string().as_str() {
+        "Unauthorized Access" => hyper::StatusCode::UNAUTHORIZED,
+        _ => hyper::StatusCode::INTERNAL_SERVER_ERROR,
+    };
     Response::builder()
-        .status(StatusCode::INTERNAL_SERVER_ERROR)
+        .status(status)
         .body(Body::from(format!("Something went wrong: {}", err)))
         .unwrap()
 }
@@ -82,9 +88,31 @@ async fn redirect_handler(req: Request<Body>) -> Result<Response<Body>> {
         .unwrap())
 }
 
+async fn auth_middleware(req: Request<Body>) -> Result<Request<Body>> {
+    let auth_token_header = req.headers().get(hyper::header::AUTHORIZATION);
+    match auth_token_header {
+        None => Err(anyhow!("Unauthorized Access")),
+        Some(auth_token) => {
+            let token = auth_token.to_str()?;
+            validate_token(token)?;
+            Ok(req)
+        }
+    }
+}
+
+fn validate_token(encoded_token: &str) -> Result<()> {
+    let auth_token_bytes = decode(&encoded_token)?;
+    let auth_token = from_utf8(&auth_token_bytes)?;
+    if auth_token != CONFIG.auth_token.as_str() {
+        return Err(anyhow!("Unauthorized Access"));
+    }
+    Ok(())
+}
+
 pub fn router() -> RouterBuilder<Body, Error> {
     Router::builder()
         .middleware(Middleware::pre(logger))
+        .middleware(Middleware::pre(auth_middleware))
         .get("/", home_handler)
         .get("/:key", redirect_handler)
         .scope("/api", url_maps_router())
