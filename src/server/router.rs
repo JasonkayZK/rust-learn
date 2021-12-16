@@ -1,7 +1,9 @@
 use crate::dao::url_map_dao::UrlMap;
+use crate::service::url_maps_router;
 use crate::BaseMapperEnum;
+use anyhow::{Error, Result};
 use hyper::{Body, Request, Response, StatusCode};
-use routerify::{ext::RequestExt, Error, Middleware, RequestInfo, Router, RouterBuilder};
+use routerify::{ext::RequestExt, Middleware, RequestInfo, Router, RouterBuilder};
 use tokio::sync::mpsc::Sender;
 use tracing::{error, info};
 
@@ -35,7 +37,7 @@ macro_rules! recv_failed {
     };
 }
 
-async fn logger(req: Request<Body>) -> Result<Request<Body>, Error> {
+async fn logger(req: Request<Body>) -> Result<Request<Body>> {
     info!(
         "{} {} {}",
         req.remote_addr(),
@@ -53,11 +55,11 @@ async fn error_handler(err: routerify::RouteError, _: RequestInfo) -> Response<B
         .unwrap()
 }
 
-async fn home_handler(_: Request<Body>) -> Result<Response<Body>, Error> {
+async fn home_handler(_: Request<Body>) -> Result<Response<Body>> {
     Ok(Response::new(Body::from("Url Mapper in Rust!")))
 }
 
-async fn redirect_handler(req: Request<Body>) -> Result<Response<Body>, Error> {
+async fn redirect_handler(req: Request<Body>) -> Result<Response<Body>> {
     let sender = req
         .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
         .unwrap();
@@ -85,5 +87,6 @@ pub fn router() -> RouterBuilder<Body, Error> {
         .middleware(Middleware::pre(logger))
         .get("/", home_handler)
         .get("/:key", redirect_handler)
+        .scope("/api", url_maps_router())
         .err_handler_with_info(error_handler)
 }

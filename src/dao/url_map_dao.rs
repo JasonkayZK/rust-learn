@@ -12,6 +12,12 @@ pub struct UrlMap {
     pub url: String,
 }
 
+impl UrlMap {
+    pub fn new(key: String, url: String) -> Self {
+        Self { key, url }
+    }
+}
+
 pub struct UrlMapDao {
     db: Arc<DbHandle>,
     receiver: Receiver<BaseMapperEnum<String, UrlMap>>,

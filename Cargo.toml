@@ -14,6 +14,7 @@ anyhow = "1.0.41"
 config = { version = "0.11.0", features = ["json"] }
 lazy_static = "1.4.0"
 serde = { version = "1.0.126", features = ["derive"] }
+serde_json = "1.0.64"
 sqlx = { version = "0.5.5", features = ["runtime-tokio-rustls", "postgres", "migrate"] }
 tokio = { version = "1.6.2", features = ["full"] }
 async-trait = { version = "0.1.51" }

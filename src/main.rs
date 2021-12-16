@@ -11,6 +11,7 @@ use tracing_subscriber::FmtSubscriber;
 mod configs;
 mod dao;
 mod server;
+mod service;
 
 #[tokio::main]
 async fn main() -> Result<()> {
