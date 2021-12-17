@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: url-mapper-rs
+  namespace: url-mapper-rs
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: url-mapper-rs
+  template:
+    metadata:
+      labels:
+        app: url-mapper-rs
+    spec:
+      containers:
+        - name: url-mapper-rs
+          image: jasonkay/url-mapper-rs:v2
+          env:
+            - name: DATABASE_URL
+              value: postgres://postgres:123456@postgres:5432/postgres?sslmode=disable
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: url-mapper-rs
+  namespace: url-mapper-rs
+spec:
+  selector:
+    app: url-mapper-rs
+  ports:
+    - port: 9527
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: url-mapper-rs
+  namespace: url-mapper-rs
+spec:
+  rules:
+    - http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: url-mapper-rs
+                port:
+                  number: 9527

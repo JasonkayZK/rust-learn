@@ -4,14 +4,13 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: check-toml
-      - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
         args: [ --markdown-linebreak-ext=md ]
 
   - repo: local
     hooks:
-      - id: make-ci
-        name: make ci
-        entry: make ci
+      - id: make-fmt
+        name: make fmt
+        entry: make fmt
         language: system
