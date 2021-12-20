@@ -10,7 +10,10 @@ use tracing::subscriber::set_global_default;
 use tracing_subscriber::FmtSubscriber;
 
 mod configs;
+mod controller;
 mod dao;
+#[macro_use]
+mod macros;
 mod server;
 mod service;
 

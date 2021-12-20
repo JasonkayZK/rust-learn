@@ -1,0 +1,30 @@
+{% extends "index.html" %}
+{% block title %}Url Maps Index{% endblock title %}
+{% block content %}
+<table class="pure-table pure-table-striped">
+    <thead>
+    <tr>
+        <th>Key</th>
+        <th>URL</th>
+        <th>Actions <a href="/web/url_maps/new">Create</a></th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for url_map in url_maps %}
+    <tr>
+        <td>{{ url_map.key }}</td>
+        <td>{{ url_map.url }}</td>
+        <td>
+            <a href="/{{ url_map.key }}" target="_blank">Test</a>
+            <a href="/web/url_maps/{{ url_map.key }}/edit">Edit</a>
+            <a href="#"
+               data="{{ url_map.key }}"
+               class="delete-url-map">
+                Delete
+            </a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock content %}

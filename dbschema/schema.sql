@@ -5,8 +5,8 @@ CREATE TABLE IF NOT EXISTS url_maps
 );
 
 INSERT INTO url_maps (key, url)
-VALUES ('qq', 'qq.com'),
-       ('google', 'google.com'),
-       ('facebook', 'facebook.com'),
-       ('twitter', 'twitter.com'),
-       ('bilibili', 'bilibili.com');
+VALUES ('qq', 'https://qq.com'),
+       ('google', 'https://google.com'),
+       ('facebook', 'https://facebook.com'),
+       ('twitter', 'https://twitter.com'),
+       ('bilibili', 'https://bilibili.com');

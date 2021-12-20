@@ -1,16 +1,15 @@
 use crate::dao::url_map_dao::UrlMap;
+use crate::server::State;
 use crate::{json_response, recv_failed_json, sender_failed_json, BaseMapperEnum};
 use anyhow::Result;
 use hyper::{body::to_bytes, Body, Request, Response};
 use routerify::ext::RequestExt;
 use serde::{Deserialize, Serialize};
-use tokio::sync::mpsc::Sender;
 
 pub async fn read_data_list(req: Request<Body>) -> Result<Response<Body>> {
     let (tx, rx) = tokio::sync::oneshot::channel();
-    let sender = req
-        .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
-        .unwrap();
+    let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();
+    let sender = state.db_sender();
     sender_failed_json!(
         sender.send(BaseMapperEnum::ReadDataList { resp: tx }).await,
         "GetUrlMaps"
@@ -20,9 +19,8 @@ pub async fn read_data_list(req: Request<Body>) -> Result<Response<Body>> {
 }
 
 pub async fn read_data_by_id(req: Request<Body>) -> Result<Response<Body>> {
-    let sender = req
-        .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
-        .unwrap();
+    let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();
+    let sender = state.db_sender();
     let (tx, rx) = tokio::sync::oneshot::channel();
     let id = req.param("id").unwrap();
     sender_failed_json!(
@@ -43,9 +41,8 @@ pub async fn create_data(mut req: Request<Body>) -> Result<Response<Body>> {
     let url_map_bytes = to_bytes(body).await?;
     let url_map = serde_json::from_slice::<UrlMap>(&url_map_bytes)?;
     let (tx, rx) = tokio::sync::oneshot::channel();
-    let sender = req
-        .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
-        .unwrap();
+    let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();
+    let sender = state.db_sender();
     sender_failed_json!(
         sender
             .send(BaseMapperEnum::CreateData {
@@ -71,9 +68,8 @@ pub async fn update_data(mut req: Request<Body>) -> Result<Response<Body>> {
     let id = req.param("id").unwrap();
     let url_map = UrlMap::new(id.into(), url_map_url.url);
     let (tx, rx) = tokio::sync::oneshot::channel();
-    let sender = req
-        .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
-        .unwrap();
+    let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();
+    let sender = state.db_sender();
     sender_failed_json!(
         sender
             .send(BaseMapperEnum::UpdateData {
@@ -89,9 +85,8 @@ pub async fn update_data(mut req: Request<Body>) -> Result<Response<Body>> {
 
 pub async fn delete_data_by_id(req: Request<Body>) -> Result<Response<Body>> {
     let id = req.param("id").unwrap();
-    let sender = req
-        .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
-        .unwrap();
+    let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();
+    let sender = state.db_sender();
     let (tx, rx) = tokio::sync::oneshot::channel();
     sender_failed_json!(
         sender

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width"/>
+    <link rel="stylesheet"
+          href="https://unpkg.com/purecss@2.0.6/build/pure-min.css"
+          integrity="sha384-Uu6IeWbM+gzNVXJcM9XV3SohHtmWE+3VGi496jvgX1jyvDTXfdK+rfZc8C1Aehk5"
+          crossorigin="anonymous">
+    <link rel="stylesheet" href="/web/style.css"/>
+    <title>{% block title %}{% endblock title %} - Url Mapper in Rust</title>
+</head>
+<body>
+<div id="content">
+    <fieldset>
+        <legend>Authorization</legend>
+        <input
+                type="text"
+                value=""
+                name="authorization"
+                id="authorization"
+                size=50/>
+        <button id="save_auth_token_button" class="pure-button pure-button-primary">Save</button>
+    </fieldset>
+    {% block content %}{% endblock content %}
+</div>
+<div id="footer">
+    &copy; Copyright 2021 by <a href="/github" target="_blank">JasonkayZK</a>
+</div>
+<script src="/web/index.js" charset="utf-8"></script>
+</body>
+</html>

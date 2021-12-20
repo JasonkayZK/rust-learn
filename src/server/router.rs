@@ -1,43 +1,13 @@
-use crate::dao::url_map_dao::UrlMap;
+use crate::server::State;
 use crate::service::url_maps_router;
-use crate::{BaseMapperEnum, CONFIG};
+use crate::{controller, BaseMapperEnum, CONFIG};
 use anyhow::{anyhow, Error, Result};
 use base64::decode;
 use hyper::{Body, Request, Response};
 use routerify::{ext::RequestExt, Middleware, RequestInfo, Router, RouterBuilder};
 use std::str::from_utf8;
-use tokio::sync::mpsc::Sender;
 use tracing::{error, info};
-
-macro_rules! sender_failed {
-    ($m: expr, $f: tt) => {
-        match $m {
-            Ok(_) => {}
-            Err(e) => {
-                error!("Database Manager failed to get {}! error: {}", $f, e);
-                return Ok(Response::builder()
-                    .status(hyper::StatusCode::INTERNAL_SERVER_ERROR)
-                    .body(Body::from(format!("Something went wrong: {}", e)))
-                    .unwrap());
-            }
-        }
-    };
-}
-
-macro_rules! recv_failed {
-    ($m: expr) => {
-        match $m {
-            Ok(d) => d,
-            Err(e) => {
-                error!("Database Manager returned error: {}", e);
-                return Ok(Response::builder()
-                    .status(hyper::StatusCode::NOT_FOUND)
-                    .body(Body::from("Key does not exist"))
-                    .unwrap());
-            }
-        }
-    };
-}
+use crate::dao::url_map_dao::UrlMap;
 
 async fn logger(req: Request<Body>) -> Result<Request<Body>> {
     info!(
@@ -66,9 +36,8 @@ async fn home_handler(_: Request<Body>) -> Result<Response<Body>> {
 }
 
 async fn redirect_handler(req: Request<Body>) -> Result<Response<Body>> {
-    let sender = req
-        .data::<Sender<BaseMapperEnum<String, UrlMap>>>()
-        .unwrap();
+    let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();
+    let sender = state.db_sender();
     let key = req.param("key").unwrap();
     let (tx, rx) = tokio::sync::oneshot::channel();
     sender_failed!(
@@ -116,5 +85,6 @@ pub fn router() -> RouterBuilder<Body, Error> {
         .get("/", home_handler)
         .get("/:key", redirect_handler)
         .scope("/api", url_maps_router())
+        .scope("/web", controller::router())
         .err_handler_with_info(error_handler)
 }

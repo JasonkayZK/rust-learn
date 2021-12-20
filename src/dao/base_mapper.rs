@@ -17,16 +17,6 @@ pub enum BaseMapperEnum<I, T> {
     DeleteDataById { id: I, resp: Responder<T> },
 }
 
-#[macro_export]
-macro_rules! resp_failed {
-    ($m: expr, $f: tt) => {
-        match $m {
-            Ok(_) => {}
-            Err(e) => tracing::error!("Resp failed for {}, error: {:?}", $f, e),
-        }
-    };
-}
-
 #[async_trait]
 pub trait BaseMapper<I, T> {
     async fn read_data_list(&self, conn: &mut BaseConnection) -> Result<Vec<T>, Error>;

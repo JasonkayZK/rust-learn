@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+{% block title %}Edit Url Map {{ url_map.key }}{% endblock title %}
+{% block content %}
+<form id="update_url_map_form" class="pure-form pure-form-stacked">
+    <label for="key">Key</label>
+    <input type="text" value="{{ url_map.key }}" name="key" id="key" readonly/>
+
+    <label for="url">URL</label>
+    <input type="text"
+           value="{{ url_map.url }}"
+           name="url"
+           id="url"
+           class="pure-input-1" />
+
+    <button type="submit" class="pure-button pure-button-primary">Save</button>
+</form>
+{% endblock content %}

@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+{% block title %}Create Url Map{% endblock title %}
+{% block content %}
+<form id="create_url_map_form" class="pure-form pure-form-stacked">
+    <label for="key">Key</label>
+    <input type="text" value="" name="key" id="key"/>
+
+    <label for="url">URL</label>
+    <input type="text" value="" name="url" id="url" class="pure-input-1" />
+
+    <button type="submit" class="pure-button pure-button-primary">Create</button>
+</form>
+{% endblock content %}

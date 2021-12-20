@@ -1,4 +1,5 @@
 use crate::server::router::router;
+use crate::server::state::State;
 use crate::CONFIG;
 use anyhow::Result;
 use hyper::Server as HyperServer;
@@ -16,7 +17,8 @@ impl<T: Send + Sync + 'static> Server<T> {
     }
 
     pub async fn listen(&self) -> Result<()> {
-        let router = router().data(self.db_sender.clone()).build().unwrap();
+        let state = State::new(self.db_sender.clone())?;
+        let router = router().data(state).build().unwrap();
         let service = RouterService::new(router).unwrap();
 
         let address = format!("{}:{}", CONFIG.host, CONFIG.port).parse()?;

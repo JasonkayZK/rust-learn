@@ -9,6 +9,7 @@ use std::fmt::{Debug, Formatter};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Conf {
+    pub env: String,
     pub host: String,
     pub port: i32,
     pub database: Database,
@@ -27,6 +28,8 @@ impl Conf {
 
         // Get env config
         let e = env::var("ENV").unwrap_or_else(|_| ENV_DEVELOPMENT.into());
+        c.set("env", e.clone())?;
+
         let env_conf = get_default_config_path(e.as_str());
         c.merge(File::with_name(env_conf.as_str()).required(false))
             .context(format!("Unable to load config/{}", e))?;
