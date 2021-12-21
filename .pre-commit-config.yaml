@@ -11,7 +11,7 @@ repos:
 
   - repo: local
     hooks:
-      - id: make-ci
-        name: make ci
-        entry: make ci
+      - id: make-fmt
+        name: make fmt
+        entry: make fmt
         language: system
