@@ -1,9 +1,9 @@
-use crate::{BaseMapperEnum, recv_failed, sender_failed, server::State};
+use crate::dao::url_map_dao::UrlMap;
+use crate::{recv_failed, sender_failed, server::State, BaseMapperEnum};
 use anyhow::Result;
 use hyper::{Body, Request, Response};
 use routerify::ext::RequestExt;
 use tera::Context;
-use crate::dao::url_map_dao::UrlMap;
 
 pub async fn index(req: Request<Body>) -> Result<Response<Body>> {
     let state = req.data::<State<BaseMapperEnum<String, UrlMap>>>().unwrap();

@@ -1,4 +1,4 @@
-use crate::{CONFIG};
+use crate::CONFIG;
 use anyhow::Result;
 use tera::Tera;
 use tokio::sync::mpsc::Sender;

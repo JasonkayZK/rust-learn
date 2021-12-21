@@ -1,13 +1,14 @@
+use crate::dao::url_map_dao::UrlMap;
 use crate::server::State;
 use crate::service::url_maps_router;
 use crate::{controller, BaseMapperEnum, CONFIG};
 use anyhow::{anyhow, Error, Result};
 use base64::decode;
+use hyper::header::HeaderValue;
 use hyper::{Body, Request, Response};
 use routerify::{ext::RequestExt, Middleware, RequestInfo, Router, RouterBuilder};
 use std::str::from_utf8;
 use tracing::{error, info};
-use crate::dao::url_map_dao::UrlMap;
 
 async fn logger(req: Request<Body>) -> Result<Request<Body>> {
     info!(
@@ -58,6 +59,10 @@ async fn redirect_handler(req: Request<Body>) -> Result<Response<Body>> {
 }
 
 async fn auth_middleware(req: Request<Body>) -> Result<Request<Body>> {
+    if req.method() == hyper::Method::OPTIONS {
+        return Ok(req);
+    }
+
     let auth_token_header = req.headers().get(hyper::header::AUTHORIZATION);
     match auth_token_header {
         None => Err(anyhow!("Unauthorized Access")),
@@ -78,9 +83,31 @@ fn validate_token(encoded_token: &str) -> Result<()> {
     Ok(())
 }
 
+async fn cors(mut res: Response<Body>) -> Result<Response<Body>> {
+    let headers = res.headers_mut();
+    headers.insert(
+        hyper::header::ACCESS_CONTROL_ALLOW_ORIGIN,
+        HeaderValue::from_static("*"),
+    );
+    headers.insert(
+        hyper::header::ACCESS_CONTROL_ALLOW_HEADERS,
+        HeaderValue::from_static("*"),
+    );
+    headers.insert(
+        hyper::header::ACCESS_CONTROL_ALLOW_METHODS,
+        HeaderValue::from_static("*"),
+    );
+    headers.insert(
+        hyper::header::ACCESS_CONTROL_EXPOSE_HEADERS,
+        HeaderValue::from_static("*"),
+    );
+    Ok(res)
+}
+
 pub fn router() -> RouterBuilder<Body, Error> {
     Router::builder()
         .middleware(Middleware::pre(logger))
+        .middleware(Middleware::post(cors))
         .middleware(Middleware::pre(auth_middleware))
         .get("/", home_handler)
         .get("/:key", redirect_handler)
