@@ -93,7 +93,44 @@ Hello, world!
 | [wasm-hello](https://github.com/JasonkayZK/rust-learn/tree/wasm-hello)                                             | 2021-10-09                                | A simple rust-wasm demo.[Use template: [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template)]<br />Linked Blog: [Rust实现WebAssembly初窥](https://jasonkayzk.github.io/2021/10/10/Rust实现WebAssembly初窥/) |
 | [feature-phantom](https://github.com/JasonkayZK/rust-learn/tree/feature-phantom)                                   | 2021-10-19                                | A demo to show how to use `PhantomData` beautify your code.<br />Linked Blog: [Rust中的PhantomType](https://jasonkayzk.github.io/2021/10/20/Rust中的PhantomType/)                                                      |
 | [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs)                                       | 2021-12-04<br />(2021-12-21 Last Updated) | A simple URL Mapper service built in Rust.<br />Linked Youtube: https://www.youtube.com/playlist?list=PLz51_WNhdOqv7S5pnycKySU_4PpCagU4Q                                                                           |
+| [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm)                                               | 2021-12-22                                | Collect lots of algorithm & data structures in Rust(Such as: LinkedList, …)                                                                                                                                        |
 |                                                                                                                    |                                           |                                                                                                                                                                                                                    |
+
+<br/>
+
+## **Serial Project**
+
+### **url-mapper-rs**
+
+Project Space:
+
+-   [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs)
+
+Learning Step:
+
+-   [Part I : Configuration](https://github.com/JasonkayZK/rust-learn/commit/12b88b1b5f5e02141ff90716feefea834817c34b)
+-   [Part II : Database Setup](https://github.com/JasonkayZK/rust-learn/commit/89327a61a4afda4e2fb9f55171889ee7fa205de5)
+-   [Part III - Database Manager: add mapper & tokio-async](https://github.com/JasonkayZK/rust-learn/commit/51120a38865911aa19a5fd4b093d077a40e95cd0)
+-   [Part IV: Basic Server & log tracing](https://github.com/JasonkayZK/rust-learn/commit/75267288ec824cd9b65f84245e14b37a9b4d5b4c)
+-   [Part V: Server and Database Manager communication](https://github.com/JasonkayZK/rust-learn/commit/cefc2ad7639c8359719cb639b9351c16db9e19d1)
+-   [Part VI - UrlMap CRUD API](https://github.com/JasonkayZK/rust-learn/commit/d77521b4c39ca953ef51cc75065f23a487ba6b12)
+-   [Part VII - Auth Middleware](https://github.com/JasonkayZK/rust-learn/commit/2da0d7d7ef20cf54bf4d01f4cc927e29ca5a58ea)
+-   [Part VIII - Containerization](https://github.com/JasonkayZK/rust-learn/commit/5d5cebcf69dccb809afb46b74dd6479991e511ae)
+-   [Part IX - Handling Signals & Deploying to Kubernetes](https://github.com/JasonkayZK/rust-learn/commit/03d3a5c76ad168da2ac3bd850e18bde6780d747f)
+-   [Part X - Frontend using Tera](https://github.com/JasonkayZK/rust-learn/commit/ad3828f69af89ea25092d8319bb6099cc357966f)
+-   [Part XI - React Front-End](https://github.com/JasonkayZK/rust-learn/commit/bdb21c2bff6ead55ba55554a51e0223e76453c60)
+
+
+
+### algorithm
+
+Project Space:
+
+-   [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm)
+
+Learning Step:
+
+Not Yet!
 
 <br/>
 
