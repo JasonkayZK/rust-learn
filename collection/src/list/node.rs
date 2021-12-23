@@ -9,9 +9,9 @@ pub type LinkNode<T> = Option<CoreNode<T>>;
 
 #[derive(Debug)]
 pub struct Node<T> {
-    val: T,
-    next: LinkNode<T>,
-    prev: LinkNode<T>,
+    pub val: T,
+    pub next: LinkNode<T>,
+    pub prev: LinkNode<T>,
 }
 
 impl<T> Node<T> {
@@ -23,40 +23,67 @@ impl<T> Node<T> {
         }
     }
 
+    pub fn new_core_node(val: T) -> CoreNode<T> {
+        Rc::new(RefCell::new(Self::new(val)))
+    }
+
     pub fn val(&self) -> &T {
         &self.val
     }
 
-    pub fn set_next_by_raw_val(&mut self, val: T) {
-        self.next = Some(Rc::new(RefCell::new(Self::new(val))))
+    pub fn set_next_by_raw_val(&mut self, val: T) -> LinkNode<T> {
+        let old_val = self.next.take();
+        self.next = Some(Rc::new(RefCell::new(Self::new(val))));
+        old_val
     }
 
-    pub fn set_prev_by_raw_val(&mut self, val: T) {
-        self.prev = Some(Rc::new(RefCell::new(Self::new(val))))
+    pub fn set_prev_by_raw_val(&mut self, val: T) -> LinkNode<T> {
+        let old_val = self.prev.take();
+        self.prev = Some(Rc::new(RefCell::new(Self::new(val))));
+        old_val
     }
 
     pub fn get_next(&self) -> LinkNode<T> {
         match self.next.as_ref() {
             None => None,
-            Some(core_node) => Some(core_node.clone()),
+            Some(core_node) => Some(Rc::clone(core_node)),
         }
     }
 
     pub fn get_prev(&self) -> LinkNode<T> {
         match self.prev.as_ref() {
             None => None,
-            Some(core_node) => Some(core_node.clone()),
+            Some(core_node) => Some(Rc::clone(core_node)),
         }
+    }
+
+    pub fn set_val(&mut self, val: T) {
+        self.val = val;
+    }
+
+    pub fn set_next(&mut self, next: LinkNode<T>) {
+        self.next = next;
+    }
+
+    pub fn set_prev(&mut self, prev: LinkNode<T>) {
+        self.prev = prev;
     }
 }
 
 mod test {
     use crate::list::node::Node;
+    use std::rc::Rc;
 
     #[test]
     fn test_new() {
         let node = Node::new(5);
         println!("{:?}", node)
+    }
+
+    #[test]
+    fn test_get_val() {
+        let node = Node::new(2.2);
+        println!("{}", node.val())
     }
 
     #[test]
@@ -74,10 +101,24 @@ mod test {
         node.set_next_by_raw_val(String::from("next"));
         node.set_prev_by_raw_val(String::from("prev"));
 
-        println!("{:?}", node.get_next().unwrap());
-        println!("{:?}", node.get_prev().unwrap());
+        println!(
+            "next: {:?}",
+            node.get_next().unwrap().try_borrow().unwrap().val
+        );
 
-        println!("{:?}", node.get_next().unwrap()); // Still can take value
+        let prev1 = node.get_prev().unwrap();
+        println!("prev: {:?}", prev1.try_borrow().unwrap().val);
+
+        // Still can take value, but different from above
+        let prev2 = node.get_prev().unwrap();
+        println!("prev: {:?}", prev2.try_borrow().unwrap().val);
+
+        println!(
+            "prev: {:?}",
+            node.get_prev().unwrap().try_borrow().unwrap().val // Rc will be optimized!
+        );
+
+        let prev3 = node.get_prev().unwrap();
+        println!("rc count: {}", Rc::strong_count(&prev3)); // 4
     }
-
 }
