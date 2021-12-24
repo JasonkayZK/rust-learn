@@ -56,18 +56,6 @@ impl<T> Node<T> {
             Some(core_node) => Some(Rc::clone(core_node)),
         }
     }
-
-    pub fn set_val(&mut self, val: T) {
-        self.val = val;
-    }
-
-    pub fn set_next(&mut self, next: LinkNode<T>) {
-        self.next = next;
-    }
-
-    pub fn set_prev(&mut self, prev: LinkNode<T>) {
-        self.prev = prev;
-    }
 }
 
 mod test {

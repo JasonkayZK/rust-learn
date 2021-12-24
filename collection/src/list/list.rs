@@ -1,6 +1,5 @@
 use std::cell::{Ref, RefMut};
 use std::error::Error;
-use std::vec::IntoIter;
 
 pub trait List<T> {
     fn new() -> Self;
@@ -22,6 +21,16 @@ pub trait List<T> {
     fn peek_front_mut(&mut self) -> Option<RefMut<T>>;
 
     fn peek_back_mut(&mut self) -> Option<RefMut<T>>;
+
+    fn get_idx(&self) -> Option<Ref<T>>;
+
+    fn get_idx_mut(&self) -> Option<RefMut<T>>;
+
+    fn insert(&mut self, idx: isize, data: T) -> Result<(), Box<dyn Error>>;
+
+    fn remove(&mut self, idx: isize) -> Result<T, Box<dyn Error>>;
+
+    fn traverse(&self);
 
     // fn into_iter(self) -> IntoIter<T>;
 }
