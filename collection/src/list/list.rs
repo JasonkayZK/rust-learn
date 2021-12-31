@@ -22,13 +22,13 @@ pub trait List<T> {
 
     fn peek_back_mut(&mut self) -> Option<RefMut<T>>;
 
-    fn get_idx(&self) -> Option<Ref<T>>;
+    fn get_by_idx(&self, idx: isize) -> Option<Ref<T>>;
 
-    fn get_idx_mut(&self) -> Option<RefMut<T>>;
+    fn get_by_idx_mut(&self, idx: isize) -> Option<RefMut<T>>;
 
-    fn insert(&mut self, idx: isize, data: T) -> Result<(), Box<dyn Error>>;
+    fn insert_by_idx(&mut self, idx: isize, data: T) -> Result<(), Box<dyn Error>>;
 
-    fn remove(&mut self, idx: isize) -> Result<T, Box<dyn Error>>;
+    fn remove_by_idx(&mut self, idx: isize) -> Result<T, Box<dyn Error>>;
 
     fn traverse(&self);
 

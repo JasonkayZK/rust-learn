@@ -58,6 +58,20 @@ impl<T> Node<T> {
     }
 }
 
+impl<T> Iterator for Node<T> {
+    type Item = Self;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.next.as_ref() {
+            None => {None}
+            Some(next) => {
+                Node::new(next.clone())
+            }
+        }
+    }
+
+}
+
 mod test {
     use crate::list::node::Node;
     use std::rc::Rc;

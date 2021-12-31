@@ -59,73 +59,117 @@ impl<T: Display> List<T> for LinkedList<T> {
     }
 
     fn pop_front(&mut self) -> Option<T> {
-        if self.length <= 0 {
-            // Head is none
-            None
-        }
-
-        let old_head = self.head.take();
-        match old_head.borrow_mut().next.take() {
-            None => {
-                self.tail.take(); // If head is None, remove tail
+        self.head.take().map(|old_head| {
+            match old_head.borrow_mut().next.take() {
+                Some(new_head) => {
+                    new_head.borrow_mut().prev.take();
+                    self.head = Some(new_head);
+                }
+                None => {
+                    self.tail.take();
+                }
             }
-            Some(new_head) => {
-                new_head.borrow_mut().prev.take();
-                self.head = Some(new_head);
-            }
-        }
-        self.length -= 1;
-        Rc::try_unwrap(old_head).ok().unwrap().into_inner().val
+            self.length -= 1;
+            Rc::try_unwrap(old_head).ok().unwrap().into_inner().val
+        })
     }
 
     fn pop_back(&mut self) -> Option<T> {
-        todo!()
+        self.tail.take().map(|old_tail| {
+            match old_tail.borrow_mut().prev.take() {
+                Some(new_tail) => {
+                    new_tail.borrow_mut().next.take();
+                    self.tail = Some(new_tail);
+                }
+                None => {
+                    self.head.take();
+                }
+            }
+            self.length -= 1;
+            Rc::try_unwrap(old_tail).ok().unwrap().into_inner().val
+        })
     }
 
     fn peek_front(&self) -> Option<Ref<T>> {
-        todo!()
+        self.head
+            .as_ref()
+            .map(|node| Ref::map(node.borrow(), |node| &node.val))
     }
 
     fn peek_back(&self) -> Option<Ref<T>> {
-        todo!()
+        self.tail
+            .as_ref()
+            .map(|node| Ref::map(node.borrow(), |node| &node.val))
     }
 
     fn peek_front_mut(&mut self) -> Option<RefMut<T>> {
-        todo!()
+        self.head
+            .as_ref()
+            .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.val))
     }
 
     fn peek_back_mut(&mut self) -> Option<RefMut<T>> {
+        self.tail
+            .as_ref()
+            .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.val))
+    }
+
+    fn get_by_idx(&self, idx: isize) -> Option<Ref<T>> {
+        match idx {
+            _ if idx < 0 || idx > self.length => None,
+            _ if idx == 0 => self.peek_front(),
+            _ => {
+                if let Some(ref first_node_ref) = self.head.clone() {
+                    let mut cur_idx = 0;
+                    let mut cur_node = first_node_ref.clone();
+
+                    while let Some(ref mut  next_node_ref) = cur_node.clone().borrow().next {
+                        cur_node = next_node_ref.clone();
+                        cur_idx += 1;
+                        if cur_idx == idx {
+                            break;
+                        }
+                    }
+                    cur_node
+                        .map(|node| RefMut::map(node.borrow_mut(), |node| &mut node.val))
+                } else {
+                    None
+                }
+            }
+        }
+    }
+
+    fn get_by_idx_mut(&self, idx: isize) -> Option<RefMut<T>> {
         todo!()
     }
 
-    fn get_idx(&self) -> Option<Ref<T>> {
+    fn insert_by_idx(&mut self, _idx: isize, _data: T) -> Result<(), Box<dyn Error>> {
         todo!()
     }
 
-    fn get_idx_mut(&self) -> Option<RefMut<T>> {
-        todo!()
-    }
-
-    fn insert(&mut self, idx: isize, data: T) -> Result<(), Box<dyn Error>> {
-        todo!()
-    }
-
-    fn remove(&mut self, idx: isize) -> Result<T, Box<dyn Error>> {
+    fn remove_by_idx(&mut self, _idx: isize) -> Result<T, Box<dyn Error>> {
         todo!()
     }
 
     fn traverse(&self) {
-        print!("[");
         if let Some(ref first_node_ref) = self.head {
             let mut cur_node = first_node_ref.clone();
-            print!("{}:{} ", cur_node.borrow().val, Rc::strong_count(&cur_node));
+            print!(
+                "[val: {}, strong_ref: {}] => ",
+                cur_node.borrow().val,
+                Rc::strong_count(&cur_node)
+            );
 
             while let Some(ref next_node_ref) = cur_node.clone().borrow().next {
                 cur_node = next_node_ref.clone();
-                print!("{}:{} ", cur_node.borrow().val, Rc::strong_count(&cur_node));
+                print!(
+                    "[{}:{}] => ",
+                    cur_node.borrow().val,
+                    Rc::strong_count(&cur_node)
+                );
             }
         }
-        println!("]");
+        println!();
     }
 }
 
@@ -165,11 +209,40 @@ mod test {
     }
 
     #[test]
-    fn test_pop() {}
+    fn test_pop() {
+        let mut list: LinkedList<String> = LinkedList::new();
+
+        list.push_front(String::from("abc"));
+        list.push_back(String::from("def"));
+        list.push_back(String::from("ghi"));
+        list.traverse();
+        assert_eq!(list.length, 3);
+
+        let front = list.pop_front();
+        println!("pop front: {:?}", front.as_ref().unwrap());
+        list.traverse();
+        assert_eq!("abc", front.unwrap().as_str());
+        assert_eq!(list.length, 2);
+
+        let back = list.pop_back();
+        println!("pop back: {:?}", back.as_ref().unwrap());
+        list.traverse();
+        assert_eq!("ghi", back.unwrap().as_str());
+        assert_eq!(list.length, 1);
+
+        let back = list.pop_back();
+        println!("pop back: {:?}", back.as_ref().unwrap());
+        list.traverse();
+        assert_eq!("def", back.unwrap().as_str());
+        assert_eq!(list.length, 0);
+
+        println!("list len: {:?}", list.length);
+        list.traverse();
+    }
 
     #[test]
-    fn test_peak() {}
+    fn test_peek() {}
 
     #[test]
-    fn test_peak_mut() {}
+    fn test_peek_mut() {}
 }
