@@ -1,7 +1,8 @@
+//! A Unsafe Double LinkedList
+use std::marker::PhantomData;
 use std::ptr;
 use std::ptr::NonNull;
 
-/// A Unsafe Double LinkedList
 struct Node<T> {
     val: T,
     next: Link<T>,
@@ -23,7 +24,23 @@ type Link<T> = Option<NonNull<Node<T>>>;
 pub struct DoubleLinkedList<T> {
     head: Link<T>,
     tail: Link<T>,
-    len: i32,
+    len: usize,
+    marker: PhantomData<Box<Node<T>>>,
+}
+
+/// An iterator over the elements of a `DoubleLinkedList`.
+pub struct Iter<'a, T: 'a> {
+    head: Option<NonNull<Node<T>>>,
+    tail: Option<NonNull<Node<T>>>,
+    len: usize,
+    marker: PhantomData<&'a Node<T>>,
+}
+
+pub struct IterMut<'a, T: 'a> {
+    head: Option<NonNull<Node<T>>>,
+    tail: Option<NonNull<Node<T>>>,
+    len: usize,
+    marker: PhantomData<&'a mut Node<T>>,
 }
 
 impl<T> DoubleLinkedList<T> {
@@ -32,10 +49,11 @@ impl<T> DoubleLinkedList<T> {
             head: None,
             tail: None,
             len: 0,
+            marker: PhantomData,
         }
     }
 
-    pub fn len(&self) -> i32 {
+    pub fn len(&self) -> usize {
         self.len
     }
 
@@ -43,16 +61,10 @@ impl<T> DoubleLinkedList<T> {
         self.len += 1;
 
         let new_node = Node::new(val);
-        if self.head.is_null() {
-
-        }
-
-
+        if self.head.is_null() {}
     }
 
-    pub fn push_back(&mut self, val: T) {
-
-    }
+    pub fn push_back(&mut self, val: T) {}
 
     pub fn pop_front(&mut self) -> T {}
 
@@ -87,35 +99,8 @@ impl<T> DoubleLinkedList<T> {
 
 impl<T> Drop for DoubleLinkedList<T> {
     fn drop(&mut self) {
-        unsafe {
-            let mut cur_node = self.head;
-            while !cur_node.is_null() {
-                let next = (*cur_node).next;
-                (*cur_node).prev = ptr::null_mut(); // clear prev ptr
-                (*cur_node).next = ptr::null_mut(); // clear next ptr
-                cur_node = next;
-            }
-        }
         println!("list has been dropped!");
     }
-}
-
-pub struct IntoIter<T> {
-    list: DoubleLinkedList<T>,
-}
-
-
-pub struct Iter<'a, T: 'a> {
-    head: Link<T>,
-    tail: Link<T>,
-    len: i32,
-}
-
-
-pub struct IterMut<'a, T: 'a> {
-    head: Link<T>,
-    tail: Link<T>,
-    len: i32,
 }
 
 #[cfg(test)]
