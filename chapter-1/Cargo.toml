@@ -1,13 +1,12 @@
 [package]
-name = "rust-learn"
+name = "rust-course"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 license-file = "LICENSE"
-description = "learning rust"
+description = "yet another learning rust course"
 homepage = "https://jasonkayzk.github.io/"
 readme = "README.md"
 repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
-my-libs = { path = "libs", version = "0.1.0" }
