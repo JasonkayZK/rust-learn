@@ -1,9 +1,10 @@
-pub fn bubble_sort<T: Ord>(arr: &mut [T]) {
+pub fn bubble_sort<T: PartialOrd>(arr: &mut [T]) {
     bubble_sort_with_comparator(arr, |x: &T, y: &T| x.lt(y))
 }
 
-pub fn bubble_sort_with_comparator<T: Ord, F>(arr: &mut [T], is_less: F)
+pub fn bubble_sort_with_comparator<T, F>(arr: &mut [T], is_less: F)
 where
+    T: PartialOrd,
     F: Fn(&T, &T) -> bool,
 {
     let mut ordered;
