@@ -2,6 +2,8 @@ pub mod bubble_sort;
 pub mod quick_sort;
 pub mod insertion_sort;
 pub mod selection_sort;
+pub mod merge_sort;
+pub mod heap_sort;
 
 pub fn is_sorted<T: PartialOrd>(arr: &[T]) -> bool {
     is_sorted_with_comparator(arr, |x, y| x.lt(y))
