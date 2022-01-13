@@ -57,15 +57,44 @@ where
     T: PartialOrd,
     F: Fn(&T, &T) -> bool,
 {
+    // 将数组切分为arr[lo...j-1], arr[j], arr[j+1...hi]
     let mut i = lo;
-    for j in lo..hi {
-        if is_less(&arr[j], &arr[hi]) {
-            arr.swap(i, j);
+    let mut j = hi + 1;
+
+    unsafe { // 内部同时涉及到数组中的不变借用和可变借用，需要使用unsafe
+        // 选定开头为标准元素
+        let key: *const T = &arr[lo];
+
+        loop {
+            // 左右移动, 跳过已经有序的位置
             i += 1;
+            while is_less(&arr[i], &*key) {
+                i += 1;
+                if i == hi {
+                    break;
+                }
+            }
+            j -= 1;
+            while is_less(&*key, &arr[j]) {
+                j -= 1;
+                if j == lo {
+                    break;
+                }
+            }
+
+            // 切分完毕, 跳过交换
+            if i >= j {
+                break;
+            }
+
+            // 找到乱序的, 交换
+            arr.swap(i, j);
         }
     }
-    arr.swap(i, hi);
-    i
+    // 将key放入对应位置
+    arr.swap(lo, j);
+
+    j
 }
 
 #[cfg(test)]
