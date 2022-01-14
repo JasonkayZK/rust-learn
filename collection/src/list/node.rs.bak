@@ -65,7 +65,7 @@ impl<T> Iterator for Node<T> {
         match self.next.as_ref() {
             None => {None}
             Some(next) => {
-                Node::new(next.clone())
+                Some(Node::new(next.clone()))
             }
         }
     }
