@@ -4,28 +4,25 @@ use std::marker::PhantomData;
 use std::{mem, ptr};
 use std::ops::{Deref, DerefMut};
 
-/// A Vector implementation
-///  Refer to https://github.com/rust-lang/nomicon/tree/master/src/vec
-pub struct Vector<T> {
+/// Internal struct of Vector for sharing elem between Vector & IntoIter
+struct RawVector<T> {
     ptr: NonNull<T>,
     cap: usize,
-    len: usize,
     _marker: PhantomData<T>,
 }
 
-unsafe impl<T: Send> Send for Vector<T> {}
+unsafe impl<T: Send> Send for RawVector<T> {}
 
-unsafe impl<T: Sync> Sync for Vector<T> {}
+unsafe impl<T: Sync> Sync for RawVector<T> {}
 
-impl<T> Vector<T> {
+impl<T> RawVector<T> {
     pub fn new() -> Self {
         // currently not handle ZSTs
         assert_ne!(mem::size_of::<T>(), 0, "We're not ready to handle ZSTs");
 
-        Vector {
+        RawVector {
             // No memory allocate here, and avoid not defining behavior
             ptr: NonNull::dangling(),
-            len: 0,
             cap: 0,
             _marker: PhantomData,
         }
@@ -68,18 +65,63 @@ impl<T> Vector<T> {
         };
         self.cap = new_cap;
     }
+}
+
+impl<T> Drop for RawVector<T> {
+    fn drop(&mut self) {
+        // We can't call "alloc::dealloc" when self.cap() == 0
+        // Since we are not allocate any memory!
+        if self.cap != 0 {
+            // If T: !Drop, the line below is unnecessary!
+            // We could check T is "need_drop" to avoid call pop
+            // But this will be optimized by LLVM automatically!
+            // while let Some(_) = self.pop() {}
+
+            let layout = Layout::array::<T>(self.cap).unwrap();
+            unsafe {
+                alloc::dealloc(self.ptr.as_ptr() as *mut u8, layout);
+            }
+        }
+
+        println!("RawVector has been dropped!")
+    }
+}
+
+/// A Vector implementation
+///  Refer to https://github.com/rust-lang/nomicon/tree/master/src/vec
+pub struct Vector<T> {
+    buf: RawVector<T>,
+    len: usize,
+}
+
+impl<T> Vector<T> {
+
+    pub fn new() -> Self {
+        Vector {
+            buf: RawVector::new(),
+            len: 0,
+        }
+    }
+
+    fn ptr(&self) -> *mut T {
+        self.buf.ptr.as_ptr()
+    }
+
+    fn cap(&self) -> usize {
+        self.buf.cap
+    }
 
     pub fn push(&mut self, elem: T) {
         // Cause capacity grow when no capacity here
-        if self.cap == self.cap {
-            self.grow();
+        if self.cap() == self.cap() {
+            self.buf.grow();
         }
 
         // No index here:
         // foo[idx] = elem will call drop on foo[idx] !
         // Use ptr::write to force write elem in foo[idx] without call "drop"!
         unsafe {
-            ptr::write(self.ptr.as_ptr().add(self.len), elem);
+            ptr::write(self.ptr().add(self.len), elem);
         }
         self.len += 1;
     }
@@ -92,7 +134,7 @@ impl<T> Vector<T> {
             // Directly move foo[idx] out of Vector will deallocate this memory (in Vector) forever[which cause problem]!
             // So use prt::read to read raw bit in memory!
             unsafe {
-                Some(ptr::read(self.ptr.as_ptr().add(self.len)))
+                Some(ptr::read(self.ptr().add(self.len)))
             }
         }
     }
@@ -100,18 +142,18 @@ impl<T> Vector<T> {
     pub fn insert(&mut self, idx: usize, elem: T) {
         assert!(idx <= self.len, "index out of bounds");
 
-        if self.cap == self.len {
-            self.grow();
+        if self.cap() == self.len {
+            self.buf.grow();
         }
 
         unsafe {
             // copy [i..len] to [i+1..len+1]
             // ptr::copy is the same as "memmove" in C!
-            ptr::copy(self.ptr.as_ptr().add(idx),
-                      self.ptr.as_ptr().add(idx + 1),
+            ptr::copy(self.ptr().add(idx),
+                      self.ptr().add(idx + 1),
                       self.len - idx);
             // write elem binary into arr[idx]
-            ptr::write(self.ptr.as_ptr().add(idx), elem);
+            ptr::write(self.ptr().add(idx), elem);
             self.len += 1;
         }
     }
@@ -121,10 +163,10 @@ impl<T> Vector<T> {
 
         unsafe {
             self.len -= 1;
-            let res = ptr::read(self.ptr.as_ptr().add(idx));
+            let res = ptr::read(self.ptr().add(idx));
             // copy [i+1..len+1] to [i..len] to override arr[idx]!ß
-            ptr::copy(self.ptr.as_ptr().add(idx + 1),
-                      self.ptr.as_ptr().add(idx),
+            ptr::copy(self.ptr().add(idx + 1),
+                      self.ptr().add(idx),
                       self.len - idx);
             res
         }
@@ -132,9 +174,9 @@ impl<T> Vector<T> {
 
     pub fn into_iter(self) -> IntoIter<T> {
         // Move pointer here
-        let buf = self.ptr;
+        let buf = self.ptr();
         // Copy cap & len here
-        let cap = self.cap;
+        let cap = self.cap();
         let len = self.len;
 
         // We can't Drop Vector here!
@@ -157,25 +199,7 @@ impl<T> Vector<T> {
             }
         }
     }
-}
 
-impl<T> Drop for Vector<T> {
-    fn drop(&mut self) {
-        // We can't call "alloc::dealloc" when self.cap == 0
-        // Since we are not allocate any memory!
-        if self.cap != 0 {
-            // If T: !Drop, the line below is unnecessary!
-            // We could check T is "need_drop" to avoid call pop
-            // But this will be optimized by LLVM automatically!
-            while let Some(_) = self.pop() {}
-            let layout = Layout::array::<T>(self.cap).unwrap();
-            unsafe {
-                alloc::dealloc(self.ptr.as_ptr() as *mut u8, layout);
-            }
-        }
-
-        println!("vector has been dropped!")
-    }
 }
 
 /// <Deref> Implement directly from "std::slice::from_raw_parts"
@@ -184,7 +208,7 @@ impl<T> Deref for Vector<T> {
 
     fn deref(&self) -> &Self::Target {
         unsafe {
-            std::slice::from_raw_parts(self.ptr.as_ptr(), self.len)
+            std::slice::from_raw_parts(self.ptr(), self.len)
         }
     }
 }
@@ -193,7 +217,7 @@ impl<T> Deref for Vector<T> {
 impl<T> DerefMut for Vector<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         unsafe {
-            std::slice::from_raw_parts_mut(self.ptr.as_ptr(), self.len)
+            std::slice::from_raw_parts_mut(self.ptr(), self.len)
         }
     }
 }
@@ -248,12 +272,13 @@ impl<T> DoubleEndedIterator for IntoIter<T> {
 /// Drop the unused elem and memory in IntoIter
 impl<T> Drop for IntoIter<T> {
     fn drop(&mut self) {
-        if self.cap != 0 {
+        self.grow();
+        if self.cap() != 0 {
             // Drop each elem
             for _ in &mut *self {}
 
             // Deallocate the memory
-            let layout = Layout::array::<T>(self.cap).unwrap();
+            let layout = Layout::array::<T>(self.cap()).unwrap();
             unsafe {
                 alloc::dealloc(self.buf.as_ptr() as *mut u8, layout);
             }
