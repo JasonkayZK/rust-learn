@@ -1,3 +1,4 @@
+use crate::list::error::IndexOutOfRangeError;
 use std::error::Error;
 use std::fmt::Debug;
 use std::marker::PhantomData;
@@ -10,12 +11,16 @@ struct Node<T> {
 }
 
 impl<T> Node<T> {
-    fn new(t: T) -> Node<T> {
+    fn new(val: T) -> Node<T> {
         Node {
-            val: t,
+            val,
             prev: None,
             next: None,
         }
+    }
+
+    fn into_val(self: Box<Self>) -> T {
+        self.val
     }
 }
 
@@ -42,7 +47,7 @@ impl<T> LinkedList<T> {
         }
     }
 
-    fn length(&self) -> usize {
+    pub fn length(&self) -> usize {
         self.length
     }
 
@@ -81,51 +86,244 @@ impl<T> LinkedList<T> {
         self.length += 1;
     }
 
-    fn pop_front(&mut self) -> Option<T> {
+    /// Removes the first element and returns it, or `None` if the list is
+    /// empty.
+    ///
+    /// This operation should compute in *O*(1) time.
+    pub fn pop_front(&mut self) -> Option<T> {
+        self.head.map(|node| {
+            self.length -= 1;
+
+            unsafe {
+                let node = Box::from_raw(node.as_ptr());
+
+                self.head = node.next;
+
+                match self.head {
+                    None => self.tail = None,
+                    Some(head) => (*head.as_ptr()).prev = None,
+                }
+                node.into_val()
+            }
+        })
+    }
+
+    /// Removes the last element from a list and returns it, or `None` if
+    /// it is empty.
+    ///
+    /// This operation should compute in *O*(1) time.
+    pub fn pop_back(&mut self) -> Option<T> {
+        self.tail.map(|node| {
+            self.length -= 1;
+
+            unsafe {
+                let node = Box::from_raw(node.as_ptr());
+
+                self.tail = node.prev;
+
+                match self.tail {
+                    None => self.head = None,
+                    Some(tail) => (*tail.as_ptr()).next = None,
+                }
+                node.into_val()
+            }
+        })
+    }
+
+    /// Provides a reference to the front element, or `None` if the list is
+    /// empty.
+    ///
+    /// This operation should compute in *O*(1) time.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::list::linked_list::LinkedList;
+    ///
+    /// let mut dl = LinkedList::new();
+    /// assert_eq!(dl.front(), None);
+    ///
+    /// dl.push_front(1);
+    /// assert_eq!(dl.front(), Some(&1));
+    /// ```
+    pub fn peek_front(&self) -> Option<&T> {
+        unsafe { self.head.as_ref().map(|node| &node.as_ref().val) }
+    }
+
+    /// Provides a reference to the back element, or `None` if the list is
+    /// empty.
+    ///
+    /// This operation should compute in *O*(1) time.
+    pub fn peek_back(&self) -> Option<&T> {
+        unsafe { self.tail.as_ref().map(|node| &node.as_ref().val) }
+    }
+
+    /// Provides a mutable reference to the front element, or `None` if the list
+    /// is empty.
+    ///
+    /// This operation should compute in *O*(1) time.
+    pub fn peek_front_mut(&mut self) -> Option<&mut T> {
+        unsafe { self.head.as_mut().map(|node| &mut node.as_mut().val) }
+    }
+
+    /// Provides a mutable reference to the back element, or `None` if the list
+    /// is empty.
+    ///
+    /// This operation should compute in *O*(1) time.
+    pub fn peek_back_mut(&mut self) -> Option<&mut T> {
+        unsafe { self.tail.as_mut().map(|node| &mut node.as_mut().val) }
+    }
+
+    pub fn get_by_idx(&self, idx: usize) -> Result<Option<&T>, Box<dyn Error>> {
+        let len = self.length;
+
+        if idx >= len {
+            return Err(Box::new(IndexOutOfRangeError {}));
+        }
+
+        // Iterate towards the node at the given index, either from the start or the end,
+        // depending on which would be faster.
+        let offset_from_end = len - idx - 1;
+        let mut cur;
+        if idx <= offset_from_end {
+            // Head to Tail
+            cur = self.head;
+            for _ in 0..idx {
+                match cur.take() {
+                    None => {
+                        cur = self.head;
+                    }
+                    Some(current) => unsafe {
+                        cur = current.as_ref().prev;
+                    },
+                }
+            }
+        } else {
+            // Tail to Head
+            cur = self.tail;
+            for _ in 0..offset_from_end {
+                match cur.take() {
+                    None => {
+                        cur = self.tail;
+                    }
+                    Some(current) => unsafe {
+                        cur = current.as_ref().prev;
+                    },
+                }
+            }
+        }
+
+        unsafe { Ok(cur.as_ref().map(|node| &node.as_ref().val)) }
+    }
+
+    pub fn get_by_idx_mut(&self, idx: usize) -> Result<Option<&mut T>, Box<dyn Error>> {
+        let len = self.length;
+
+        if idx >= len {
+            return Err(Box::new(IndexOutOfRangeError {}));
+        }
+
+        // Iterate towards the node at the given index, either from the start or the end,
+        // depending on which would be faster.
+        let offset_from_end = len - idx - 1;
+        let mut cur;
+        if idx <= offset_from_end {
+            // Head to Tail
+            cur = self.head;
+            for _ in 0..idx {
+                match cur.take() {
+                    None => {
+                        cur = self.head;
+                    }
+                    Some(current) => unsafe {
+                        cur = current.as_ref().prev;
+                    },
+                }
+            }
+        } else {
+            // Tail to Head
+            cur = self.tail;
+            for _ in 0..offset_from_end {
+                match cur.take() {
+                    None => {
+                        cur = self.tail;
+                    }
+                    Some(current) => unsafe {
+                        cur = current.as_ref().prev;
+                    },
+                }
+            }
+        }
+
+        unsafe { Ok(cur.as_mut().map(|node| &mut node.as_mut().val)) }
+    }
+
+    pub fn insert_by_idx(&mut self, idx: usize, data: T) -> Result<(), Box<dyn Error>> {
         todo!()
     }
 
-    fn pop_back(&mut self) -> Option<T> {
-        todo!()
+    /// Removes the element at the given index and returns it.
+    ///
+    /// This operation should compute in *O*(*n*) time.
+    pub fn remove_by_idx(&mut self, idx: usize) -> Result<T, Box<dyn Error>> {
+        let len = self.length;
+
+        if idx >= len {
+            return Err(Box::new(IndexOutOfRangeError {}));
+        }
+
+        // Below, we iterate towards the node at the given index, either from
+        // the start or the end, depending on which would be faster.
+        let offset_from_end = len - at - 1;
+        if at <= offset_from_end {
+            let mut cursor = self.cursor_front_mut();
+            for _ in 0..at {
+                cursor.move_next();
+            }
+            cursor.remove_current().unwrap()
+        } else {
+            let mut cursor = self.cursor_back_mut();
+            for _ in 0..offset_from_end {
+                cursor.move_prev();
+            }
+            cursor.remove_current().unwrap()
+        }
     }
 
-    fn peek_front(&self) -> Option<&T> {
-        todo!()
+    /// Returns `true` if the `LinkedList` contains an element equal to the given value.
+    ///
+    /// This operation should compute in *O*(*n*) time.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use crate::list::linked_list::LinkedList;
+    ///
+    /// let mut list = LinkedList::new();
+    ///
+    /// list.push_back(0);
+    /// list.push_back(1);
+    /// list.push_back(2);
+    ///
+    /// assert_eq!(list.contains(&0), true);
+    /// assert_eq!(list.contains(&10), false);
+    /// ```
+    pub fn contains(&self, elem: &T) -> bool
+    where
+        T: PartialEq<T>,
+    {
+        self.iter().any(|x| x == elem)
     }
 
-    fn peek_back(&self) -> Option<&T> {
-        todo!()
+    pub fn clear(&mut self) {
+        *self = Self::new();
     }
 
-    fn peek_front_mut(&mut self) -> Option<&mut T> {
-        todo!()
-    }
-
-    fn peek_back_mut(&mut self) -> Option<&mut T> {
-        todo!()
-    }
-
-    fn get_by_idx(&self, idx: isize) -> Option<&T> {
-        todo!()
-    }
-
-    fn get_by_idx_mut(&self, idx: isize) -> Option<&mut T> {
-        todo!()
-    }
-
-    fn insert_by_idx(&mut self, idx: isize, data: T) -> Result<(), Box<dyn Error>> {
-        todo!()
-    }
-
-    fn remove_by_idx(&mut self, idx: isize) -> Result<T, Box<dyn Error>> {
-        todo!()
-    }
-
-    fn into_iter(self) -> IntoIter<T> {
+    pub fn into_iter(self) -> IntoIter<T> {
         IntoIter { list: self }
     }
 
-    fn iter(&self) -> Iter<'_, T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         Iter {
             head: self.head,
             tail: self.tail,
@@ -134,7 +332,7 @@ impl<T> LinkedList<T> {
         }
     }
 
-    fn iter_mut(&mut self) -> IterMut<'_, T> {
+    pub fn iter_mut(&mut self) -> IterMut<'_, T> {
         IterMut {
             head: self.head,
             tail: self.tail,
@@ -183,7 +381,6 @@ impl<T> Iterator for IntoIter<T> {
 }
 
 impl<T> DoubleEndedIterator for IntoIter<T> {
-
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         self.list.pop_back()
@@ -198,7 +395,6 @@ pub struct Iter<'a, T: 'a> {
 }
 
 impl<'a, T> Iterator for Iter<'a, T> {
-
     type Item = &'a T;
 
     #[inline]
@@ -206,10 +402,10 @@ impl<'a, T> Iterator for Iter<'a, T> {
         if self.len == 0 {
             None
         } else {
-            self.head.map(|node|  {
+            self.head.map(|node| {
                 self.len -= 1;
 
-                unsafe{
+                unsafe {
                     let node = &*node.as_ptr();
                     self.head = node.next;
                     &node.val
@@ -234,7 +430,7 @@ impl<'a, T> DoubleEndedIterator for Iter<'a, T> {
         if self.len == 0 {
             None
         } else {
-            self.tail.map(|node|  {
+            self.tail.map(|node| {
                 self.len -= 1;
 
                 unsafe {
@@ -263,10 +459,10 @@ impl<'a, T> Iterator for IterMut<'a, T> {
         if self.len == 0 {
             None
         } else {
-            self.head.map(|node|  {
+            self.head.map(|node| {
                 self.len -= 1;
 
-                unsafe{
+                unsafe {
                     let node = &mut *node.as_ptr();
                     self.head = node.next;
                     &mut node.val
@@ -287,13 +483,12 @@ impl<'a, T> Iterator for IterMut<'a, T> {
 }
 
 impl<'a, T> DoubleEndedIterator for IterMut<'a, T> {
-
     #[inline]
     fn next_back(&mut self) -> Option<Self::Item> {
         if self.len == 0 {
             None
         } else {
-            self.tail.map(|node|  {
+            self.tail.map(|node| {
                 self.len -= 1;
 
                 unsafe {
@@ -323,9 +518,7 @@ mod test {
         list.traverse();
     }
 
-
-
-    struct ZeroSizeType{}
+    struct ZeroSizeType {}
 
     fn _new_list_i32() -> LinkedList<i32> {
         let mut list = LinkedList::new();
@@ -350,11 +543,10 @@ mod test {
     fn _new_list_zst() -> LinkedList<ZeroSizeType> {
         let mut list = LinkedList::new();
 
-        list.push_front(ZeroSizeType{});
-        list.push_front(ZeroSizeType{});
-        list.push_back(ZeroSizeType{});
+        list.push_front(ZeroSizeType {});
+        list.push_front(ZeroSizeType {});
+        list.push_back(ZeroSizeType {});
 
         list
     }
-
 }
