@@ -2,6 +2,7 @@ use crate::list::error::IndexOutOfRangeError;
 use std::error::Error;
 use std::fmt::Debug;
 use std::marker::PhantomData;
+use std::mem;
 use std::ptr::NonNull;
 
 struct Node<T> {
@@ -272,22 +273,7 @@ impl<T> LinkedList<T> {
             return Err(Box::new(IndexOutOfRangeError {}));
         }
 
-        // Below, we iterate towards the node at the given index, either from
-        // the start or the end, depending on which would be faster.
-        let offset_from_end = len - at - 1;
-        if at <= offset_from_end {
-            let mut cursor = self.cursor_front_mut();
-            for _ in 0..at {
-                cursor.move_next();
-            }
-            cursor.remove_current().unwrap()
-        } else {
-            let mut cursor = self.cursor_back_mut();
-            for _ in 0..offset_from_end {
-                cursor.move_prev();
-            }
-            cursor.remove_current().unwrap()
-        }
+        Err(Box::new(IndexOutOfRangeError {}))
     }
 
     /// Returns `true` if the `LinkedList` contains an element equal to the given value.
@@ -349,6 +335,28 @@ impl<T: Debug> LinkedList<T> {
             print!(" [{}: {:?}] ", idx, *x)
         }
         println!(" }}");
+    }
+}
+
+impl<T> Drop for LinkedList<T> {
+    fn drop(&mut self) {
+        struct DropGuard<'a, T>(&'a mut LinkedList<T>);
+
+        impl<'a, T> Drop for DropGuard<'a, T> {
+            fn drop(&mut self) {
+                // Continue the same loop we do below. This only runs when a destructor has
+                // panicked. If another one panics this will abort.
+                while self.0.pop_front().is_some() {}
+            }
+        }
+
+        while let Some(node) = self.pop_front() {
+            let guard = DropGuard(self);
+            drop(node);
+            mem::forget(guard);
+        }
+
+        println!("LinkedList dropped!")
     }
 }
 
@@ -510,12 +518,100 @@ mod test {
     fn test_compiling() {}
 
     #[test]
-    fn test_push() {
+    fn test_push_and_pop() {
         let mut list = _new_list_i32();
 
         assert_eq!(list.length, 5);
+        list.traverse();
+
+        assert_eq!(list.pop_front(), Some(-1));
+        assert_eq!(list.pop_back(), Some(i32::MAX));
+
+        assert_eq!(list.length, 3);
+        list.traverse();
+    }
+
+    #[test]
+    fn test_peak() {
+        let mut list = _new_list_string();
+
+        assert_eq!(list.peek_front(), Some(&String::from("abc")));
+        assert_eq!(list.peek_back(), Some(&String::from("hij")));
+
+        let cur = list.peek_front_mut();
+        assert_eq!(cur, Some(&mut String::from("abc")));
+        cur.map(|x| x.push('x') );
+
+        let cur = list.peek_back_mut();
+        assert_eq!(cur, Some(&mut String::from("hij")));
+        cur.map(|x| x.push('x') );
+
+        assert_eq!(list.peek_front(), Some(&String::from("abcx")));
+        assert_eq!(list.peek_back(), Some(&String::from("hijx")));
+        assert_eq!(list.length, 3);
 
         list.traverse();
+    }
+
+    #[test]
+    fn test_get_idx() {
+        let mut list = _new_list_i32();
+
+
+        assert_eq!(list.get_by_idx(2),  Ok(Some(&456)));
+        assert_eq!(list.get_by_idx(3), Ok(Some(&789)));
+
+        print!("before change: ");
+        list.traverse();
+        list.get_by_idx_mut(2).map(|x| *x <<= 1);
+        assert_eq!(list.get_by_idx(2), Ok(Some(&456<<1)));
+        print!("after change: ");
+        list.traverse();
+    }
+
+    fn test_insert_idx() {
+
+    }
+
+    fn test_remove_idx() {
+
+    }
+
+    #[test]
+    fn test_contains() {
+        let list = _new_list_i32();
+
+        assert!(list.contains(&-1));
+        assert!(!list.contains(&-2));
+    }
+
+    #[test]
+    fn test_clear() {
+        let mut list = _new_list_zst();
+
+        assert_eq!(list.length(), 3);
+
+        list.clear();
+
+        assert_eq!(list.length(), 0);
+    }
+
+    #[test]
+    fn test_iterator() {
+        let mut list1 = _new_list_i32();
+
+        print!("before change: ");
+        list1.traverse();
+        list1.iter_mut().for_each(|x| *x = *x-1);
+        print!("after change: ");
+        list1.traverse();
+
+        let mut list2 = _new_list_string();
+        let list2_to_len = list2.into_iter().map(|x| x.len()).collect::<Vec<usize>>();
+        println!("transform list2 into len vec, list2_to_len: {:?}", list2_to_len);
+
+        // Compiling err:
+        // list2.traverse()
     }
 
     struct ZeroSizeType {}
@@ -526,6 +622,8 @@ mod test {
         list.push_front(456);
         list.push_front(123);
         list.push_back(789);
+        list.push_front(-1);
+        list.push_back(i32::MAX);
 
         list
     }
