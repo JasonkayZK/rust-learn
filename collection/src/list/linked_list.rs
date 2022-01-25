@@ -218,49 +218,40 @@ impl<T> LinkedList<T> {
     }
 
     pub fn get_by_idx_mut(&self, idx: usize) -> Result<Option<&mut T>, Box<dyn Error>> {
-        let len = self.length;
-
-        if idx >= len {
-            return Err(Box::new(IndexOutOfRangeError {}));
-        }
-
-        // Iterate towards the node at the given index, either from the start or the end,
-        // depending on which would be faster.
-        let offset_from_end = len - idx - 1;
-        let mut cur;
-        if idx <= offset_from_end {
-            // Head to Tail
-            cur = self.head;
-            for _ in 0..idx {
-                match cur.take() {
-                    None => {
-                        cur = self.head;
-                    }
-                    Some(current) => unsafe {
-                        cur = current.as_ref().next;
-                    },
-                }
-            }
-        } else {
-            // Tail to Head
-            cur = self.tail;
-            for _ in 0..offset_from_end {
-                match cur.take() {
-                    None => {
-                        cur = self.tail;
-                    }
-                    Some(current) => unsafe {
-                        cur = current.as_ref().prev;
-                    },
-                }
-            }
-        }
-
+        let mut cur = self._get_by_idx_mut(idx)?;
         unsafe { Ok(cur.as_mut().map(|node| &mut node.as_mut().val)) }
     }
 
     pub fn insert_by_idx(&mut self, idx: usize, data: T) -> Result<(), Box<dyn Error>> {
-        todo!()
+        let len = self.length;
+
+        if idx > len {
+            return Err(Box::new(IndexOutOfRangeError {}));
+        }
+
+        if idx == 0 {
+            return Ok(self.push_front(data));
+        } else if idx == len {
+            return Ok(self.push_back(data));
+        }
+
+        unsafe {
+            // Create Node
+            let mut spliced_node = Box::new(Node::new(data));
+            let before_node = self._get_by_idx_mut(idx - 1)?;
+            let after_node = before_node.unwrap().as_mut().next;
+            spliced_node.prev = before_node;
+            spliced_node.next = after_node;
+            let spliced_node = NonNull::new(Box::into_raw(spliced_node));
+
+            // Insert Node
+            before_node.unwrap().as_mut().next = spliced_node;
+            after_node.unwrap().as_mut().prev = spliced_node;
+        }
+
+        self.length += 1;
+
+        Ok(())
     }
 
     /// Removes the element at the given index and returns it.
@@ -273,7 +264,20 @@ impl<T> LinkedList<T> {
             return Err(Box::new(IndexOutOfRangeError {}));
         }
 
-        Err(Box::new(IndexOutOfRangeError {}))
+        if idx == 0 {
+            return Ok(self.pop_front().unwrap());
+        } else if idx == len - 1 {
+            return Ok(self.pop_back().unwrap());
+        };
+
+        let cur = self._get_by_idx_mut(idx)?.unwrap();
+
+        self.unlink_node(cur);
+
+        unsafe {
+            let unlinked_node = Box::from_raw(cur.as_ptr());
+            Ok(unlinked_node.val)
+        }
     }
 
     /// Returns `true` if the `LinkedList` contains an element equal to the given value.
@@ -325,6 +329,74 @@ impl<T> LinkedList<T> {
             len: self.length,
             _marker: PhantomData,
         }
+    }
+
+    fn _get_by_idx_mut(&self, idx: usize) -> Result<Option<NonNull<Node<T>>>, Box<dyn Error>> {
+        let len = self.length;
+
+        if idx >= len {
+            return Err(Box::new(IndexOutOfRangeError {}));
+        }
+
+        // Iterate towards the node at the given index, either from the start or the end,
+        // depending on which would be faster.
+        let offset_from_end = len - idx - 1;
+        let mut cur;
+        if idx <= offset_from_end {
+            // Head to Tail
+            cur = self.head;
+            for _ in 0..idx {
+                match cur.take() {
+                    None => {
+                        cur = self.head;
+                    }
+                    Some(current) => unsafe {
+                        cur = current.as_ref().next;
+                    },
+                }
+            }
+        } else {
+            // Tail to Head
+            cur = self.tail;
+            for _ in 0..offset_from_end {
+                match cur.take() {
+                    None => {
+                        cur = self.tail;
+                    }
+                    Some(current) => unsafe {
+                        cur = current.as_ref().prev;
+                    },
+                }
+            }
+        }
+
+        Ok(cur)
+    }
+
+    /// Unlinks the specified node from the current list.
+    ///
+    /// Warning: this will not check that the provided node belongs to the current list.
+    ///
+    /// This method takes care not to create mutable references to `element`,
+    /// to maintain validity of aliasing pointers.
+    #[inline]
+    fn unlink_node(&mut self, mut node: NonNull<Node<T>>) {
+        let node = unsafe { node.as_mut() }; // this one is ours now, we can create an &mut.
+
+        // Not creating new mutable (unique!) references overlapping `element`.
+        match node.prev {
+            Some(prev) => unsafe { (*prev.as_ptr()).next = node.next },
+            // this node is the head node
+            None => self.head = node.next,
+        };
+
+        match node.next {
+            Some(next) => unsafe { (*next.as_ptr()).prev = node.prev },
+            // this node is the tail node
+            None => self.tail = node.prev,
+        };
+
+        self.length -= 1;
     }
 }
 
@@ -540,14 +612,14 @@ mod test {
 
         let cur = list.peek_front_mut();
         assert_eq!(cur, Some(&mut String::from("abc")));
-        cur.map(|x| x.push('x'));
+        cur.map(|x| x.push(' '));
 
         let cur = list.peek_back_mut();
         assert_eq!(cur, Some(&mut String::from("hij")));
-        cur.map(|x| x.push('x'));
+        cur.map(|x| x.push(' '));
 
-        assert_eq!(list.peek_front(), Some(&String::from("abcx")));
-        assert_eq!(list.peek_back(), Some(&String::from("hijx")));
+        assert_eq!(list.peek_front(), Some(&String::from("abc ")));
+        assert_eq!(list.peek_back(), Some(&String::from("hij ")));
         assert_eq!(list.length, 3);
 
         list.traverse();
@@ -555,7 +627,7 @@ mod test {
 
     #[test]
     fn test_get_idx() {
-        let mut list = _new_list_i32();
+        let list = _new_list_i32();
 
         assert_eq!(list.get_by_idx(2).unwrap(), Some(&456));
         assert_eq!(list.get_by_idx(3).unwrap(), Some(&789));
@@ -573,13 +645,57 @@ mod test {
     }
 
     #[test]
-    fn test_insert_idx() {
+    fn test_get_idx_err() {
+        let list = _new_list_i32();
 
+        assert!(list.get_by_idx(99).is_err());
+        assert!(list.get_by_idx_mut(99).is_err());
+    }
+
+    #[test]
+    fn test_insert_idx() {
+        let mut list = LinkedList::new();
+
+        list.push_back(String::from("1"));
+        list.push_back(String::from("2"));
+        list.push_back(String::from("3"));
+
+        list.insert_by_idx(1, String::from("99")).unwrap();
+        list.traverse();
+
+        assert_eq!(list.get_by_idx(0).unwrap(), Some(&String::from("1")));
+        assert_eq!(list.get_by_idx(1).unwrap(), Some(&String::from("99")));
+    }
+
+    #[test]
+    fn test_insert_idx_err() {
+        let mut list = LinkedList::new();
+
+        assert!(list.insert_by_idx(99, String::from("99")).is_err());
     }
 
     #[test]
     fn test_remove_idx() {
+        let mut list = LinkedList::new();
 
+        list.push_back(String::from("1"));
+        list.push_back(String::from("2"));
+        list.push_back(String::from("3"));
+
+        let removed = list.remove_by_idx(1).unwrap();
+        list.traverse();
+
+        assert_eq!(removed, String::from("2"));
+
+        assert_eq!(list.get_by_idx(0).unwrap(), Some(&String::from("1")));
+        assert_eq!(list.get_by_idx(1).unwrap(), Some(&String::from("3")));
+    }
+
+    #[test]
+    fn test_remove_idx_err() {
+        let mut list: LinkedList<i32> = LinkedList::new();
+
+        assert!(list.remove_by_idx(99).is_err());
     }
 
     #[test]
@@ -611,7 +727,7 @@ mod test {
         print!("after change: ");
         list1.traverse();
 
-        let mut list2 = _new_list_string();
+        let list2 = _new_list_string();
         let list2_to_len = list2.into_iter().map(|x| x.len()).collect::<Vec<usize>>();
         println!(
             "transform list2 into len vec, list2_to_len: {:?}",
