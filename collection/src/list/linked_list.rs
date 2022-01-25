@@ -195,7 +195,7 @@ impl<T> LinkedList<T> {
                         cur = self.head;
                     }
                     Some(current) => unsafe {
-                        cur = current.as_ref().prev;
+                        cur = current.as_ref().next;
                     },
                 }
             }
@@ -237,7 +237,7 @@ impl<T> LinkedList<T> {
                         cur = self.head;
                     }
                     Some(current) => unsafe {
-                        cur = current.as_ref().prev;
+                        cur = current.as_ref().next;
                     },
                 }
             }
@@ -540,11 +540,11 @@ mod test {
 
         let cur = list.peek_front_mut();
         assert_eq!(cur, Some(&mut String::from("abc")));
-        cur.map(|x| x.push('x') );
+        cur.map(|x| x.push('x'));
 
         let cur = list.peek_back_mut();
         assert_eq!(cur, Some(&mut String::from("hij")));
-        cur.map(|x| x.push('x') );
+        cur.map(|x| x.push('x'));
 
         assert_eq!(list.peek_front(), Some(&String::from("abcx")));
         assert_eq!(list.peek_back(), Some(&String::from("hijx")));
@@ -557,22 +557,27 @@ mod test {
     fn test_get_idx() {
         let mut list = _new_list_i32();
 
-
-        assert_eq!(list.get_by_idx(2),  Ok(Some(&456)));
-        assert_eq!(list.get_by_idx(3), Ok(Some(&789)));
+        assert_eq!(list.get_by_idx(2).unwrap(), Some(&456));
+        assert_eq!(list.get_by_idx(3).unwrap(), Some(&789));
 
         print!("before change: ");
         list.traverse();
-        list.get_by_idx_mut(2).map(|x| *x <<= 1);
-        assert_eq!(list.get_by_idx(2), Ok(Some(&456<<1)));
+        let cur = list.get_by_idx_mut(2).unwrap().unwrap();
+        assert_eq!(cur, &mut 456);
+
+        *cur <<= 1;
         print!("after change: ");
         list.traverse();
+
+        assert_eq!(list.get_by_idx(2).unwrap(), Some(&(456 << 1)));
     }
 
+    #[test]
     fn test_insert_idx() {
 
     }
 
+    #[test]
     fn test_remove_idx() {
 
     }
@@ -602,13 +607,16 @@ mod test {
 
         print!("before change: ");
         list1.traverse();
-        list1.iter_mut().for_each(|x| *x = *x-1);
+        list1.iter_mut().for_each(|x| *x = *x - 1);
         print!("after change: ");
         list1.traverse();
 
         let mut list2 = _new_list_string();
         let list2_to_len = list2.into_iter().map(|x| x.len()).collect::<Vec<usize>>();
-        println!("transform list2 into len vec, list2_to_len: {:?}", list2_to_len);
+        println!(
+            "transform list2 into len vec, list2_to_len: {:?}",
+            list2_to_len
+        );
 
         // Compiling err:
         // list2.traverse()
