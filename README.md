@@ -57,16 +57,16 @@ Hello, world!
 
 > Or just run program with:
 >
->   ```bash
->   cargo run
->   ```
+> ```bash
+> cargo run
+> ```
 
 <br/>
 
 ## **Now Finished**
 
 | Project                                                                                                            | Date                                      | Note                                                                                                                                                                                                               |
-|--------------------------------------------------------------------------------------------------------------------|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game)                     | 2021-06-01                                | A guessing game                                                                                                                                                                                                    |
 | [chapter3-variables](https://github.com/JasonkayZK/rust-learn/tree/chapter3-variables)                             | 2021-06-02                                | Variable & Type in Rust                                                                                                                                                                                            |
 | [multiple-main-demo](https://github.com/JasonkayZK/rust-learn/tree/multiple-main-demo)                             | 2021-06-02                                | A demo to show how to run multiple main in Rust                                                                                                                                                                    |
@@ -106,40 +106,41 @@ Hello, world!
 
 Project Space:
 
--   [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs)
+- [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs)
 
 Learning Step:
 
--   [Part I : Configuration](https://github.com/JasonkayZK/rust-learn/commit/12b88b1b5f5e02141ff90716feefea834817c34b)
--   [Part II : Database Setup](https://github.com/JasonkayZK/rust-learn/commit/89327a61a4afda4e2fb9f55171889ee7fa205de5)
--   [Part III - Database Manager: add mapper & tokio-async](https://github.com/JasonkayZK/rust-learn/commit/51120a38865911aa19a5fd4b093d077a40e95cd0)
--   [Part IV: Basic Server & log tracing](https://github.com/JasonkayZK/rust-learn/commit/75267288ec824cd9b65f84245e14b37a9b4d5b4c)
--   [Part V: Server and Database Manager communication](https://github.com/JasonkayZK/rust-learn/commit/cefc2ad7639c8359719cb639b9351c16db9e19d1)
--   [Part VI - UrlMap CRUD API](https://github.com/JasonkayZK/rust-learn/commit/d77521b4c39ca953ef51cc75065f23a487ba6b12)
--   [Part VII - Auth Middleware](https://github.com/JasonkayZK/rust-learn/commit/2da0d7d7ef20cf54bf4d01f4cc927e29ca5a58ea)
--   [Part VIII - Containerization](https://github.com/JasonkayZK/rust-learn/commit/5d5cebcf69dccb809afb46b74dd6479991e511ae)
--   [Part IX - Handling Signals & Deploying to Kubernetes](https://github.com/JasonkayZK/rust-learn/commit/03d3a5c76ad168da2ac3bd850e18bde6780d747f)
--   [Part X - Frontend using Tera](https://github.com/JasonkayZK/rust-learn/commit/ad3828f69af89ea25092d8319bb6099cc357966f)
--   [Part XI - React Front-End](https://github.com/JasonkayZK/rust-learn/commit/bdb21c2bff6ead55ba55554a51e0223e76453c60)
-
-
+- [Part I : Configuration](https://github.com/JasonkayZK/rust-learn/commit/12b88b1b5f5e02141ff90716feefea834817c34b)
+- [Part II : Database Setup](https://github.com/JasonkayZK/rust-learn/commit/89327a61a4afda4e2fb9f55171889ee7fa205de5)
+- [Part III - Database Manager: add mapper & tokio-async](https://github.com/JasonkayZK/rust-learn/commit/51120a38865911aa19a5fd4b093d077a40e95cd0)
+- [Part IV: Basic Server & log tracing](https://github.com/JasonkayZK/rust-learn/commit/75267288ec824cd9b65f84245e14b37a9b4d5b4c)
+- [Part V: Server and Database Manager communication](https://github.com/JasonkayZK/rust-learn/commit/cefc2ad7639c8359719cb639b9351c16db9e19d1)
+- [Part VI - UrlMap CRUD API](https://github.com/JasonkayZK/rust-learn/commit/d77521b4c39ca953ef51cc75065f23a487ba6b12)
+- [Part VII - Auth Middleware](https://github.com/JasonkayZK/rust-learn/commit/2da0d7d7ef20cf54bf4d01f4cc927e29ca5a58ea)
+- [Part VIII - Containerization](https://github.com/JasonkayZK/rust-learn/commit/5d5cebcf69dccb809afb46b74dd6479991e511ae)
+- [Part IX - Handling Signals & Deploying to Kubernetes](https://github.com/JasonkayZK/rust-learn/commit/03d3a5c76ad168da2ac3bd850e18bde6780d747f)
+- [Part X - Frontend using Tera](https://github.com/JasonkayZK/rust-learn/commit/ad3828f69af89ea25092d8319bb6099cc357966f)
+- [Part XI - React Front-End](https://github.com/JasonkayZK/rust-learn/commit/bdb21c2bff6ead55ba55554a51e0223e76453c60)
 
 ### algorithm
 
 Project Space:
 
--   [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm)
-    -   [sorting](https://github.com/JasonkayZK/rust-learn/tree/algorithm/algorithms/src/sorting)
-        -   [bubble_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/bubble_sort.rs)
-        -   [insertion_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/insertion_sort.rs)
-        -   [merge_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/merge_sort.rs)
-        -   [quick_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/quick_sort.rs)
-        -   [selection_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/selection_sort.rs)
--   [collection](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection)
-    -   [list](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/list)
-        -   [vector.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/vector.rs)
--   [concurrency](https://github.com/JasonkayZK/rust-learn/tree/algorithm/concurrency)
-    -   [my_arc.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/concurrency/src/my_arc.rs)
+- [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm)
+    - [sorting](https://github.com/JasonkayZK/rust-learn/tree/algorithm/algorithms/src/sorting)
+        - [bubble_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/bubble_sort.rs)
+        - [insertion_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/insertion_sort.rs)
+        - [merge_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/merge_sort.rs)
+        - [quick_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/quick_sort.rs)
+        - [selection_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/selection_sort.rs)
+- [collection](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection)
+    - [list](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/list)
+        - [vector.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/vector.rs)
+        - [linked_list.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/linked_list.rs)
+    - [tree](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/tree)
+        - [binary_search_tree.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/tree/binary_search_tree.rs)
+- [concurrency](https://github.com/JasonkayZK/rust-learn/tree/algorithm/concurrency)
+    - [my_arc.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/concurrency/src/my_arc.rs)
 
 Learning Step:
 
