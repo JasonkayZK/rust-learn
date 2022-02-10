@@ -1,5 +1,6 @@
 use std::cmp::max;
 use std::marker::PhantomData;
+use std::mem;
 use std::ptr::NonNull;
 
 struct TreeNode<T> {
@@ -25,8 +26,8 @@ impl<T> TreeNode<T> {
 }
 
 pub struct BinarySearchTree<T>
-    where
-        T: PartialOrd,
+where
+    T: PartialOrd,
 {
     size: usize,
     root: Option<NonNull<TreeNode<T>>>,
@@ -42,13 +43,8 @@ impl<T: std::cmp::PartialOrd> Default for BinarySearchTree<T> {
 impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
     /// Creates a new, empty binary search tree.
     /// # Examples
+    ///
     /// ```
-    /// use collection::tree::binary_search_tree::BinarySearchTree;
-    /// let mut tree = BinarySearchTree::new();
-    /// ```
-    /// # Panics
-    /// This function will panic if the type `T` is not `PartialOrd`.
-    /// ```should_panic
     /// use collection::tree::binary_search_tree::BinarySearchTree;
     /// let mut tree: BinarySearchTree<i32> = BinarySearchTree::new();
     /// ```
@@ -104,24 +100,189 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
             return None;
         }
 
-        self.size -= 1;
-        self._min().map(|mut node| {
-            unsafe {
-                let node = Box::from_raw(node.as_ptr());
-                self.remove(&node.val);
-                node.into_val()
-            }
+        self._min().map(|node| unsafe {
+            let node = Box::from_raw(node.as_ptr());
+            self.remove(&node.val);
+            node.into_val()
         })
     }
 
-    pub fn insert(&mut self, elem: T) {}
+    /// Insert a value into the binary search tree.
+    ///
+    /// # Examples
+    /// ```
+    /// use collection::tree::binary_search_tree::BinarySearchTree;
+    /// let mut tree = BinarySearchTree::new();
+    /// tree.insert(1);
+    /// tree.insert(2);
+    /// tree.insert(3);
+    /// ```
+    pub fn insert(&mut self, elem: T) {
+        let mut node = Box::new(TreeNode::new(elem));
+        node.left = None;
+        node.right = None;
+        node.parent = None;
+        let node = NonNull::new(Box::into_raw(node));
 
+        // tree is empty
+        if self.is_empty() {
+            self.root = node;
+            self.size += 1;
+            return;
+        }
+
+        // tree is not empty
+
+        // find the parent node
+        let mut curr = self.root.unwrap();
+        loop {
+            unsafe {
+                if (*node.unwrap().as_ptr()).val < (*curr.as_ptr()).val {
+                    if (*curr.as_ptr()).left.is_none() {
+                        (*curr.as_ptr()).left = node;
+                        break;
+                    } else {
+                        curr = (*curr.as_ptr()).left.unwrap();
+                    }
+                } else {
+                    if (*curr.as_ptr()).right.is_none() {
+                        (*curr.as_ptr()).right = node;
+                        break;
+                    } else {
+                        curr = (*curr.as_ptr()).right.unwrap();
+                    }
+                }
+            }
+        }
+
+        // set the parent node
+        unsafe {
+            (*node.unwrap().as_ptr()).parent = Some(curr);
+        }
+
+        // update the size
+        self.size += 1;
+    }
+
+    /// Remove a value from the binary search tree.
+    ///
+    /// # Examples
+    /// ```
+    /// use collection::tree::binary_search_tree::BinarySearchTree;
+    /// let mut tree = BinarySearchTree::new();
+    /// tree.insert(1);
+    /// tree.insert(2);
+    /// tree.insert(3);
+    /// tree.remove(&2);
+    /// assert!(!tree.contains(&2));
+    /// assert!(tree.contains(&1));
+    /// ```
     pub fn remove(&mut self, elem: &T) -> Option<T> {
         if self.is_empty() {
             return None;
         }
 
-        None
+        let removed_node = self._find_node(elem);
+        if removed_node.is_none() {
+            return None;
+        }
+
+        let removed_node = removed_node.unwrap();
+        Some(self._remove_node(removed_node))
+    }
+
+    /// Remove a node from the binary search tree.
+    fn _remove_node(&mut self, mut node: NonNull<TreeNode<T>>) -> T {
+        let mut removed_node = unsafe { Box::from_raw(node.as_mut()) };
+
+        // node has no children
+        if removed_node.left.is_none() && removed_node.right.is_none() {
+            // node is root
+            if removed_node.parent.is_none() {
+                self.root = None;
+            } else {
+                let mut parent = unsafe { &mut *removed_node.parent.unwrap().as_mut() };
+                if parent.left == Some(node) {
+                    parent.left = None;
+                } else {
+                    parent.right = None;
+                }
+            }
+        } else if removed_node.left.is_none() || removed_node.right.is_none() {
+            // node has one child, find the child
+            let mut child = if removed_node.left.is_some() {
+                removed_node.left.unwrap()
+            } else {
+                removed_node.right.unwrap()
+            };
+
+            // node is root
+            if removed_node.parent.is_none() {
+                self.root = Some(child);
+            } else {
+                // node is not root
+                unsafe {
+                    let mut parent = &mut *removed_node.parent.unwrap().as_mut();
+                    if parent.left == Some(node) {
+                        parent.left = Some(child);
+                    } else {
+                        parent.right = Some(child);
+                    }
+
+                    (*child.as_mut()).parent = removed_node.parent;
+                }
+            }
+        } else {
+            // node has two children
+            let successor = self._find_successor(node);
+            let successor_node = successor.unwrap();
+            let successor_parent =
+                unsafe { &mut (*successor_node.as_ptr()).parent.unwrap().as_mut() };
+
+            // swap the values
+            mem::swap(&mut removed_node.val, &mut successor_parent.val);
+        }
+
+        removed_node.left = None;
+        removed_node.right = None;
+        removed_node.parent = None;
+
+        self.size -= 1;
+
+        removed_node.val
+    }
+
+    /// Find the successor of a node.
+    fn _find_successor(&self, node: NonNull<TreeNode<T>>) -> Option<NonNull<TreeNode<T>>> {
+        let curr = unsafe { &*node.as_ptr() };
+        if curr.right.is_some() {
+            let mut curr = curr.right.unwrap();
+            loop {
+                unsafe {
+                    if (*curr.as_ptr()).left.is_none() {
+                        return Some(curr);
+                    } else {
+                        curr = (*curr.as_ptr()).left.unwrap();
+                    }
+                }
+            }
+        } else {
+            let mut curr = node;
+            loop {
+                unsafe {
+                    if (*curr.as_ptr()).parent.is_none() {
+                        return None;
+                    } else {
+                        let parent = (*curr.as_ptr()).parent.unwrap();
+                        if (*parent.as_ptr()).right == Some(curr) {
+                            return Some(parent);
+                        } else {
+                            curr = parent;
+                        }
+                    }
+                }
+            }
+        }
     }
 
     /// Returns if the binary search tree contains the given element.
@@ -137,18 +298,39 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
         self._find_node(elem).is_some()
     }
 
+    /// Find the internal node with the given value.
+    ///
+    /// # Examples
+    /// ```
+    /// use collection::tree::binary_search_tree::BinarySearchTree;
+    /// let mut tree = BinarySearchTree::new();
+    /// tree.insert(1);
+    /// //assert!(tree._find_node(&1).is_some());
+    /// //assert!(tree._find_node(&2).is_none());
+    /// ```
     fn _find_node(&self, elem: &T) -> Option<NonNull<TreeNode<T>>> {
         if self.is_empty() {
             return None;
         }
 
-        while let Some(node) = self._find_node_recursive(elem, self.root) {
-            if node.val == *elem {
-                return Some(node);
+        let mut node = self.root.unwrap();
+        loop {
+            unsafe {
+                if elem < &(*node.as_ptr()).val {
+                    if (*node.as_ptr()).left.is_none() {
+                        return None;
+                    }
+                    node = (*node.as_ptr()).left.unwrap();
+                } else if elem > &(*node.as_ptr()).val {
+                    if (*node.as_ptr()).right.is_none() {
+                        return None;
+                    }
+                    node = (*node.as_ptr()).right.unwrap();
+                } else {
+                    return Some(node);
+                }
             }
         }
-
-        None
     }
 
     /// Returns the height of the binary search tree.
@@ -175,7 +357,10 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
         let root = root.unwrap();
         let left = unsafe { (*root.as_ptr()).left };
         let right = unsafe { (*root.as_ptr()).right };
-        max(BinarySearchTree::_height(left), BinarySearchTree::_height(right)) + 1
+        max(
+            BinarySearchTree::_height(left),
+            BinarySearchTree::_height(right),
+        ) + 1
     }
 
     /// Returns the minimum element of the binary search tree.
@@ -237,9 +422,7 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
     }
 
     pub fn into_iter(self) -> IntoIter<T> {
-        IntoIter {
-            tree: self,
-        }
+        IntoIter { tree: self }
     }
 
     pub fn iter(&self) -> Iter<T> {
@@ -271,7 +454,10 @@ pub struct IntoIter<T: PartialOrd> {
     tree: BinarySearchTree<T>,
 }
 
-impl<T> Drop for IntoIter<T> where T: PartialOrd {
+impl<T> Drop for IntoIter<T>
+where
+    T: PartialOrd,
+{
     fn drop(&mut self) {
         // only need to ensure all our elements are read;
         // buffer will clean itself up afterwards.
@@ -347,14 +533,47 @@ mod tests {
     }
 
     #[test]
-    fn test_binary_search_tree() {
-        let mut tree: BinarySearchTree<i32> = BinarySearchTree::new();
-        assert_eq!(tree.size(), 0);
-        assert!(tree.is_empty());
-        assert_eq!(tree.height(), 0);
-        assert_eq!(tree.min(), None);
-        assert_eq!(tree.max(), None);
-        assert_eq!(tree.size(), 1);
-        assert!(!tree.is_empty());
+    fn test_insert() {
+        let mut tree = BinarySearchTree::new();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
     }
+
+    #[test]
+    fn test_remove() {
+        let mut tree = BinarySearchTree::new();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        tree.remove(&1);
+        assert!(!tree.contains(&1));
+        assert!(!tree.contains(&2));
+    }
+
+    #[test]
+    fn test_pop_min() {
+        let mut tree = BinarySearchTree::new();
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree.size(), 3);
+
+        assert_eq!(tree.pop_min(), Some(1));
+        assert_eq!(tree.pop_min(), Some(2));
+        assert_eq!(tree.pop_min(), Some(3));
+        assert_eq!(tree.pop_min(), None);
+    }
+
+    // #[test]
+    // fn test_binary_search_tree() {
+    //     let mut tree: BinarySearchTree<i32> = BinarySearchTree::new();
+    //     assert_eq!(tree.size(), 0);
+    //     assert!(tree.is_empty());
+    //     assert_eq!(tree.height(), 0);
+    //     assert_eq!(tree.min(), None);
+    //     assert_eq!(tree.max(), None);
+    //     assert_eq!(tree.size(), 1);
+    //     assert!(!tree.is_empty());
+    // }
 }

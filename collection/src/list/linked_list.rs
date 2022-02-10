@@ -139,13 +139,13 @@ impl<T> LinkedList<T> {
     /// # Examples
     ///
     /// ```
-    /// use crate::list::linked_list::LinkedList;
+    /// use collection::list::linked_list::LinkedList;
     ///
     /// let mut dl = LinkedList::new();
-    /// assert_eq!(dl.front(), None);
+    /// assert_eq!(dl.peek_front(), None);
     ///
     /// dl.push_front(1);
-    /// assert_eq!(dl.front(), Some(&1));
+    /// assert_eq!(dl.peek_front(), Some(&1));
     /// ```
     pub fn peek_front(&self) -> Option<&T> {
         unsafe { self.head.as_ref().map(|node| &node.as_ref().val) }
@@ -287,7 +287,7 @@ impl<T> LinkedList<T> {
     /// # Examples
     ///
     /// ```
-    /// use crate::list::linked_list::LinkedList;
+    /// use collection::list::linked_list::LinkedList;
     ///
     /// let mut list = LinkedList::new();
     ///
@@ -401,7 +401,7 @@ impl<T> LinkedList<T> {
 }
 
 impl<T: Debug> LinkedList<T> {
-    fn traverse(&self) {
+    pub fn traverse(&self) {
         print!("{{ ");
         for (idx, x) in self.iter().enumerate() {
             print!(" [{}: {:?}] ", idx, *x)

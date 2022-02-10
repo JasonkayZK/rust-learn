@@ -96,7 +96,7 @@ impl<T> Drop for RawVector<T> {
 }
 
 /// A Vector implementation
-///  Refer to https://github.com/rust-lang/nomicon/tree/master/src/vec
+///  Refer to <https://github.com/rust-lang/nomicon/tree/master/src/vec>
 pub struct Vector<T> {
     buf: RawVector<T>,
     len: usize,
