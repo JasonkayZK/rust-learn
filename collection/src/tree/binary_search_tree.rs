@@ -1,4 +1,5 @@
 use std::cmp::max;
+use std::fmt::Display;
 use std::marker::PhantomData;
 use std::mem;
 use std::ptr::NonNull;
@@ -26,8 +27,8 @@ impl<T> TreeNode<T> {
 }
 
 pub struct BinarySearchTree<T>
-where
-    T: PartialOrd,
+    where
+        T: PartialOrd,
 {
     size: usize,
     root: Option<NonNull<TreeNode<T>>>,
@@ -101,9 +102,7 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
         }
 
         self._min().map(|node| unsafe {
-            let node = Box::from_raw(node.as_ptr());
-            self.remove(&node.val);
-            node.into_val()
+            self.remove(&(*node.as_ptr()).val).unwrap()
         })
     }
 
@@ -386,10 +385,14 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
         }
 
         let mut node = self.root.unwrap();
-        while unsafe { (*node.as_ptr()).left.is_some() } {
-            node = unsafe { (*node.as_ptr()).left.unwrap() };
+        loop {
+            unsafe {
+                if (*node.as_ptr()).left.is_none() {
+                    return Some(node);
+                }
+                node = (*node.as_ptr()).left.unwrap();
+            }
         }
-        Some(node)
     }
 
     /// Returns the maximum element of the binary search tree.
@@ -440,6 +443,35 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
     }
 }
 
+impl<T> BinarySearchTree<T> where T: PartialOrd + Display {
+    fn traverse(&self) {
+        if self.root.is_none() {
+            println!("Empty tree");
+            return;
+        }
+
+        let mut stack = Vec::new();
+        let mut node = self.root.unwrap();
+        print!("[");
+        loop {
+            if unsafe { (*node.as_ptr()).left.is_some() } {
+                stack.push(node);
+                node = unsafe { (*node.as_ptr()).left.unwrap() };
+            } else {
+                print!("{} ", unsafe { &(*node.as_ptr()).val });
+                if unsafe { (*node.as_ptr()).right.is_some() } {
+                    node = unsafe { (*node.as_ptr()).right.unwrap() };
+                } else if stack.len() > 0 {
+                    node = stack.pop().unwrap();
+                } else {
+                    break;
+                }
+            }
+        }
+        println!("]");
+    }
+}
+
 impl<T: PartialOrd, const N: usize> From<[T; N]> for BinarySearchTree<T> {
     fn from(s: [T; N]) -> Self {
         let mut tree = Self::new();
@@ -455,8 +487,8 @@ pub struct IntoIter<T: PartialOrd> {
 }
 
 impl<T> Drop for IntoIter<T>
-where
-    T: PartialOrd,
+    where
+        T: PartialOrd,
 {
     fn drop(&mut self) {
         // only need to ensure all our elements are read;
@@ -546,9 +578,13 @@ mod tests {
         tree.insert(1);
         tree.insert(2);
         tree.insert(3);
-        tree.remove(&1);
-        assert!(!tree.contains(&1));
+        assert_eq!(tree.size, 3);
+
+        tree.remove(&2);
+        assert_eq!(tree.size, 2);
         assert!(!tree.contains(&2));
+        assert!(tree.contains(&1));
+        assert!(tree.contains(&3));
     }
 
     #[test]
@@ -560,8 +596,21 @@ mod tests {
         assert_eq!(tree.size(), 3);
 
         assert_eq!(tree.pop_min(), Some(1));
+        tree.traverse();
+        assert_eq!(tree.size(), 2);
+        assert!(!tree.contains(&1));
+
         assert_eq!(tree.pop_min(), Some(2));
+        tree.traverse();
+        assert_eq!(tree.size(), 1);
+        assert!(!tree.contains(&2));
+
+
         assert_eq!(tree.pop_min(), Some(3));
+        assert_eq!(tree.size(), 0);
+        assert!(!tree.contains(&3));
+
+
         assert_eq!(tree.pop_min(), None);
     }
 
