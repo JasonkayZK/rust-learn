@@ -20,15 +20,11 @@ impl<T> TreeNode<T> {
             parent: None,
         }
     }
-
-    fn into_val(self: Box<Self>) -> T {
-        self.val
-    }
 }
 
 pub struct BinarySearchTree<T>
-    where
-        T: PartialOrd,
+where
+    T: PartialOrd,
 {
     size: usize,
     root: Option<NonNull<TreeNode<T>>>,
@@ -101,9 +97,8 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
             return None;
         }
 
-        self._min().map(|node| unsafe {
-            self.remove(&(*node.as_ptr()).val).unwrap()
-        })
+        self._min()
+            .map(|node| unsafe { self.remove(&(*node.as_ptr()).val).unwrap() })
     }
 
     /// Insert a value into the binary search tree.
@@ -218,6 +213,9 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
             // node is root
             if removed_node.parent.is_none() {
                 self.root = Some(child);
+                unsafe {
+                    (*child.as_ptr()).parent = None;
+                }
             } else {
                 // node is not root
                 unsafe {
@@ -443,8 +441,11 @@ impl<T: std::cmp::PartialOrd> BinarySearchTree<T> {
     }
 }
 
-impl<T> BinarySearchTree<T> where T: PartialOrd + Display {
-    fn traverse(&self) {
+impl<T> BinarySearchTree<T>
+where
+    T: PartialOrd + Display,
+{
+    pub fn traverse(&self) {
         if self.root.is_none() {
             println!("Empty tree");
             return;
@@ -452,13 +453,45 @@ impl<T> BinarySearchTree<T> where T: PartialOrd + Display {
 
         let mut stack = Vec::new();
         let mut node = self.root.unwrap();
-        print!("[");
+        print!("{{");
         loop {
             if unsafe { (*node.as_ptr()).left.is_some() } {
                 stack.push(node);
                 node = unsafe { (*node.as_ptr()).left.unwrap() };
             } else {
-                print!("{} ", unsafe { &(*node.as_ptr()).val });
+                unsafe {
+                    let raw_node = &(*node.as_ptr());
+                    print!("[");
+
+                    // print node
+                    print!("val: {}, ", raw_node.val);
+
+                    // print left child
+                    print!("left: ");
+                    if raw_node.left.is_some() {
+                        print!("{}, ", &(*raw_node.left.unwrap().as_ptr()).val);
+                    } else {
+                        print!("None, ");
+                    }
+
+                    // print right child
+                    print!("right: ");
+                    if raw_node.right.is_some() {
+                        print!("{}, ", &(*raw_node.right.unwrap().as_ptr()).val);
+                    } else {
+                        print!("None, ");
+                    }
+
+                    // print parent
+                    print!("parent: ");
+                    if raw_node.parent.is_some() {
+                        print!("{}", &(*raw_node.parent.unwrap().as_ptr()).val);
+                    } else {
+                        print!("None");
+                    }
+
+                    print!("] ");
+                }
                 if unsafe { (*node.as_ptr()).right.is_some() } {
                     node = unsafe { (*node.as_ptr()).right.unwrap() };
                 } else if stack.len() > 0 {
@@ -468,7 +501,7 @@ impl<T> BinarySearchTree<T> where T: PartialOrd + Display {
                 }
             }
         }
-        println!("]");
+        println!("}}");
     }
 }
 
@@ -487,8 +520,8 @@ pub struct IntoIter<T: PartialOrd> {
 }
 
 impl<T> Drop for IntoIter<T>
-    where
-        T: PartialOrd,
+where
+    T: PartialOrd,
 {
     fn drop(&mut self) {
         // only need to ensure all our elements are read;
@@ -580,10 +613,15 @@ mod tests {
         tree.insert(3);
         assert_eq!(tree.size, 3);
 
-        tree.remove(&2);
+        tree.remove(&1);
         assert_eq!(tree.size, 2);
+        assert!(!tree.contains(&1));
+        assert!(tree.contains(&2));
+        assert!(tree.contains(&3));
+
+        tree.remove(&2);
+        assert_eq!(tree.size, 1);
         assert!(!tree.contains(&2));
-        assert!(tree.contains(&1));
         assert!(tree.contains(&3));
     }
 
@@ -605,24 +643,36 @@ mod tests {
         assert_eq!(tree.size(), 1);
         assert!(!tree.contains(&2));
 
+        assert_eq!(tree.pop_min(), Some(3));
+        assert_eq!(tree.size(), 0);
+        assert!(!tree.contains(&3));
+
+        assert_eq!(tree.pop_min(), None);
+    }
+
+    #[test]
+    fn test_pop_min2() {
+        let mut tree = BinarySearchTree::new();
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(3);
+        assert_eq!(tree.size(), 3);
+
+        assert_eq!(tree.pop_min(), Some(1));
+        tree.traverse();
+        assert_eq!(tree.size(), 2);
+        assert!(!tree.contains(&1));
+
+        assert_eq!(tree.pop_min(), Some(2));
+        tree.traverse();
+        assert_eq!(tree.size(), 1);
+        assert!(!tree.contains(&2));
 
         assert_eq!(tree.pop_min(), Some(3));
         assert_eq!(tree.size(), 0);
         assert!(!tree.contains(&3));
 
-
         assert_eq!(tree.pop_min(), None);
     }
 
-    // #[test]
-    // fn test_binary_search_tree() {
-    //     let mut tree: BinarySearchTree<i32> = BinarySearchTree::new();
-    //     assert_eq!(tree.size(), 0);
-    //     assert!(tree.is_empty());
-    //     assert_eq!(tree.height(), 0);
-    //     assert_eq!(tree.min(), None);
-    //     assert_eq!(tree.max(), None);
-    //     assert_eq!(tree.size(), 1);
-    //     assert!(!tree.is_empty());
-    // }
 }
