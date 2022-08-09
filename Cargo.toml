@@ -1,13 +1,14 @@
 [package]
-name = "rust-learn"
+name = "hot-reload-demo"
 version = "0.1.0"
-edition = "2018"
+edition = "2021"
 license-file = "LICENSE"
-description = "learning rust"
+description = "a demo to show hot reload in rust"
 homepage = "https://jasonkayzk.github.io/"
 readme = "README.md"
 repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
-my-libs = { path = "libs", version = "0.1.0" }
+hot-lib-reloader = "*"
+lib = { path = "lib" }

@@ -1,0 +1,1 @@
+cargo watch -w target/debug -x run
