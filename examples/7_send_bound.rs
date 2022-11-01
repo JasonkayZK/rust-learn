@@ -12,5 +12,6 @@ async fn main() {
         // `rc` is no longer used. It is **not** persisted when
         // the task yields to the scheduler
         tokio::task::yield_now().await;
-    }).await;
+    })
+    .await;
 }

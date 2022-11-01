@@ -7,7 +7,6 @@ use mini_redis::{Connection, Frame};
 use tokio::net::{TcpListener, TcpStream};
 use tokio::time;
 
-
 #[tokio::main]
 async fn main() {
     // Bind the listener to the address
