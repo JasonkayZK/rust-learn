@@ -97,6 +97,7 @@ Hello, world!
 | [too-many-lists](https://github.com/JasonkayZK/rust-learn/tree/algorithm/too-many-lists) | 2022-01-05                                | A accomplishment for [Learn Rust With Entirely Too Many Linked Lists](https://github.com/rust-unofficial/too-many-lists) |
 | [ffi-demo](https://github.com/JasonkayZK/rust-learn/tree/ffi-demo) | 2022-01-17                                | A FFI(Foreign Function Interface) demo according to:<br />https://nomicon.purewhite.io/ffi.html |
 | [hot-reload](https://github.com/JasonkayZK/rust-learn/tree/hot-reload) | 2022-08-10                                | A demo to show hot-reload in Rust.<br />Reference: https://robert.kra.hn/posts/hot-reloading-rust/ |
+| [tokio](https://github.com/JasonkayZK/rust-learn/tree/tokio) | 2022-11-01                                | A branch to learn [tokio](https://github.com/tokio-rs/tokio) |
 |                                                              |                                           |                                                              |
 
 <br/>
