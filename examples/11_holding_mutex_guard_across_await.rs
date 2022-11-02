@@ -1,4 +1,4 @@
-use tokio::sync::{Mutex, MutexGuard};
+use std::sync::{Mutex, MutexGuard};
 
 #[tokio::main]
 async fn main() {
@@ -11,8 +11,15 @@ async fn main() {
 }
 
 async fn increment_and_do_stuff(mutex: &Mutex<i32>) {
-    let mut lock: MutexGuard<i32> = mutex.lock().await;
-    *lock += 1;
+    {
+        let mut lock: MutexGuard<i32> = mutex.lock().unwrap();
+        *lock += 1;
+    }
+
+    // Won't work right now:
+    // let mut lock: MutexGuard<i32> = mutex.lock().unwrap();
+    // *lock += 1;
+    // drop(lock);
 
     do_something_async().await;
 } // lock goes out of scope here

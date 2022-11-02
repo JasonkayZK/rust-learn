@@ -13,3 +13,4 @@ authors = ["Jasonkay jasonkayzk@gmail.com"]
 tokio = { version = "1", features = ["full"] }
 mini-redis = "0.4"
 chrono = "0.4.21"
+bytes = "1"
