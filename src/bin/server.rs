@@ -57,10 +57,6 @@ async fn process(socket: TcpStream, db: SharedDb) {
                 let hashed_key = hash_str(cmd.key());
                 println!("Hashed key: {:?}", hashed_key);
 
-                {
-                    tokio::time::sleep(tokio::time::Duration::from_secs(5)).await;
-                }
-
                 let mut db = db[hashed_key % db.len()].lock().unwrap();
                 db.insert(cmd.key().to_string(), cmd.value().clone());
                 Frame::Simple("OK".to_string())
