@@ -4,18 +4,12 @@ use tokio::sync::mpsc;
 
 #[derive(Debug)]
 enum Command {
-    Get {
-        key: String,
-    },
-    Set {
-        key: String,
-        val: Bytes,
-    }
+    Get { key: String },
+    Set { key: String, val: Bytes },
 }
 
 #[tokio::main]
 async fn main() {
-
     // Create a new channel with a capacity of at most 32.
     let (tx, mut rx) = mpsc::channel(32);
     let tx2 = tx.clone();

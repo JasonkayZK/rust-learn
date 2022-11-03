@@ -19,7 +19,6 @@ enum Command {
 
 #[tokio::main]
 async fn main() {
-
     // Create a new channel with a capacity of at most 32.
     let (tx, mut rx) = mpsc::channel(32);
     // The `Sender` handles are moved into the tasks. As there are two
