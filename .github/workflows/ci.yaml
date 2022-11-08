@@ -62,4 +62,5 @@ jobs:
         env:
           RUST_TEST_THREADS: 8
         with:
-          command: test --package collection --package algorithms --package concurrency --no-fail-fast
+          command: test
+          args: -p collection -p algorithms -p concurrency --no-fail-fast
