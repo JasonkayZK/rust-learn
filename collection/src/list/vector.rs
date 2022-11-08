@@ -514,14 +514,14 @@ mod test {
     #[test]
     fn test_zst() {
         #[derive(Debug)]
-        struct X{}
+        struct X {}
 
         let mut list: Vector<X> = Vector::new();
 
-        list.push(X{});
-        list.push(X{});
-        list.push(X{});
-        list.push(X{});
+        list.push(X {});
+        list.push(X {});
+        list.push(X {});
+        list.push(X {});
 
         println!("pop: {:?}", list.pop());
         println!("remove: {:?}", list.remove(0));

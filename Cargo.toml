@@ -10,3 +10,6 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+algorithms = { path = "algorithms" }
+collection = { path = "collection" }
+concurrency = { path = "concurrency" }

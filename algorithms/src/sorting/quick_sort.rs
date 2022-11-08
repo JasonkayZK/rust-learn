@@ -61,7 +61,8 @@ where
     let mut i = lo;
     let mut j = hi + 1;
 
-    unsafe { // 内部同时涉及到数组中的不变借用和可变借用，需要使用unsafe
+    unsafe {
+        // 内部同时涉及到数组中的不变借用和可变借用，需要使用unsafe
         // 选定开头为标准元素
         let key: *const T = &arr[lo];
 

@@ -674,5 +674,4 @@ mod tests {
 
         assert_eq!(tree.pop_min(), None);
     }
-
 }
