@@ -1,14 +1,5 @@
-use my_libs::hello::say_hello;
+pub const VERSION: &str = include_str!(concat!(env!("OUT_DIR"), "/VERSION"));
 
 fn main() {
-    match say_hello("jasonkay") {
-        Ok(res) => {
-            if res {
-                println!("let's rust-up!")
-            }
-        }
-        Err(e) => {
-            println!("error occurred: {:?}", e)
-        }
-    }
+    println!("Hello, world on build version: {}", VERSION);
 }
