@@ -1,14 +1,17 @@
-use my_libs::hello::say_hello;
+extern crate core;
+
+use std::panic;
 
 fn main() {
-    match say_hello("jasonkay") {
-        Ok(res) => {
-            if res {
-                println!("let's rust-up!")
-            }
-        }
-        Err(e) => {
-            println!("error occurred: {:?}", e)
-        }
-    }
+    let res = panic::catch_unwind(|| {
+        println!("not panic");
+    });
+    assert!(res.is_ok());
+
+    let res = panic::catch_unwind(|| {
+        panic!("panicked!");
+    });
+    assert!(res.is_err());
+
+    println!("End of main()");
 }

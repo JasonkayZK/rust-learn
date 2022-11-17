@@ -9,5 +9,10 @@ readme = "README.md"
 repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
+[profile.dev]
+panic = "unwind"
+
+[profile.release]
+panic = "abort"
+
 [dependencies]
-my-libs = { path = "libs", version = "0.1.0" }
