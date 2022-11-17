@@ -7,7 +7,7 @@ use std::process::Command;
 fn get_git_version() -> String {
     let version = env::var("CARGO_PKG_VERSION").unwrap();
 
-    let child = Command::new("git").args(&["describe", "--always"]).output();
+    let child = Command::new("git").args(["describe", "--always"]).output();
     match child {
         Ok(child) => {
             let buf = String::from_utf8(child.stdout).expect("failed to read stdout");
