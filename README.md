@@ -100,6 +100,8 @@ Hello, world!
 | [tokio](https://github.com/JasonkayZK/rust-learn/tree/tokio) | 2022-11-01                                | A branch to learn [tokio](https://github.com/tokio-rs/tokio) |                                                              |
 | [recover](https://github.com/JasonkayZK/rust-learn/tree/recover) | 2022-11-17                                | A branch to show how rust recovered from panic               | [Rust从panic中恢复](https://jasonkayzk.github.io/2022/11/17/Rust从panic中恢复/) |
 | [build-version](https://github.com/JasonkayZK/rust-learn/tree/build-version) | 2022-11-17                                | A branch to use `build.rs` add commit version for binary executable | [为Cargo编译的可执行文件增加commit版本号](https://jasonkayzk.github.io/2022/11/17/为Cargo编译的可执行文件增加commit版本号/) |
+| [error](https://github.com/JasonkayZK/rust-learn/tree/error) | 2022-11-18                                | A branch to show error handle in Rust                        | [Rust中的错误处理](https://jasonkayzk.github.io/2022/11/18/Rust中的错误处理/) |
+|                                                              |                                           |                                                              |                                                              |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
