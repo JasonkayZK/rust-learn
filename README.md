@@ -1,166 +1,242 @@
-# **Rust Learn**
+# **Rust中的默认初始化和初始化重载**
 
-<a href="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml">
-  <img src="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml/badge.svg"/>
-</a>
+## **引言**
 
-A repo to learn rust.
+与 Go 中默认给出默认值不同，Rust 要求在创建对象的时候就对各个字段进行初始化；
 
-This main branch is a standard template for new rust project!
+例如，下面的代码没有对字段进行初始化，无法编译：
 
-<br/>
+```rust
+#[derive(Debug)]
+pub struct Foo {
+    bar: String,
+    baz: i32,
+    abc: bool,
+}
 
-## **Learning Resource**
+fn main() {
+    let x = Foo {};
 
-Learn Rust with：
-
-- [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)；
-- [《Rust语言圣经(Rust Course)》](https://course.rs/about-book.html)
-- [《Rust语言实战》](https://zh.practice.rs/why-exercise.html)
-- [《Rusty Book》](https://rusty.rs/about.html)
-- [《Rust 秘典（死灵书）》](https://nomicon.purewhite.io/intro.html)
-- [《The Little Book of Rust Macros （Rust 宏小册）》](https://zjp-cn.github.io/tlborm/introduction.html)
-
-Gitbook Url：
-
-- https://www.gitbook.com/book/kaisery/trpl-zh-cn/details
-
-<br/>
-
-## **Jupyter**
-
-**The Jupyter branch is shown below (Which helps you run Rust as script!)：**
-
-- https://github.com/JasonkayZK/rust-learn/tree/jupyter
-
-Which depend on jupyter kernel：
-
-- https://github.com/google/evcxr/tree/main/evcxr_jupyter
-
-<br/>
-
-## **Create Project**
-
-Use Cargo to create a project:
-
-```bash
-cargo new hello_rust --bin
+    println!("{:?}", x);
+}
 ```
 
-build:
+报错：
 
-```bash
-cd hello_rust && cargo build --release
+```
+error[E0063]: missing fields `abc`, `bar` and `baz` in initializer of `Foo`
+ --> examples/0_default.rs:8:13
+  |
+8 |     let x = Foo {};
+  |             ^^^ missing `abc`, `bar` and `baz`
 ```
 
-run:
+因此，我们要手动赋值：
 
-```bash
-./target/release/hello_rust
-Hello, world!
+```rust
+let x = Foo {
+  bar: "".to_string(),
+  baz: 0,
+  abc: false
+};
 ```
 
-> Or just run program with:
->
-> ```bash
-> cargo run
-> ```
+但是每次都需要手动的指定空值，非常麻烦；
+
+我们可以使用 Default Trait 来简化；
 
 <br/>
 
-## **Now Finished**
+## **Default Trait**
 
-| Project                                                      | Date                                      | Note                                                         | Linked Blog                                                  |
-| ------------------------------------------------------------ | ----------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01                                | A guessing game                                              |                                                              |
-| [chapter3-variables](https://github.com/JasonkayZK/rust-learn/tree/chapter3-variables) | 2021-06-02                                | Variable & Type in Rust                                      |                                                              |
-| [multiple-main-demo](https://github.com/JasonkayZK/rust-learn/tree/multiple-main-demo) | 2021-06-02                                | A demo to show how to run multiple main in Rust              |                                                              |
-| [chapter4-function](https://github.com/JasonkayZK/rust-learn/tree/chapter4-function) | 2021-06-02                                | Function in Rust                                             |                                                              |
-| [chapter5-control-flow](https://github.com/JasonkayZK/rust-learn/tree/chapter5-control-flow) | 2021-06-02                                | Control flow(if/loop/while/for) in Rust                      |                                                              |
-| [chapter6-ownership](https://github.com/JasonkayZK/rust-learn/tree/chapter6-ownership) | 2021-06-03                                | Ownership(also string/slice) in Rust                         |                                                              |
-| [chapter7-struct](https://github.com/JasonkayZK/rust-learn/tree/chapter7-struct) | 2021-06-04                                | Struct in Rust                                               |                                                              |
-| [chapter8-enum-and-match](https://github.com/JasonkayZK/rust-learn/tree/chapter8-enum-and-match) | 2021-06-07                                | Enum & Match in Rust                                         |                                                              |
-| [chapter9-modules](https://github.com/JasonkayZK/rust-learn/tree/chapter9-modules) | 2021-06-07                                | Modules(mod/pub/use/super) in Rust                           |                                                              |
-| [chapter10-collections](https://github.com/JasonkayZK/rust-learn/tree/chapter10-collections) | 2021-06-09                                | Vector & String & Map in Rust                                |                                                              |
-| [chapter11-error-handling](https://github.com/JasonkayZK/rust-learn/tree/chapter11-error-handling) | 2021-06-09                                | Error handling in Rust (Panic! & Result)                     |                                                              |
-| [chapter12-generic-trait-lifetime](https://github.com/JasonkayZK/rust-learn/tree/chapter12-generic-trait-lifetime) | 2021-06-10                                | Generic & Trait & Lifetime in Rust                           |                                                              |
-| [chapter13-testing](https://github.com/JasonkayZK/rust-learn/tree/chapter13-testing) | 2021-06-12                                | Testing(Write, Run & Organize) in Rust                       |                                                              |
-| [chapter14-io-project-grep](https://github.com/JasonkayZK/rust-learn/tree/chapter14-io-project-grep) | 2021-06-13                                | A io project: `mini-grep` written in rust.                   |                                                              |
-| [chapter15-functional-features](https://github.com/JasonkayZK/rust-learn/tree/chapter15-functional-features) | 2021-06-14                                | Functional features(Closure & Iterator) in rust.             |                                                              |
-| [chapter16-cargo](https://github.com/JasonkayZK/rust-learn/tree/chapter16-cargo) | 2021-06-15                                | Cargo(Config, Publish, Install & Extend) & Workspace in rust. |                                                              |
-| [chapter17-smart-pointer](https://github.com/JasonkayZK/rust-learn/tree/chapter17-smart-pointer) | 2021-09-29                                | Smart Pointer in Rust(Within double-linked-list accomplishment). |                                                              |
-| [chapter18-concurrency](https://github.com/JasonkayZK/rust-learn/tree/chapter18-concurrency) | 2021-10-03                                | Concurrency in Rust.                                         |                                                              |
-| [chapter19-oop](https://github.com/JasonkayZK/rust-learn/tree/chapter19-oop) | 2021-11-14                                | Object-Oriented-Programming in Rust.                         |                                                              |
-| [chapter20-match-patterns](https://github.com/JasonkayZK/rust-learn/tree/chapter20-match-patterns) | 2021-11-14                                | The Match Patterns in Rust.                                  |                                                              |
-| [chapter21-advanced-features](https://github.com/JasonkayZK/rust-learn/tree/chapter21-advanced-features) | 2021-11-14                                | The advanced features in Rust:<br />Unsafe、Lifetime、Trait、Type、Function & Closure |                                                              |
-| [actix-web-demo](https://github.com/JasonkayZK/rust-learn/tree/actix-web-demo) | 2021-10-04                                | RESTful API accomplished by [actix-web](https://github.com/actix/actix-web) framework. |                                                              |
-| [rbatis-demo](https://github.com/JasonkayZK/rust-learn/tree/rbatis-demo) | 2021-10-07                                | A demo to show how to use ORM framework: [rbatis](https://github.com/rbatis/rbatis) |                                                              |
-| [wasm-hello](https://github.com/JasonkayZK/rust-learn/tree/wasm-hello) | 2021-10-09                                | A simple rust-wasm demo.[Use template: [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template)] | [《Rust实现WebAssembly初窥》](https://jasonkayzk.github.io/2021/10/10/Rust实现WebAssembly初窥/) |
-| [feature-phantom](https://github.com/JasonkayZK/rust-learn/tree/feature-phantom) | 2021-10-19                                | A demo to show how to use `PhantomData` beautify your code   | [《Rust中的PhantomType》](https://jasonkayzk.github.io/2021/10/20/Rust中的PhantomType/) |
-| [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs) | 2021-12-04<br />(2021-12-21 Last Updated) | A simple URL Mapper service built in Rust                    | [《Building a Web Application with Rust》](https://www.youtube.com/playlist?list=PLz51_WNhdOqv7S5pnycKySU_4PpCagU4Q) |
-| [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm) | 2021-12-22                                | Collect lots of algorithm & data structures in Rust(Such as: LinkedList, …) |                                                              |
-| [too-many-lists](https://github.com/JasonkayZK/rust-learn/tree/algorithm/too-many-lists) | 2022-01-05                                | A accomplishment for [Learn Rust With Entirely Too Many Linked Lists](https://github.com/rust-unofficial/too-many-lists) |                                                              |
-| [ffi-demo](https://github.com/JasonkayZK/rust-learn/tree/ffi-demo) | 2022-01-17                                | A FFI(Foreign Function Interface) demo according to:<br />https://nomicon.purewhite.io/ffi.html |                                                              |
-| [hot-reload](https://github.com/JasonkayZK/rust-learn/tree/hot-reload) | 2022-08-10                                | A demo to show hot-reload in Rust.<br />Reference: https://robert.kra.hn/posts/hot-reloading-rust/ |                                                              |
-| [tokio](https://github.com/JasonkayZK/rust-learn/tree/tokio) | 2022-11-01                                | A branch to learn [tokio](https://github.com/tokio-rs/tokio) |                                                              |
-| [recover](https://github.com/JasonkayZK/rust-learn/tree/recover) | 2022-11-17                                | A branch to show how rust recovered from panic               | [《Rust从panic中恢复》](https://jasonkayzk.github.io/2022/11/17/Rust从panic中恢复/) |
-| [build-version](https://github.com/JasonkayZK/rust-learn/tree/build-version) | 2022-11-17                                | A branch to use `build.rs` add commit version for binary executable | [《为Cargo编译的可执行文件增加commit版本号》](https://jasonkayzk.github.io/2022/11/17/为Cargo编译的可执行文件增加commit版本号/) |
-| [error](https://github.com/JasonkayZK/rust-learn/tree/error) | 2022-11-18                                | A branch to show error handle in Rust                        | [《Rust中的错误处理》](https://jasonkayzk.github.io/2022/11/18/Rust中的错误处理/) |
-| [project-structure](https://github.com/JasonkayZK/rust-learn/tree/project-structure) | 2022-11-19                                | A branch to show how rust project structure organized        | [《Rust模块组织结构》](https://jasonkayzk.github.io/2022/11/19/Rust模块组织结构/) |
-| [default-and-with](https://github.com/JasonkayZK/rust-learn/tree/default-and-with) | 2022-11-19                                | Use Default or With Trait to initiate item                   | [《Rust中的默认初始化和初始化重载》](https://jasonkayzk.github.io/2022/11/19/Rust中的默认初始化和初始化重载/) |
-|                                                              |                                           |                                                              |                                                              |
+我们可以为 Foo 类型实现 Default Trait：
 
-<br/>
+examples/0_default.rs
 
-## **Serial Project**
+```rust
+impl Default for Foo {
+    fn default() -> Self {
+        Foo {
+            bar: "".to_string(),
+            baz: 0,
+            abc: false,
+        }
+    }
+}
 
-### **url-mapper-rs**
+fn main() {
+    let x = Foo::default();
 
-Project Space:
+    println!("{:?}", x);
+}
+```
 
-- [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs)
+随后即可使用 `Foo::default()` 初始化；
 
-Learning Step:
+同时，也可以初始化部分字段，例如：
 
-- [Part I : Configuration](https://github.com/JasonkayZK/rust-learn/commit/12b88b1b5f5e02141ff90716feefea834817c34b)
-- [Part II : Database Setup](https://github.com/JasonkayZK/rust-learn/commit/89327a61a4afda4e2fb9f55171889ee7fa205de5)
-- [Part III - Database Manager: add mapper & tokio-async](https://github.com/JasonkayZK/rust-learn/commit/51120a38865911aa19a5fd4b093d077a40e95cd0)
-- [Part IV: Basic Server & log tracing](https://github.com/JasonkayZK/rust-learn/commit/75267288ec824cd9b65f84245e14b37a9b4d5b4c)
-- [Part V: Server and Database Manager communication](https://github.com/JasonkayZK/rust-learn/commit/cefc2ad7639c8359719cb639b9351c16db9e19d1)
-- [Part VI - UrlMap CRUD API](https://github.com/JasonkayZK/rust-learn/commit/d77521b4c39ca953ef51cc75065f23a487ba6b12)
-- [Part VII - Auth Middleware](https://github.com/JasonkayZK/rust-learn/commit/2da0d7d7ef20cf54bf4d01f4cc927e29ca5a58ea)
-- [Part VIII - Containerization](https://github.com/JasonkayZK/rust-learn/commit/5d5cebcf69dccb809afb46b74dd6479991e511ae)
-- [Part IX - Handling Signals & Deploying to Kubernetes](https://github.com/JasonkayZK/rust-learn/commit/03d3a5c76ad168da2ac3bd850e18bde6780d747f)
-- [Part X - Frontend using Tera](https://github.com/JasonkayZK/rust-learn/commit/ad3828f69af89ea25092d8319bb6099cc357966f)
-- [Part XI - React Front-End](https://github.com/JasonkayZK/rust-learn/commit/bdb21c2bff6ead55ba55554a51e0223e76453c60)
+```rust
+let y = Foo { baz: 2, ..Default::default() };
+```
 
-### algorithm
+实际上，对于 Rust 中的常见类型，他们默认都实现了 Default Trait；
 
-Project Space:
+因此我们可以直接使用 `#[derive(Default)]` 来生成 Default Trait，而无需手动实现；
 
-- [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm)
-    - [sorting](https://github.com/JasonkayZK/rust-learn/tree/algorithm/algorithms/src/sorting)
-        - [bubble_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/bubble_sort.rs)
-        - [insertion_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/insertion_sort.rs)
-        - [merge_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/merge_sort.rs)
-        - [quick_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/quick_sort.rs)
-        - [selection_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/selection_sort.rs)
-- [collection](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection)
-    - [list](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/list)
-        - [vector.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/vector.rs)
-        - [linked_list.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/linked_list.rs)
-    - [tree](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/tree)
-        - [binary_search_tree.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/tree/binary_search_tree.rs)
-- [concurrency](https://github.com/JasonkayZK/rust-learn/tree/algorithm/concurrency)
-    - [my_arc.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/concurrency/src/my_arc.rs)
+例如：
 
-Learning Step:
+```rust
+#[derive(Debug, Default)]
+pub struct Foo {
+    bar: String,
+    baz: i32,
+    abc: bool,
+}
 
-Not Yet!
+fn main() {
+    let x = Foo::default();
+
+    let y = Foo { baz: 2, ..Default::default() };
+
+    println!("{:?}", x);
+    println!("{:?}", y);
+}
+```
 
 <br/>
 
-## **More Info**
+## **With Trait**
 
-- https://rust.cc/
-- https://wiki.rust-china.org/
+在面向对象的语言中，可以通过单个参数或多个参数构造一个新的对象；
+
+除了上面 Default 的方式外，还可以通过 With Trait 实现类似的功能；
+
+例如：
+
+examples/1_with.rs
+
+```rust
+pub trait With<T> {
+    fn with(value: T) -> Self;
+}
+
+#[derive(Debug, Default)]
+pub struct Foo {
+    bar: String,
+    baz: i32,
+    abc: bool,
+}
+
+impl With<String> for Foo {
+    fn with(x: String) -> Self {
+        Foo {
+            bar: x,
+            ..Default::default()
+        }
+    }
+}
+
+impl With<i32> for Foo {
+    fn with(x: i32) -> Self {
+        Foo {
+            baz: x,
+            ..Default::default()
+        }
+    }
+}
+
+impl With<bool> for Foo {
+    fn with(x: bool) -> Self {
+        Foo {
+            abc: x,
+            ..Default::default()
+        }
+    }
+}
+
+impl With<(String, bool)> for Foo {
+    fn with(x: (String, bool)) -> Self {
+        Foo {
+            bar: x.0,
+            abc: x.1,
+            ..Default::default()
+        }
+    }
+}
+```
+
+在上面的代码中，我们定义的 With Trait：
+
+```rust
+pub trait With<T> {
+    fn with(value: T) -> Self;
+}
+```
+
+我们分别为 Foo 类型实现了不同范型类型的 With：String、i32、bool 甚至 `(String, bool)` 类型；
+
+因此，我们可以使用 with 函数：
+
+examples/1_with.rs
+
+```rust
+fn main() {
+    let a = Foo::with("test".to_string());
+    let b = Foo::with(1);
+    let c = Foo::with(true);
+    let d = Foo::with(("multi".to_string(), true));
+
+    println!("a: {:?}", a);
+    println!("b: {:?}", b);
+    println!("c: {:?}", c);
+    println!("d: {:?}", d);
+}
+```
+
+注意到，**上面调用的都是 `Foo::with` 方法，但是实际上是不同的 Trait 范型实现！**
+
+**虽然 Rust 中没有范型，但是我们可以通过 Trait + Generic 的方式实现相同的功能！**
+
+<br/>
+
+## **`..`运算符**
+
+最后，再补充一点，在上面的 `..Default::default()` 会将对象各个字段解构，随后赋给对应字段名相同的属性；
+
+除了 default 构建的对象，正常的对象也可以使用这个运算符结构，例如：
+
+examples/2_dot_operator.rs
+
+```rust
+#[derive(Debug)]
+pub struct Foo {
+    bar: String,
+    baz: i32,
+    abc: bool,
+}
+
+fn main() {
+    let x = Foo {
+        bar: "hello".to_string(),
+        baz: 0,
+        abc: false,
+    };
+
+    let y = Foo { abc: true, ..x };
+
+    // println!("{:?}", x);
+    println!("{:?}", y);
+}
+```
+
+我们可以使用 `..x` 来构造 y；
+
+但是需要注意的是，**`..` 也是 Move 语义，因此上面的代码如果在后面使用了x，则会报错！**
+
+<br/>
+
+# **附录**
+
+参考文章：
+
+-   https://www.cnblogs.com/cutepig/p/12685126.html
