@@ -107,7 +107,7 @@ Hello, world!
 | [build-version](https://github.com/JasonkayZK/rust-learn/tree/build-version) | 2022-11-17                                | A branch to use `build.rs` add commit version for binary executable | [《为Cargo编译的可执行文件增加commit版本号》](https://jasonkayzk.github.io/2022/11/17/为Cargo编译的可执行文件增加commit版本号/) |
 | [error](https://github.com/JasonkayZK/rust-learn/tree/error) | 2022-11-18                                | A branch to show error handle in Rust                        | [《Rust中的错误处理》](https://jasonkayzk.github.io/2022/11/18/Rust中的错误处理/) |
 | [project-structure](https://github.com/JasonkayZK/rust-learn/tree/project-structure) | 2022-11-19                                | A branch to show how rust project structure organized        | [《Rust模块组织结构》](https://jasonkayzk.github.io/2022/11/19/Rust模块组织结构/) |
-|                                                              |                                           |                                                              |                                                              |
+| [default-and-with](https://github.com/JasonkayZK/rust-learn/tree/default-and-with) | 2022-11-19                                | Use Default or With Trait to initiate item                   | [《Rust中的默认初始化和初始化重载》](https://jasonkayzk.github.io/2022/11/19/Rust中的默认初始化和初始化重载/) |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
