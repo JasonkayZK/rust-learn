@@ -109,6 +109,7 @@ Hello, world!
 | [project-structure](https://github.com/JasonkayZK/rust-learn/tree/project-structure) | 2022-11-19                                | A branch to show how rust project structure organized        | [《Rust模块组织结构》](https://jasonkayzk.github.io/2022/11/19/Rust模块组织结构/) |
 | [default-and-with](https://github.com/JasonkayZK/rust-learn/tree/default-and-with) | 2022-11-19                                | Use Default or With Trait to initiate item                   | [《Rust中的默认初始化和初始化重载》](https://jasonkayzk.github.io/2022/11/19/Rust中的默认初始化和初始化重载/) |
 | [cargo](https://github.com/JasonkayZK/rust-learn/tree/cargo) | 2022-11-23                                | A branch to learn [cargo](https://doc.rust-lang.org/cargo/index.html) in Rust | [《Cargo命令及其扩展》](https://jasonkayzk.github.io/2022/11/23/Cargo命令及其扩展/) |
+| [compare](https://github.com/JasonkayZK/rust-learn/tree/compare) | 2022-11-23                                | A branch to show how PartialEq/Ord, Eq/Ord works in Rust     | [《Rust中的比较》](https://jasonkayzk.github.io/2022/11/23/Rust中的比较/) |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
