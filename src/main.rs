@@ -1,14 +1,6 @@
-use my_libs::hello::say_hello;
+use chrono::Local;
 
 fn main() {
-    match say_hello("jasonkay") {
-        Ok(res) => {
-            if res {
-                println!("let's rust-up!")
-            }
-        }
-        Err(e) => {
-            println!("error occurred: {:?}", e)
-        }
-    }
+    let date = Local::now();
+    println!("{}", date.format("[%Y-%m-%d] [%H:%M:%S]"));
 }
