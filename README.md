@@ -14,12 +14,20 @@ This main branch is a standard template for new rust project!
 
 Learn Rust with：
 
-- [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)；
+- [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)
 - [《Rust语言圣经(Rust Course)》](https://course.rs/about-book.html)
-- [《Rust语言实战》](https://zh.practice.rs/why-exercise.html)
+- [《rust-by-example》](https://doc.rust-lang.org/stable/rust-by-example/)
+- [《too-many-lists》](https://rust-unofficial.github.io/too-many-lists/)
 - [《Rusty Book》](https://rusty.rs/about.html)
 - [《Rust 秘典（死灵书）》](https://nomicon.purewhite.io/intro.html)
 - [《The Little Book of Rust Macros （Rust 宏小册）》](https://zjp-cn.github.io/tlborm/introduction.html)
+
+
+Exercises:
+
+- [rustlings](https://github.com/rust-lang/rustlings)
+- [《Rust语言实战》](https://zh.practice.rs/why-exercise.html)
+
 
 Gitbook Url：
 
