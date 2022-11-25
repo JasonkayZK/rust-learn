@@ -118,6 +118,7 @@ Hello, world!
 | [default-and-with](https://github.com/JasonkayZK/rust-learn/tree/default-and-with) | 2022-11-19                                | Use Default or With Trait to initiate item                   | [《Rust中的默认初始化和初始化重载》](https://jasonkayzk.github.io/2022/11/19/Rust中的默认初始化和初始化重载/) |
 | [cargo](https://github.com/JasonkayZK/rust-learn/tree/cargo) | 2022-11-23                                | A branch to learn [cargo](https://doc.rust-lang.org/cargo/index.html) in Rust | [《Cargo命令及其扩展》](https://jasonkayzk.github.io/2022/11/23/Cargo命令及其扩展/) |
 | [compare](https://github.com/JasonkayZK/rust-learn/tree/compare) | 2022-11-23                                | A branch to show how PartialEq/Ord, Eq/Ord works in Rust     | [《Rust中的比较》](https://jasonkayzk.github.io/2022/11/23/Rust中的比较/) |
+| [any](https://github.com/JasonkayZK/rust-learn/tree/any)     | 2022-11-25                                | A branch to show reflection in Rust via Any                  | [《Rust反射之Any》](https://jasonkayzk.github.io/2022/11/24/Rust反射之Any/) |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
