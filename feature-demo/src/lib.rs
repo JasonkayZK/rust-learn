@@ -1,4 +1,4 @@
 pub mod bmp;
-pub mod png;
 pub mod ico;
+pub mod png;
 pub mod webp;
