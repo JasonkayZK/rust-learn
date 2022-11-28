@@ -120,6 +120,7 @@ Hello, world!
 | [compare](https://github.com/JasonkayZK/rust-learn/tree/compare) | 2022-11-23                                | A branch to show how PartialEq/Ord, Eq/Ord works in Rust     | [《Rust中的比较》](https://jasonkayzk.github.io/2022/11/23/Rust中的比较/) |
 | [any](https://github.com/JasonkayZK/rust-learn/tree/any)     | 2022-11-25                                | A branch to show reflection in Rust via Any                  | [《Rust反射之Any》](https://jasonkayzk.github.io/2022/11/24/Rust反射之Any/) |
 | [reflection](https://github.com/JasonkayZK/rust-learn/tree/reflection) | 2022-11-25                                | A branch to show reflection in Rust via proc-macros          | [《Rust反射之过程宏》](https://jasonkayzk.github.io/2022/11/25/Rust反射之过程宏/) |
+| [cargo-features](https://github.com/JasonkayZK/rust-learn/tree/cargo-features) | 2022-11-28                                | A branch to show cargo features in Rust                      | [《通过一个例子学习Cargo-Features》](https://jasonkayzk.github.io/2022/11/28/通过一个例子学习Cargo-Features/) |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
