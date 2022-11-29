@@ -30,11 +30,24 @@ fn string_process_demo() {
 
     // 生成一个任务
     spawner.spawn(async {
-        println!("howdy!");
+        println!("before StringProcessFuture!");
         // 创建定时器Future，并等待它完成
         let res = StringProcessFuture::new(
             |s: &mut String| {
                 s.push_str(" hello ");
+            },
+            |s: &str| -> bool { s.len() > 10 },
+        )
+        .await;
+        println!("res: {}", res);
+    });
+
+    spawner.spawn(async {
+        println!("before StringProcessFuture!");
+        // 创建定时器Future，并等待它完成
+        let res = StringProcessFuture::new(
+            |s: &mut String| {
+                s.push_str(" world ");
             },
             |s: &str| -> bool { s.len() > 10 },
         )
