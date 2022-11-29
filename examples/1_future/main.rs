@@ -57,7 +57,6 @@ fn string_process_demo() {
     drop(spawner);
 
     // 运行执行器直到任务队列为空
-    // 任务运行后，会先打印`howdy!`, 暂停2秒，接着打印 `done!`
     executor.run();
 }
 
