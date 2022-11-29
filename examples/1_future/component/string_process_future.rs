@@ -34,7 +34,7 @@ impl Future for StringProcessFuture {
     type Output = String;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
-        // 通过检查共享状态，来确定定时器是否已经完成
+        // 检查任务是否已经完成
         let mut task = self.task.lock().unwrap();
         if task.check_task() {
             Poll::Ready(task.s.clone())
