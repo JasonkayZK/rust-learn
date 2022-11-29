@@ -50,7 +50,7 @@ impl Spawner {
             future: Mutex::new(Some(future)),
             task_sender: self.task_sender.clone(),
         });
-        self.task_sender.send(task).expect("任务队列已满");
+        self.task_sender.send(task).expect("Channel已关闭");
     }
 }
 

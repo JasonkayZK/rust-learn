@@ -52,6 +52,7 @@ impl TimerFuture {
         thread::spawn(move || {
             // 睡眠指定时间实现计时功能
             thread::sleep(duration);
+            println!("sleep task completed!");
             let mut shared_state = thread_shared_state.lock().unwrap();
             // 通知执行器定时器已经完成，可以继续`poll`对应的`Future`了
             shared_state.completed = true;

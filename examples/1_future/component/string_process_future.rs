@@ -18,12 +18,15 @@ pub struct StringProcessTask {
 
 impl StringProcessTask {
     pub fn check_task(&self) -> bool {
-        println!("cur len: {}", self.s.len());
         (self.complete_checker)(&self.s)
     }
 
     pub fn process(&mut self) {
-        (self.processor)(&mut self.s)
+        while !self.check_task() {
+            (self.processor)(&mut self.s);
+            println!("cur len: {}", self.s.len());
+            thread::sleep(Duration::new(1, 0));
+        }
     }
 }
 
@@ -33,8 +36,6 @@ impl Future for StringProcessFuture {
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
         // 通过检查共享状态，来确定定时器是否已经完成
         let mut task = self.task.lock().unwrap();
-        thread::sleep(Duration::new(1, 0));
-        task.process();
         if task.check_task() {
             Poll::Ready(task.s.clone())
         } else {
@@ -60,7 +61,9 @@ impl StringProcessFuture {
         // 创建新线程
         let shared_task = task.clone();
         thread::spawn(move || {
+            // Do real "IO" cost task
             let mut shared_state = shared_task.lock().unwrap();
+            shared_state.process();
             // 通知执行`poll`对应的`Future`
             if let Some(waker) = shared_state.waker.take() {
                 waker.wake()

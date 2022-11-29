@@ -10,12 +10,9 @@ fn timer_demo() {
     let (executor, spawner) = new_executor_and_spawner();
 
     // 生成一个任务
-    spawner.spawn(async {
-        println!("howdy!");
+    spawner.spawn(
         // 创建定时器Future，并等待它完成
-        TimerFuture::new(Duration::new(2, 0)).await;
-        println!("done!");
-    });
+        TimerFuture::new(Duration::new(2, 0)));
 
     // drop掉任务，这样执行器就知道任务已经完成，不会再有新的任务进来
     drop(spawner);
@@ -38,7 +35,7 @@ fn string_process_demo() {
             },
             |s: &str| -> bool { s.len() > 10 },
         )
-        .await;
+            .await;
         println!("res: {}", res);
     });
 
@@ -49,9 +46,9 @@ fn string_process_demo() {
             |s: &mut String| {
                 s.push_str(" world ");
             },
-            |s: &str| -> bool { s.len() > 10 },
+            |s: &str| -> bool { s.len() > 20 },
         )
-        .await;
+            .await;
         println!("res: {}", res);
     });
 
@@ -64,8 +61,8 @@ fn string_process_demo() {
 }
 
 fn main() {
-    // println!("\ntimer_demo:");
-    // timer_demo();
+    println!("\ntimer_demo:");
+    timer_demo();
 
     println!("\nstring_process_demo:");
     string_process_demo()
