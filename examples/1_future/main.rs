@@ -12,7 +12,8 @@ fn timer_demo() {
     // 生成一个任务
     spawner.spawn(
         // 创建定时器Future，并等待它完成
-        TimerFuture::new(Duration::new(2, 0)));
+        TimerFuture::new(Duration::new(2, 0)),
+    );
 
     // drop掉任务，这样执行器就知道任务已经完成，不会再有新的任务进来
     drop(spawner);
@@ -35,7 +36,7 @@ fn string_process_demo() {
             },
             |s: &str| -> bool { s.len() > 10 },
         )
-            .await;
+        .await;
         println!("res: {}", res);
     });
 
@@ -48,7 +49,7 @@ fn string_process_demo() {
             },
             |s: &str| -> bool { s.len() > 20 },
         )
-            .await;
+        .await;
         println!("res: {}", res);
     });
 
