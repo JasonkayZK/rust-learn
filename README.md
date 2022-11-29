@@ -20,3 +20,7 @@ Others:
 
 - https://ipotato.me/article/70
 - https://swatinem.de/blog/futures-n-tasks/
+
+## Blog
+
+-   [《Rust中Future执行底层探秘》](https://jasonkayzk.github.io/2022/11/29/Rust中Future执行底层探秘/)
