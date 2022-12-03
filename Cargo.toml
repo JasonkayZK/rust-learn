@@ -1,12 +1,4 @@
-[package]
-name = "rust-learn"
-version = "0.1.0"
-edition = "2018"
-license-file = "LICENSE"
-description = "learning rust"
-homepage = "https://jasonkayzk.github.io/"
-readme = "README.md"
-repository = "https://github.com/JasonkayZK/rust-learn/"
-authors = ["Jasonkay jasonkayzk@gmail.com"]
-
-[dependencies]
+[workspace]
+members = [
+    "tonic-demo"
+]
