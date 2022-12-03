@@ -8,11 +8,11 @@ description = "A demo to learn tonic and grpc."
 
 [[bin]]
 name="server"
-path="./bin/server.rs"
+path="src/bin/server.rs"
 
 [[bin]]
 name="client"
-path="./bin/client.rs"
+path="src/bin/client.rs"
 
 [dependencies]
 prost = "0.11.3"
