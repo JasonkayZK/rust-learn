@@ -1,10 +1,23 @@
-fn main() {
-    let proto_file = "./proto/hello.proto";
+use std::error::Error;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let protos = [
+        "proto/basic/basic.proto",
+        "proto/hello.proto",
+        "proto/goodbye.proto",
+    ];
 
     tonic_build::configure()
         .build_server(true)
-        .compile(&[proto_file], &["."])
-        .unwrap_or_else(|e| panic!("protobuf compile error: {}", e));
+        .compile(&protos, &["proto/"])?;
 
-    println!("cargo:rerun-if-changed={}", proto_file);
+    rerun(&protos);
+
+    Ok(())
+}
+
+fn rerun(proto_files: &[&str]) {
+    for proto_file in proto_files {
+        println!("cargo:rerun-if-changed={}", proto_file);
+    }
 }

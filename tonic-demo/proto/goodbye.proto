@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+import "basic/basic.proto";
+
+package goodbye;
+
+service Goodbye {
+  rpc Goodbye(GoodbyeRequest) returns (GoodbyeResponse) {}
+}
+
+message GoodbyeRequest {
+  string name = 1;
+}
+
+message GoodbyeResponse {
+  string data = 1;
+  basic.BaseResponse message = 2;
+}

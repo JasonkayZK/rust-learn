@@ -1,9 +1,11 @@
 syntax = "proto3";
 
-package Hello;
+import "basic/basic.proto";
+
+package hello;
 
 service Hello {
-  rpc HelloWorld(HelloRequest) returns (HelloResponse) {}
+  rpc Hello(HelloRequest) returns (HelloResponse) {}
 }
 
 message HelloRequest {
@@ -11,5 +13,6 @@ message HelloRequest {
 }
 
 message HelloResponse {
-  string message = 1;
+  string data = 1;
+  basic.BaseResponse message = 2;
 }
