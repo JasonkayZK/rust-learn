@@ -14,6 +14,8 @@ pub struct HelloService {}
 #[tonic::async_trait]
 impl Hello for HelloService {
     async fn hello(&self, req: Request<HelloRequest>) -> Result<Response<HelloResponse>, Status> {
+        println!("hello receive request: {:?}", req);
+
         let response = HelloResponse {
             data: format!("Hello, {}", req.into_inner().name),
             message: Some(BaseResponse {
@@ -34,6 +36,8 @@ impl Goodbye for GoodbyeService {
         &self,
         req: Request<GoodbyeRequest>,
     ) -> Result<Response<GoodbyeResponse>, Status> {
+        println!("goodbye receive request: {:?}", req);
+
         let response = GoodbyeResponse {
             data: format!("Goodbye, {}", req.into_inner().name),
             message: Some(BaseResponse {

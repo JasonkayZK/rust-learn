@@ -1,4 +1,7 @@
 use std::error::Error;
+use std::fs;
+
+static OUT_DIR: &str = "src/proto-gen";
 
 fn main() -> Result<(), Box<dyn Error>> {
     let protos = [
@@ -7,8 +10,10 @@ fn main() -> Result<(), Box<dyn Error>> {
         "proto/goodbye.proto",
     ];
 
+    fs::create_dir_all(OUT_DIR).unwrap();
     tonic_build::configure()
         .build_server(true)
+        .out_dir(OUT_DIR)
         .compile(&protos, &["proto/"])?;
 
     rerun(&protos);
