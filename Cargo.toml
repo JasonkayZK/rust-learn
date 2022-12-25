@@ -10,3 +10,5 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+arboard = "3.2.0"
+clipboard-master = "3.1.3"
