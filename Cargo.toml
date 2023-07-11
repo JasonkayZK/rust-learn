@@ -10,3 +10,10 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+rusqlite = "0.29.0"
+rusqlite_migration = { version = "1.0.2" }
+
+anyhow = "1"
+lazy_static = "1.4.0"
+include_dir = "0.7.3"
+boost-rs = { version = "0.0.4", features = ["logger"] }
