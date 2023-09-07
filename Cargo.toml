@@ -10,3 +10,12 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+rusqlite = { version = "0.28.0", features = ["bundled", "load_extension"] }
+anyhow = { version = "1.0.75" }
+diesel = { version = "2.1.0", features = ["sqlite"] }
+diesel_migrations = "2.1.0"
+chrono = "0.4.23"
+log = "0.4"
+lazy_static = "1.4.0"
+dotenv = "0.15"
+uuid = { version = "1.4.1", features = ["v4"] }
