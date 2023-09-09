@@ -2,7 +2,15 @@ fn main() {}
 
 #[cfg(test)]
 mod tests {
-    use crdts::{CmRDT, MVReg, Map};
+    use crdts::{CmRDT, MVReg, Map, map};
+
+    type TActor = String;
+    type TKey = String;
+    type TVal = MVReg<(), TActor>;
+
+    type TOp = map::Op<TKey, Map<TKey, TVal, TActor>, TActor>;
+    type TMap = Map<TKey, Map<TKey, TVal, TActor>, TActor>;
+
 
     #[test]
     fn pprint() {
@@ -25,7 +33,14 @@ mod tests {
 
     #[test]
     fn map() {
-        let mut m: Map<&str, MVReg<&str, _>, &str> = Map::new();
+        let mut m: TMap = Map::new();
+        let r_ctx = m.read_ctx();
+
+        m.apply(
+            m.update("user_32", m.read_ctx().derive_add_ctx("A".to_string()), |map, ctx| {
+                map.update("name", ctx, |reg, ctx| reg.write((), ctx))
+            }),
+        );
 
         println!("{:?}", m.len());
     }
