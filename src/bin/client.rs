@@ -22,5 +22,10 @@ async fn main() {
         )
         .await
         .unwrap();
-    println!("list: {:#?}", storage_client.list(ctx).await.unwrap())
+    println!("list: {:#?}", storage_client.list(ctx).await.unwrap());
+
+    storage_client
+        .register(ctx, "192.168.31.22:8888".to_string())
+        .await
+        .unwrap();
 }

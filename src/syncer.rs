@@ -27,24 +27,17 @@ impl Syncer {
         let client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
 
         let c = client;
-        match Self::check_health(&addr).await {
-            true => {
-                let e = Self::sync_data(&c).await.err();
-                if e.is_some() {
-                    error!(
-                        "ConnectionRefused: sync data from: {} err: {}",
-                        addr,
-                        e.unwrap()
-                    );
-                    return;
-                }
-                let mut s = Syncer::global().lock();
-                s.clients.insert(addr, c.clone());
-            }
-            false => {
-                error!("ConnectionRefused: {}", addr)
-            }
+        let e = Self::sync_data(&c).await.err();
+        if e.is_some() {
+            error!(
+                "ConnectionRefused: sync data from: {} err: {}",
+                addr,
+                e.unwrap()
+            );
+            return;
         }
+        let mut s = Syncer::global().lock();
+        s.clients.insert(addr, c.clone());
     }
 
     pub fn check_client_exist(addr: &str) -> bool {
@@ -68,6 +61,7 @@ impl Syncer {
         }
     }
 
+    #[allow(dead_code)]
     async fn check_health(addr: &str) -> bool {
         let client;
         {
@@ -77,7 +71,8 @@ impl Syncer {
                     return false;
                 }
                 Some(client) => client,
-            }.clone();
+            }
+            .clone();
         }
 
         match client.ping(context::current()).await {
@@ -95,10 +90,7 @@ impl Syncer {
     async fn sync_data(client: &StorageClient) -> anyhow::Result<()> {
         let my_local_ip = local_ip().unwrap();
         let mut data = client
-            .register(
-                context::current(),
-                format!("{}:{}", my_local_ip, SYNC_PORT),
-            )
+            .register(context::current(), format!("{}:{}", my_local_ip, SYNC_PORT))
             .await?;
         let mut store = StorageHandler::global().lock();
         store.merge_data(&mut data);
