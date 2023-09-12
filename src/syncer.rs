@@ -2,6 +2,7 @@ use crate::api::StorageClient;
 use local_ip_address::local_ip;
 use std::collections::HashMap;
 use std::sync::OnceLock;
+use anyhow::format_err;
 
 use crate::storage::StorageHandler;
 use crate::utils::{PONG, SYNC_PORT};
@@ -28,8 +29,8 @@ impl Syncer {
 
         let c = client;
         let mut s = Syncer::global().lock();
-        s.clients.insert(addr.clone(), c.clone());
-        let e = Self::sync_data(&c).await.err();
+        s.clients.insert(addr.clone(), c);
+        let e = Self::sync_data(&addr).await.err();
         if e.is_some() {
             error!(
                 "ConnectionRefused: sync data from: {} err: {}",
@@ -86,7 +87,14 @@ impl Syncer {
         }
     }
 
-    async fn sync_data(client: &StorageClient) -> anyhow::Result<()> {
+    async fn sync_data(addr: &str) -> anyhow::Result<()> {
+        let clients = &Self::global().lock().clients;
+        let client = clients.get(addr);
+        if client.is_none() {
+            return Err(format_err!("No client found for: {}", addr));
+        }
+        let client = client.unwrap();
+
         let my_local_ip = local_ip().unwrap();
         let mut data = client
             .register(context::current(), format!("{}:{}", my_local_ip, SYNC_PORT))
