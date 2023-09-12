@@ -1,8 +1,7 @@
 use crate::api::StorageClient;
 use local_ip_address::local_ip;
-use std::collections::HashMap;
+use std::collections::{HashSet};
 use std::sync::OnceLock;
-use anyhow::format_err;
 
 use crate::storage::StorageHandler;
 use crate::utils::{PONG, SYNC_PORT};
@@ -13,7 +12,7 @@ use tarpc::{client, context};
 
 #[derive(Debug, Default)]
 pub struct Syncer {
-    clients: HashMap<String, StorageClient>,
+    clients: HashSet<String>,
 }
 
 impl Syncer {
@@ -22,14 +21,8 @@ impl Syncer {
             return;
         }
 
-        let to_storage_server = tarpc::serde_transport::tcp::connect(&addr, Json::default)
-            .await
-            .unwrap();
-        let client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
-
-        let c = client;
         let mut s = Syncer::global().lock();
-        s.clients.insert(addr.clone(), c);
+        s.clients.insert(addr.clone());
         let e = Self::sync_data(&addr).await.err();
         if e.is_some() {
             error!(
@@ -42,7 +35,7 @@ impl Syncer {
 
     pub fn check_client_exist(addr: &str) -> bool {
         let s = Syncer::global().lock();
-        s.clients.contains_key(addr)
+        s.clients.contains(addr)
     }
 
     fn global() -> &'static Mutex<Syncer> {
@@ -57,43 +50,19 @@ impl Syncer {
 
     fn new() -> Self {
         Self {
-            clients: HashMap::new(),
+            clients: HashSet::new(),
         }
     }
 
     #[allow(dead_code)]
-    async fn check_health(addr: &str) -> bool {
-        let client;
-        {
-            let s = Syncer::global().lock();
-            client = match s.clients.get(addr) {
-                None => {
-                    return false;
-                }
-                Some(client) => client,
-            }
-            .clone();
-        }
-
-        match client.ping(context::current()).await {
-            Ok(resp) => {
-                info!("check health success for: {}", addr);
-                resp.eq(PONG)
-            }
-            Err(e) => {
-                error!("check health for {} err: {}", addr, e);
-                false
-            }
-        }
+    async fn check_health(addr: &str) -> anyhow::Result<bool> {
+        let client = Self::get_client(addr).await?;
+        let resp = client.ping(context::current()).await?;
+        Ok(resp.eq(PONG))
     }
 
     async fn sync_data(addr: &str) -> anyhow::Result<()> {
-        let clients = &Self::global().lock().clients;
-        let client = clients.get(addr);
-        if client.is_none() {
-            return Err(format_err!("No client found for: {}", addr));
-        }
-        let client = client.unwrap();
+        let client = Self::get_client(addr).await?;
 
         let my_local_ip = local_ip().unwrap();
         let mut data = client
@@ -102,6 +71,14 @@ impl Syncer {
         let mut store = StorageHandler::global().lock();
         store.merge_data(&mut data);
         Ok(())
+    }
+
+    async fn get_client(addr: &str) -> anyhow::Result<StorageClient> {
+        let to_storage_server = tarpc::serde_transport::tcp::connect(&addr, Json::default)
+            .await
+            .unwrap();
+        let client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
+        Ok(client)
     }
 }
 
