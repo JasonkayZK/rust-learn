@@ -27,6 +27,8 @@ impl Syncer {
         let client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
 
         let c = client;
+        let mut s = Syncer::global().lock();
+        s.clients.insert(addr.clone(), c.clone());
         let e = Self::sync_data(&c).await.err();
         if e.is_some() {
             error!(
@@ -34,10 +36,7 @@ impl Syncer {
                 addr,
                 e.unwrap()
             );
-            return;
         }
-        let mut s = Syncer::global().lock();
-        s.clients.insert(addr, c.clone());
     }
 
     pub fn check_client_exist(addr: &str) -> bool {
