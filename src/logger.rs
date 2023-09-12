@@ -39,7 +39,6 @@ impl log::Log for Logger {
             Level::Trace => 90, // BrightBlack
         };
 
-
         println!(
             "\u{1B}[{}m[{:>5}][{:>10}]:{} - {}\u{1B}[0m",
             color,

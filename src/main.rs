@@ -1,16 +1,15 @@
-use std::env;
 use dotenv::dotenv;
 use futures::{future, StreamExt};
-use log::{info};
+use log::info;
+use std::env;
 use tarpc::server::incoming::Incoming;
 use tarpc::tokio_serde::formats::Json;
 
-
-use tarpc::server;
 use rust_learn::api::{Storage, StorageServer};
 use rust_learn::logger;
-use tarpc::server::Channel;
 use rust_learn::utils::get_port;
+use tarpc::server;
+use tarpc::server::Channel;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -18,7 +17,9 @@ async fn main() -> anyhow::Result<()> {
     logger::init();
     let server_port = get_port(env::args().collect());
 
-    let mut listener = tarpc::serde_transport::tcp::listen(format!("0.0.0.0:{}", server_port), Json::default).await?;
+    let mut listener =
+        tarpc::serde_transport::tcp::listen(format!("0.0.0.0:{}", server_port), Json::default)
+            .await?;
     info!("Listening on port {}", listener.local_addr().port());
     listener.config_mut().max_frame_length(usize::MAX);
     listener

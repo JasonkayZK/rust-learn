@@ -1,5 +1,5 @@
-use std::collections::{BTreeSet};
-use std::sync::{OnceLock};
+use std::collections::BTreeSet;
+use std::sync::OnceLock;
 
 use boost_rs::rand::string::get_random_alphanumeric_string;
 use log::info;
@@ -19,9 +19,7 @@ impl StorageHandler {
     }
 
     fn new() -> Self {
-        let mut d = BTreeSet::from([
-            "1".to_string(),
-        ]);
+        let mut d = BTreeSet::from(["1".to_string()]);
 
         for _ in 0..2 {
             d.insert(get_random_alphanumeric_string(5));
@@ -29,9 +27,7 @@ impl StorageHandler {
 
         info!("load data success: {:#?}", d);
 
-        Self {
-            data: d,
-        }
+        Self { data: d }
     }
 
     pub fn add(&mut self, k: String) {
@@ -42,7 +38,11 @@ impl StorageHandler {
         self.data.remove(k)
     }
 
-    pub fn get_copy_list(&self) -> Vec<String> {
+    pub fn merge_data(&mut self, data: &mut BTreeSet<String>) {
+        self.data.append(data)
+    }
+
+    pub fn get_copy_data(&self) -> BTreeSet<String> {
         self.data.iter().map(|x| x.to_string()).collect()
     }
 

@@ -1,30 +1,44 @@
-use std::fmt::Debug;
-use futures::future::{Ready, ready};
+use futures::executor::block_on;
+use futures::future::{ready, Ready};
 use log::debug;
+use std::collections::BTreeSet;
+use std::fmt::Debug;
+use std::string::ToString;
+
 use tarpc::context::Context;
 
 use crate::storage::StorageHandler;
+use crate::syncer::Syncer;
+use crate::utils::PONG;
 
 #[tarpc::service]
 pub trait Storage {
-    async fn list() -> Vec<String>;
+    async fn ping() -> String;
+
+    async fn list() -> BTreeSet<String>;
 
     async fn add(k: String) -> ();
 
     async fn remove(k: String) -> ();
 
-    async fn sync(connect_addr: String) -> ();
+    async fn register(connect_addr: String) -> BTreeSet<String>;
 }
 
 #[derive(Clone)]
 pub struct StorageServer;
 
 impl Storage for StorageServer {
-    type ListFut = Ready<Vec<String>>;
+    type PingFut = Ready<String>;
+
+    fn ping(self, _ctx: Context) -> Self::PingFut {
+        ready(PONG.to_string())
+    }
+
+    type ListFut = Ready<BTreeSet<String>>;
 
     fn list(self, _ctx: Context) -> Self::ListFut {
         let store = StorageHandler::global().lock();
-        ready(store.get_copy_list())
+        ready(store.get_copy_data())
     }
 
     type AddFut = Ready<()>;
@@ -45,16 +59,11 @@ impl Storage for StorageServer {
         ready(())
     }
 
-    type SyncFut = Ready<()>;
+    type RegisterFut = Ready<BTreeSet<String>>;
 
-    fn sync(self, _ctx: Context, connect_addr: String) -> Self::SyncFut {
+    fn register(self, _ctx: Context, connect_addr: String) -> Self::RegisterFut {
+        block_on(async { Syncer::add_client(connect_addr).await });
 
-        // tarpc::serde_transport::tcp::connect(connect_addr, Json::default)
-        // let storage_client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
-        //
-        // let ctx = context::current();
-        // storage_client.add(ctx, boost_rs::rand::string::get_random_alphanumeric_string(3)).await.unwrap();
-        // println!("list: {:#?}", storage_client.list(ctx).await.unwrap())
-        todo!()
+        ready(StorageHandler::global().lock().get_copy_data())
     }
 }
