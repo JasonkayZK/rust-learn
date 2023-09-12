@@ -10,3 +10,22 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+log = "0.4.19"
+dotenv = "0.15"
+chrono = "0.4.26"
+anyhow = "1.0"
+futures = "0.3"
+tarpc = { version = "0.33.0", features = ["full"] }
+serde = { version = "1.0.171" }
+boost-rs = { version = "0.0.4", features = ["rand"] }
+parking_lot = "0.12.1"
+once_cell = "1.18.0"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+
+[[bin]]
+name="server"
+path="./src/bin/server.rs"
+
+[[bin]]
+name="client"
+path="./src/bin/client.rs"

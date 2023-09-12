@@ -25,7 +25,9 @@ async fn main() -> anyhow::Result<()> {
         .filter_map(|r| future::ready(r.ok())) // Ignore accept errors.
         .map(server::BaseChannel::with_defaults)
         .max_channels_per_key(1, |t| t.transport().peer_addr().unwrap().ip()) // Limit channels to 1 per IP.
-        .map(|channel| channel.execute(StorageServer.serve()))
+        .map(|channel| {
+            channel.execute(StorageServer.serve())
+        })
         .buffer_unordered(16) // Max 16 channels.
         .for_each(|_| async {})
         .await;
