@@ -14,14 +14,14 @@ async fn main() -> anyhow::Result<()> {
     cli.register(RegisterRequest {
         connect_addr: "192.168.31.22:8888".to_string(),
     })
-        .await
-        .unwrap();
+    .await
+    .unwrap();
 
     cli.add(AddRequest {
         key: boost_rs::rand::string::get_random_alphanumeric_string(3),
     })
-        .await
-        .unwrap();
+    .await
+    .unwrap();
 
     println!(
         "list: {:#?}",

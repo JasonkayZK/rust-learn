@@ -94,6 +94,10 @@ impl Syncer {
                 };
 
                 debug!("Sync Opt: {:?} success, data: {}", opt, data);
+                debug!(
+                    "Current data: {:#?}",
+                    StorageHandler::global().lock().get_copy_data()
+                )
             }
         });
     }

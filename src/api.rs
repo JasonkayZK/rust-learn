@@ -57,7 +57,6 @@ impl Storage for StorageService {
             return Ok(Response::new(RemoveResponse {}));
         }
 
-
         debug!("remove store: {}, success", k);
         store.remove(&k);
         Syncer::sync_opt(SyncOptEnum::Remove, k);
