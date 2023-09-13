@@ -30,6 +30,10 @@ impl StorageHandler {
         Self { data: d }
     }
 
+    pub fn contains(&self, k: &str) -> bool {
+        self.data.contains(k)
+    }
+
     pub fn add(&mut self, k: String) {
         self.data.insert(k);
     }
