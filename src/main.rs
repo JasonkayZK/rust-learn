@@ -17,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
     info!("Listening on port {}", addr);
 
     Server::builder()
-        .add_service(StorageServer::new(StorageService::default()))
+        .add_service(StorageServer::new(StorageService))
         .serve(addr.parse()?)
         .await?;
 
