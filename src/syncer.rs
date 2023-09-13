@@ -1,19 +1,26 @@
 use std::collections::HashSet;
 use std::sync::OnceLock;
 
+use anyhow::Result;
 use local_ip_address::local_ip;
-use log::{error, info};
+use log::{debug, error, info};
 use parking_lot::Mutex;
 use tonic::transport::{Channel, Endpoint, Error};
 
 use crate::storage::StorageHandler;
 use crate::storage_proto::storage_client::StorageClient;
-use crate::storage_proto::{PingRequest, RegisterRequest};
+use crate::storage_proto::{AddRequest, PingRequest, RegisterRequest, RemoveRequest};
 use crate::utils::{PONG, SYNC_PORT};
 
 #[derive(Debug, Default)]
 pub struct Syncer {
     clients: HashSet<String>,
+}
+
+#[derive(Debug)]
+pub enum SyncOptEnum {
+    Add,
+    Remove,
 }
 
 impl Syncer {
@@ -35,6 +42,62 @@ impl Syncer {
         s.clients.contains(addr)
     }
 
+    pub fn sync_opt(opt: SyncOptEnum, data: String) {
+        let client_list;
+        {
+            client_list = Self::global().lock().clients.clone();
+        }
+        let mut disconnected_addr = vec![];
+
+        debug!(
+            "Start sync opt: {:?}, current client list: {:#?}",
+            opt, client_list
+        );
+
+        tokio::spawn(async move {
+            for client_addr in client_list.iter() {
+                // Step 1: Get client
+                let mut rpc_cli = match Self::get_client(client_addr).await {
+                    Ok(cli) => cli,
+                    Err(e) => {
+                        error!("Get client for address: {} err: {}", client_addr, e);
+                        disconnected_addr.push(client_addr.clone());
+                        continue;
+                    }
+                };
+                // Step 2: Check health
+                match Self::check_health(&mut rpc_cli).await {
+                    Ok(is_health) => {
+                        if !is_health {
+                            error!("Checked unhealthy for address: {}", client_addr);
+                            disconnected_addr.push(client_addr.clone());
+                            continue;
+                        }
+                    }
+                    Err(e) => {
+                        error!(
+                            "Check health failed for address: {} err: {}",
+                            client_addr, e
+                        );
+                        disconnected_addr.push(client_addr.clone());
+                        continue;
+                    }
+                }
+                // Step 3: Opt
+                match opt {
+                    SyncOptEnum::Add => {
+                        Self::sync_add(&mut rpc_cli, data.clone(), client_addr).await;
+                    }
+                    SyncOptEnum::Remove => {
+                        Self::sync_remove(&mut rpc_cli, data.clone(), client_addr).await;
+                    }
+                };
+
+                debug!("Sync Opt: {:?} success, data: {}", opt, data);
+            }
+        });
+    }
+
     fn global() -> &'static Mutex<Syncer> {
         static SYNCER: OnceLock<Mutex<Syncer>> = OnceLock::new();
 
@@ -51,9 +114,7 @@ impl Syncer {
         }
     }
 
-    #[allow(dead_code)]
-    async fn check_health(addr: &str) -> anyhow::Result<bool> {
-        let mut client = Self::get_client(addr).await?;
+    async fn check_health(client: &mut StorageClient<Channel>) -> Result<bool> {
         let resp = client.ping(PingRequest {}).await?;
         Ok(resp.into_inner().msg.eq(PONG))
     }
@@ -88,6 +149,31 @@ impl Syncer {
     async fn get_client(addr: &str) -> Result<StorageClient<Channel>, Error> {
         let addr = Endpoint::from_shared(format!("http://{}", addr))?;
         StorageClient::connect(addr).await
+    }
+
+    async fn sync_add(client: &mut StorageClient<Channel>, data: String, addr: &str) {
+        match client.add(AddRequest { key: data.clone() }).await {
+            Err(e) => {
+                error!("Sync[Add] data: {} for addr: {} error: {}", data, addr, e);
+            }
+            _ => {
+                debug!("Sync[Add] data: {} for addr: {} success", data, addr)
+            }
+        };
+    }
+
+    async fn sync_remove(client: &mut StorageClient<Channel>, data: String, addr: &str) {
+        match client.remove(RemoveRequest { key: data.clone() }).await {
+            Err(e) => {
+                error!(
+                    "Sync[Remove] data: {} for addr: {} error: {}",
+                    data, addr, e
+                );
+            }
+            _ => {
+                debug!("Sync[Remove] data: {} for addr: {} success", data, addr)
+            }
+        }
     }
 }
 

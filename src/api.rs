@@ -9,7 +9,7 @@ use crate::storage_proto::{
     AddRequest, AddResponse, ListRequest, ListResponse, PingRequest, PingResponse, RegisterRequest,
     RegisterResponse, RemoveRequest, RemoveResponse,
 };
-use crate::syncer::Syncer;
+use crate::syncer::{SyncOptEnum, Syncer};
 use crate::utils::PONG;
 
 #[derive(Default)]
@@ -35,7 +35,8 @@ impl Storage for StorageService {
 
         let mut store = StorageHandler::global().lock();
         debug!("add store: {}, success", key);
-        store.add(key);
+        store.add(key.clone());
+        Syncer::sync_opt(SyncOptEnum::Add, key);
         Ok(Response::new(AddResponse {}))
     }
 
@@ -48,6 +49,7 @@ impl Storage for StorageService {
         let mut store = StorageHandler::global().lock();
         debug!("remove store: {}, success", k);
         store.remove(&k);
+        Syncer::sync_opt(SyncOptEnum::Remove, k);
         Ok(Response::new(RemoveResponse {}))
     }
 

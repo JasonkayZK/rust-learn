@@ -1,7 +1,7 @@
 use std::env;
 
 use rust_learn::storage_proto::storage_client::StorageClient;
-use rust_learn::storage_proto::{AddRequest, ListRequest};
+use rust_learn::storage_proto::{AddRequest, ListRequest, RegisterRequest};
 use rust_learn::utils::get_port;
 
 #[tokio::main]
@@ -20,7 +20,11 @@ async fn main() -> anyhow::Result<()> {
         cli.list(ListRequest {}).await.unwrap().into_inner().data
     );
 
-    // cli.register(RegisterRequest { connect_addr: "192.168.31.22:8888".to_string() }).await.unwrap();
+    cli.register(RegisterRequest {
+        connect_addr: "192.168.31.22:8888".to_string(),
+    })
+    .await
+    .unwrap();
 
     Ok(())
 }
