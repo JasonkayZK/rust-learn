@@ -12,7 +12,7 @@ async fn main() -> anyhow::Result<()> {
     let mut cli = StorageClient::connect(addr).await.unwrap();
 
     cli.register(RegisterRequest {
-        connect_addr: "192.168.31.22:8888".to_string(),
+        connect_addr: "localhost:8887".to_string(),
     })
     .await
     .unwrap();

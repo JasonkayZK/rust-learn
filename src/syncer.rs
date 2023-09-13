@@ -92,13 +92,12 @@ impl Syncer {
                         Self::sync_remove(&mut rpc_cli, data.clone(), client_addr).await;
                     }
                 };
-
-                debug!("Sync Opt: {:?} success, data: {}", opt, data);
-                debug!(
-                    "Current data: {:#?}",
-                    StorageHandler::global().lock().get_copy_data()
-                )
             }
+            debug!("Sync Opt: {:?} success, data: {}", opt, data);
+            debug!(
+                "Current data: {:#?}",
+                StorageHandler::global().lock().get_copy_data()
+            )
         });
     }
 
