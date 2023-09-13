@@ -34,6 +34,11 @@ impl Storage for StorageService {
         let key = req.into_inner().key;
 
         let mut store = StorageHandler::global().lock();
+        if store.contains(&key) {
+            debug!("Already contains data: {}, skip...", key);
+            return Ok(Response::new(AddResponse {}));
+        }
+
         debug!("add store: {}, success", key);
         store.add(key.clone());
         Syncer::sync_opt(SyncOptEnum::Add, key);
@@ -47,6 +52,12 @@ impl Storage for StorageService {
         let k = req.into_inner().key;
 
         let mut store = StorageHandler::global().lock();
+        if !store.contains(&k) {
+            debug!("Not contains data: {}, skip...", k);
+            return Ok(Response::new(RemoveResponse {}));
+        }
+
+
         debug!("remove store: {}, success", k);
         store.remove(&k);
         Syncer::sync_opt(SyncOptEnum::Remove, k);
