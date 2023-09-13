@@ -14,7 +14,6 @@ log = "0.4.19"
 dotenv = "0.15"
 chrono = "0.4.26"
 anyhow = "1.0"
-futures = "0.3"
 serde = { version = "1.0.171" }
 boost-rs = { version = "0.0.4", features = ["rand"] }
 parking_lot = "0.12.1"
