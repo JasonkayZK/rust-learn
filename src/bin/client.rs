@@ -1,31 +1,26 @@
-use rust_learn::api::StorageClient;
-use rust_learn::utils::get_port;
 use std::env;
-use tarpc::tokio_serde::formats::Json;
-use tarpc::{client, context};
+
+use rust_learn::storage_proto::storage_client::StorageClient;
+use rust_learn::storage_proto::{AddRequest, ListRequest};
+use rust_learn::utils::get_port;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> anyhow::Result<()> {
     let server_port = get_port(env::args().collect());
+    let addr = format!("http://0.0.0.0:{}", server_port);
 
-    let to_storage_server =
-        tarpc::serde_transport::tcp::connect(format!("0.0.0.0:{}", server_port), Json::default)
-            .await
-            .unwrap();
-    let storage_client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
+    let mut cli = StorageClient::connect(addr).await.unwrap();
+    cli.add(AddRequest {
+        key: boost_rs::rand::string::get_random_alphanumeric_string(3),
+    })
+    .await
+    .unwrap();
+    println!(
+        "list: {:#?}",
+        cli.list(ListRequest {}).await.unwrap().into_inner().data
+    );
 
-    let ctx = context::current();
-    storage_client
-        .add(
-            ctx,
-            boost_rs::rand::string::get_random_alphanumeric_string(3),
-        )
-        .await
-        .unwrap();
-    println!("list: {:#?}", storage_client.list(ctx).await.unwrap());
+    // cli.register(RegisterRequest { connect_addr: "192.168.31.22:8888".to_string() }).await.unwrap();
 
-    storage_client
-        .register(ctx, "192.168.31.22:8888".to_string())
-        .await
-        .unwrap();
+    Ok(())
 }

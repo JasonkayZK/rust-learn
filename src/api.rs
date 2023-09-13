@@ -1,69 +1,65 @@
-use futures::executor::block_on;
-use futures::future::{ready, Ready};
-use log::debug;
-use std::collections::BTreeSet;
-use std::fmt::Debug;
 use std::string::ToString;
 
-use tarpc::context::Context;
+use log::debug;
+use tonic::{Request, Response, Status};
 
 use crate::storage::StorageHandler;
+use crate::storage_proto::storage_server::Storage;
+use crate::storage_proto::{
+    AddRequest, AddResponse, ListRequest, ListResponse, PingRequest, PingResponse, RegisterRequest,
+    RegisterResponse, RemoveRequest, RemoveResponse,
+};
 use crate::syncer::Syncer;
 use crate::utils::PONG;
 
-#[tarpc::service]
-pub trait Storage {
-    async fn ping() -> String;
+#[derive(Default)]
+pub struct StorageService;
 
-    async fn list() -> BTreeSet<String>;
-
-    async fn add(k: String) -> ();
-
-    async fn remove(k: String) -> ();
-
-    async fn register(connect_addr: String) -> BTreeSet<String>;
-}
-
-#[derive(Clone)]
-pub struct StorageServer;
-
-impl Storage for StorageServer {
-    type PingFut = Ready<String>;
-
-    fn ping(self, _ctx: Context) -> Self::PingFut {
-        ready(PONG.to_string())
+#[tonic::async_trait]
+impl Storage for StorageService {
+    async fn ping(&self, _req: Request<PingRequest>) -> Result<Response<PingResponse>, Status> {
+        Ok(Response::new(PingResponse {
+            msg: PONG.to_string(),
+        }))
     }
 
-    type ListFut = Ready<BTreeSet<String>>;
-
-    fn list(self, _ctx: Context) -> Self::ListFut {
+    async fn list(&self, _req: Request<ListRequest>) -> Result<Response<ListResponse>, Status> {
         let store = StorageHandler::global().lock();
-        ready(store.get_copy_data())
+        Ok(Response::new(ListResponse {
+            data: store.get_copy_data().into_iter().collect(),
+        }))
     }
 
-    type AddFut = Ready<()>;
+    async fn add(&self, req: Request<AddRequest>) -> Result<Response<AddResponse>, Status> {
+        let key = req.into_inner().key;
 
-    fn add(self, _ctx: Context, k: String) -> Self::AddFut {
         let mut store = StorageHandler::global().lock();
-        debug!("add store: {}, success", k);
-        store.add(k);
-        ready(())
+        debug!("add store: {}, success", key);
+        store.add(key);
+        Ok(Response::new(AddResponse {}))
     }
 
-    type RemoveFut = Ready<()>;
+    async fn remove(
+        &self,
+        req: Request<RemoveRequest>,
+    ) -> Result<Response<RemoveResponse>, Status> {
+        let k = req.into_inner().key;
 
-    fn remove(self, _ctx: Context, k: String) -> Self::RemoveFut {
         let mut store = StorageHandler::global().lock();
         debug!("remove store: {}, success", k);
         store.remove(&k);
-        ready(())
+        Ok(Response::new(RemoveResponse {}))
     }
 
-    type RegisterFut = Ready<BTreeSet<String>>;
-
-    fn register(self, _ctx: Context, connect_addr: String) -> Self::RegisterFut {
-        block_on(async { Syncer::add_client(connect_addr).await });
-
-        ready(StorageHandler::global().lock().get_copy_data())
+    async fn register(
+        &self,
+        req: Request<RegisterRequest>,
+    ) -> Result<Response<RegisterResponse>, Status> {
+        let connect_addr = req.into_inner().connect_addr;
+        Syncer::add_client(connect_addr).await;
+        let store = StorageHandler::global().lock();
+        Ok(Response::new(RegisterResponse {
+            data: store.get_copy_data().into_iter().collect(),
+        }))
     }
 }

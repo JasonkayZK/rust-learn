@@ -1,14 +1,15 @@
-use crate::api::StorageClient;
-use local_ip_address::local_ip;
-use std::collections::{HashSet};
+use std::collections::HashSet;
 use std::sync::OnceLock;
 
-use crate::storage::StorageHandler;
-use crate::utils::{PONG, SYNC_PORT};
+use local_ip_address::local_ip;
 use log::{error, info};
 use parking_lot::Mutex;
-use tarpc::tokio_serde::formats::Json;
-use tarpc::{client, context};
+use tonic::transport::{Channel, Endpoint, Error};
+
+use crate::storage::StorageHandler;
+use crate::storage_proto::storage_client::StorageClient;
+use crate::storage_proto::{PingRequest, RegisterRequest};
+use crate::utils::{PONG, SYNC_PORT};
 
 #[derive(Debug, Default)]
 pub struct Syncer {
@@ -23,14 +24,10 @@ impl Syncer {
 
         let mut s = Syncer::global().lock();
         s.clients.insert(addr.clone());
-        let e = Self::sync_data(&addr).await.err();
-        if e.is_some() {
-            error!(
-                "ConnectionRefused: sync data from: {} err: {}",
-                addr,
-                e.unwrap()
-            );
-        }
+
+        tokio::spawn(async move {
+            Self::sync_data(&addr).await;
+        });
     }
 
     pub fn check_client_exist(addr: &str) -> bool {
@@ -56,29 +53,41 @@ impl Syncer {
 
     #[allow(dead_code)]
     async fn check_health(addr: &str) -> anyhow::Result<bool> {
-        let client = Self::get_client(addr).await?;
-        let resp = client.ping(context::current()).await?;
-        Ok(resp.eq(PONG))
+        let mut client = Self::get_client(addr).await?;
+        let resp = client.ping(PingRequest {}).await?;
+        Ok(resp.into_inner().msg.eq(PONG))
     }
 
-    async fn sync_data(addr: &str) -> anyhow::Result<()> {
-        let client = Self::get_client(addr).await?;
+    async fn sync_data(addr: &str) {
+        let mut client = match Self::get_client(addr).await {
+            Ok(c) => c,
+            Err(e) => {
+                error!("ConnectionRefused: sync data from: {} err: {:#?}", addr, e);
+                return;
+            }
+        };
 
         let my_local_ip = local_ip().unwrap();
-        let mut data = client
-            .register(context::current(), format!("{}:{}", my_local_ip, SYNC_PORT))
-            .await?;
+        let data = match client
+            .register(RegisterRequest {
+                connect_addr: format!("{}:{}", my_local_ip, SYNC_PORT),
+            })
+            .await
+        {
+            Ok(resp) => resp.into_inner().data,
+            Err(e) => {
+                error!("Call register err: {:#?}, local ip: {}", e, my_local_ip);
+                return;
+            }
+        };
+
         let mut store = StorageHandler::global().lock();
-        store.merge_data(&mut data);
-        Ok(())
+        store.merge_data(&mut data.into_iter().collect());
     }
 
-    async fn get_client(addr: &str) -> anyhow::Result<StorageClient> {
-        let to_storage_server = tarpc::serde_transport::tcp::connect(&addr, Json::default)
-            .await
-            .unwrap();
-        let client = StorageClient::new(client::Config::default(), to_storage_server).spawn();
-        Ok(client)
+    async fn get_client(addr: &str) -> Result<StorageClient<Channel>, Error> {
+        let addr = Endpoint::from_shared(format!("http://{}", addr))?;
+        StorageClient::connect(addr).await
     }
 }
 
