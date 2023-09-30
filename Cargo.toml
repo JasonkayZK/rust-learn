@@ -10,3 +10,5 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+automerge = "0.5.2"
+autosurgeon = { version = "0.8.2" }
