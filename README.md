@@ -126,6 +126,7 @@ Hello, world!
 | [sqlite](https://github.com/JasonkayZK/rust-learn/tree/sqlite) | 2023-07-11                                | A branch to show how to use sqlite & migrations in rust.     | [《在Rust中使用SQLite和Migration》](https://jasonkayzk.github.io/2023/07/11/在Rust中使用SQLite和Migration/) |
 | [cr-sqlite](https://github.com/JasonkayZK/rust-learn/tree/cr-sqlite) | 2023-09-07                                | A branch to show how to test [cr-sqlite](https://github.com/vlcn-io/cr-sqlite) |                                                              |
 | [sync](https://github.com/JasonkayZK/rust-learn/tree/sync)   | 2023-09-13                                | A branch to show how to sync data between servers via [tonic](https://github.com/hyperium/tonic) |                                                              |
+| [automerge](https://github.com/JasonkayZK/rust-learn/tree/automerge) | 2023-09-30                                | A repo to learn how to use [autosurgeon](https://github.com/automerge/autosurgeon). |                                                              |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
