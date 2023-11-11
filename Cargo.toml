@@ -10,3 +10,12 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+aquadoggo = "0.5.0"
+p2panda-rs = "0.7.1"
+tokio = { version = "1.0.0", features = ["rt", "rt-multi-thread", "macros"] }
+serde_json = "1.0.107"
+hex = "0.4.3"
+
+[dev-dependencies]
+zenode = "0.3.4"
+anyhow = "1.0.75"
