@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use anyhow::Result;
 use zenode::{field, field_def, Operator};
 use zenode::FieldType::*;
@@ -5,10 +6,14 @@ use zenode::FieldType::*;
 #[tokio::main]
 async fn main() -> Result<()> {
     // create an Operator
-    let op = Operator::default();
+    let op = Operator::builder()
+        .version(1)
+        .key_pair_path(PathBuf::from("schema/secret.txt"))
+        .endpoint("http://localhost:2020/graphql")
+        .build();
 
     // create a schema
-    let schema_name = "t_person";
+    let schema_name = "person";
     let id = op.create_schema(
         schema_name,
         "A person schema",

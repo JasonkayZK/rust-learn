@@ -1,0 +1,6 @@
+[person]
+description = "A person's information for demo"
+
+[person.fields]
+name = { type = "str" }
+age = { type = "int" }
