@@ -127,6 +127,7 @@ Hello, world!
 | [cr-sqlite](https://github.com/JasonkayZK/rust-learn/tree/cr-sqlite) | 2023-09-07                                | A branch to show how to test [cr-sqlite](https://github.com/vlcn-io/cr-sqlite) |                                                              |
 | [sync](https://github.com/JasonkayZK/rust-learn/tree/sync)   | 2023-09-13                                | A branch to show how to sync data between servers via [tonic](https://github.com/hyperium/tonic) |                                                              |
 | [automerge](https://github.com/JasonkayZK/rust-learn/tree/automerge) | 2023-09-30                                | A repo to learn how to use [autosurgeon](https://github.com/automerge/autosurgeon). |                                                              |
+| [p2panda-demo](https://github.com/JasonkayZK/rust-learn/tree/p2panda-demo)                      | 2023-11-12                              | A demo to show how to use [p2panda](https://github.com/p2panda/p2panda/tree/main) to create a local-first application. |                                                              |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
