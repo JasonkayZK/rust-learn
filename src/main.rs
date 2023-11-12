@@ -92,8 +92,7 @@ async fn main() {
         ..Default::default()
     };
 
-    let key_pair = get_key_pair(Some(PathBuf::from("schema/secret.txt"))).unwrap();
-    println!("Get key pair: private: {:?}, public: {:?}", hex::encode(key_pair.private_key().to_bytes()), hex::encode(key_pair.public_key().to_bytes()));
+    let key_pair = KeyPair::new();
     let node = Node::start(key_pair, config).await;
 
     migration().await.expect("migration failed");
@@ -101,7 +100,7 @@ async fn main() {
     node.on_exit().await;
 }
 
-fn get_key_pair(path: Option<PathBuf>) -> Option<KeyPair> {
+pub fn get_key_pair(path: Option<PathBuf>) -> Option<KeyPair> {
     let path = path.unwrap_or_else(|| PathBuf::from("secret.txt"));
 
     // Read private key from file or generate a new one
