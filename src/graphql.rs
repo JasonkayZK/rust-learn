@@ -1,5 +1,4 @@
 use graphql_client::GraphQLQuery;
-use p2panda_rs::operation::OperationId;
 
 #[derive(GraphQLQuery)]
 #[graphql(

@@ -6,17 +6,17 @@ use anyhow::{bail, Result};
 use aquadoggo::{Configuration, NetworkConfiguration, Node};
 use graphql_client::{GraphQLQuery, Response};
 use p2panda_rs::entry::decode::decode_entry;
-use p2panda_rs::entry::EncodedEntry;
 use p2panda_rs::entry::traits::AsEntry;
+use p2panda_rs::entry::EncodedEntry;
 use p2panda_rs::hash::Hash;
 use p2panda_rs::identity::{KeyPair, PublicKey};
-use p2panda_rs::operation::{EncodedOperation};
+use p2panda_rs::operation::EncodedOperation;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 
-use crate::graphql::{next_args, NextArgs, publish, Publish};
 use crate::graphql::next_args::NextArgsNextArgs;
 use crate::graphql::publish::PublishPublish;
+use crate::graphql::{next_args, publish, NextArgs, Publish};
 
 mod graphql;
 
@@ -117,12 +117,7 @@ async fn migration() -> Result<()> {
         let seq_num = entry.seq_num();
 
         // Check if node already knows about this entry
-        let next_args_res = next_args(
-            &mut cli,
-            *pub_key,
-            commit.entry_hash.to_string(),
-        )
-            .await?;
+        let next_args_res = next_args(&mut cli, *pub_key, commit.entry_hash.to_string()).await?;
         if next_args_res.is_some() {
             let next_args_res = next_args_res.unwrap();
             if log_id != &next_args_res.log_id {
