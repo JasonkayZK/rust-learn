@@ -1,0 +1,13 @@
+query AllSchemaFieldDefinitions{
+    all_schema_field_definition_v1 {
+        documents {
+            meta {
+                documentId
+            }
+            fields {
+                name
+                type
+            }
+        }
+    }
+}

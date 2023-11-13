@@ -1,0 +1,8 @@
+query NextArgs($pk: PublicKey!, $vid: DocumentViewId) {
+    nextArgs(publicKey: $pk, viewId: $vid) {
+        logId
+        seqNum
+        skiplink
+        backlink
+    }
+}

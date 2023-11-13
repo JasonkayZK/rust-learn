@@ -1,6 +1,13 @@
-[person]
-description = "A person's information for demo"
+[record]
+description = "Clipboard record documents"
 
-[person.fields]
-name = { type = "str" }
-age = { type = "int" }
+[record.fields]
+content = { type = "str" }
+content_preview = { type = "str" }
+data_type = { type = "str" }
+md5 = { type = "str" }
+create_time = { type = "int" }
+is_favorite = { type = "int" }
+tags = { type = "str" }
+latest_addr = { type = "str" }
+is_deleted = { type = "int" }
