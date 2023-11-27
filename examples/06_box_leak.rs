@@ -1,7 +1,7 @@
 #[derive(Debug)]
 struct Config {
     _a: String,
-    _b: String
+    _b: String,
 }
 static mut CONFIG: Option<&mut Config> = None;
 
