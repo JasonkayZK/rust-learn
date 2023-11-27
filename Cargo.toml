@@ -9,4 +9,5 @@ readme = "README.md"
 repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
-[dependencies]
+[dev-dependencies]
+lazy_static = "1.4"
