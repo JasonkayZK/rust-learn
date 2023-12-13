@@ -1,3 +1,5 @@
+#[allow(arithmetic_overflow)]
 fn main() {
-    println!("let's rust-up!")
+    let x: u8 = 255;
+    println!("{}", x + 1);
 }

@@ -1,187 +1,209 @@
-# **Rust Learn**
+# **在Rust中处理整数溢出**
 
-<a href="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml">
-  <img src="https://github.com/JasonkayZK/rust-learn/actions/workflows/ci.yaml/badge.svg"/>
-</a>
+## **默认行为**
 
-A repo to learn rust.
+默认情况下，当出现整型溢出时，Debug 模式会发生 panic，Release 模式下会在溢出后取舍归零；
 
-This main branch is a standard template for new rust project!
+src/main.rs
 
-<br/>
-
-## **Learning Resource**
-
-Learn Rust with：
-
-- [《Rust 程序设计语言（第二版） 简体中文版》](https://www.bookstack.cn/books/trpl-zh-cn)
-- [《Rust语言圣经(Rust Course)》](https://course.rs/about-book.html)
-- [《rust-by-example》](https://doc.rust-lang.org/stable/rust-by-example/)
-- [《too-many-lists》](https://rust-unofficial.github.io/too-many-lists/)
-- [《Rusty Book》](https://rusty.rs/about.html)
-- [《Rust 秘典（死灵书）》](https://nomicon.purewhite.io/intro.html)
-- [《The Little Book of Rust Macros （Rust 宏小册）》](https://zjp-cn.github.io/tlborm/introduction.html)
-
-
-Exercises:
-
-- [rustlings](https://github.com/rust-lang/rustlings)
-- [《Rust语言实战》](https://zh.practice.rs/why-exercise.html)
-
-
-Gitbook Url：
-
-- https://www.gitbook.com/book/kaisery/trpl-zh-cn/details
-
-<br/>
-
-## **Jupyter**
-
-**The Jupyter branch is shown below (Which helps you run Rust as script!)：**
-
-- https://github.com/JasonkayZK/rust-learn/tree/jupyter
-
-Which depend on jupyter kernel：
-
-- https://github.com/google/evcxr/tree/main/evcxr_jupyter
-
-<br/>
-
-## **Create Project**
-
-Use Cargo to create a project:
-
-```bash
-cargo new hello_rust --bin
+```rust
+#[allow(arithmetic_overflow)]
+fn main() {
+    let x: u8 = 255;
+    println!("{}", x + 1);
+}
 ```
 
-build:
+Rust 的编译器是非常智能的，会在编译期就检测出上面的代码存在溢出；
 
-```bash
-cd hello_rust && cargo build --release
+此时可以通过添加：`#[allow(arithmetic_overflow)]` 来关闭该检查；
+
+debug模式：
+
+```shel
+cargo run
+
+thread 'main' panicked at 'attempt to add with overflow', src/main.rs:4:20
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
 ```
 
-run:
+release模式：
 
-```bash
-./target/release/hello_rust
-Hello, world!
+
+```shel
+cargo run --release
+
+0
 ```
 
-> Or just run program with:
->
-> ```bash
-> cargo run
-> ```
+该差异的来源在于：`dev` 和 `release` 配置的定义不同（参见：[Profiles - The Cargo Book](https://doc.rust-lang.org/cargo/reference/profiles.html)）；
+
+造成这一行为的选项是 `overflow-checks`，它在 `dev` 中开启，`release` 中关闭；
+
+如果你的应用程序依赖于整数溢出行为，可以直接更改 `dev` 配置，以关闭 `overflow-checks`：
+
+```toml
+[profile.dev]
+overflow-checks = false
+```
 
 <br/>
 
-## **Now Finished**
+## **显式运算**
 
-| Project                                                      | Date                                      | Note                                                         | Linked Blog                                                  |
-| ------------------------------------------------------------ | :---------------------------------------- | :----------------------------------------------------------- | :----------------------------------------------------------- |
-| [chapter2-guessing-game](https://github.com/JasonkayZK/rust-learn/tree/chapter2-guessing-game) | 2021-06-01                                | A guessing game                                              |                                                              |
-| [chapter3-variables](https://github.com/JasonkayZK/rust-learn/tree/chapter3-variables) | 2021-06-02                                | Variable & Type                                              |                                                              |
-| [multiple-main-demo](https://github.com/JasonkayZK/rust-learn/tree/multiple-main-demo) | 2021-06-02                                | A demo to show how to run multiple main                      |                                                              |
-| [chapter4-function](https://github.com/JasonkayZK/rust-learn/tree/chapter4-function) | 2021-06-02                                | Function                                                     |                                                              |
-| [chapter5-control-flow](https://github.com/JasonkayZK/rust-learn/tree/chapter5-control-flow) | 2021-06-02                                | Control flow(if/loop/while/for)                              |                                                              |
-| [chapter6-ownership](https://github.com/JasonkayZK/rust-learn/tree/chapter6-ownership) | 2021-06-03                                | Ownership(also string/slice)                                 |                                                              |
-| [chapter7-struct](https://github.com/JasonkayZK/rust-learn/tree/chapter7-struct) | 2021-06-04                                | Struct                                                       |                                                              |
-| [chapter8-enum-and-match](https://github.com/JasonkayZK/rust-learn/tree/chapter8-enum-and-match) | 2021-06-07                                | Enum & Match                                                 |                                                              |
-| [chapter9-modules](https://github.com/JasonkayZK/rust-learn/tree/chapter9-modules) | 2021-06-07                                | Modules(mod/pub/use/super)                                   |                                                              |
-| [chapter10-collections](https://github.com/JasonkayZK/rust-learn/tree/chapter10-collections) | 2021-06-09                                | Vector & String & Map                                        |                                                              |
-| [chapter11-error-handling](https://github.com/JasonkayZK/rust-learn/tree/chapter11-error-handling) | 2021-06-09                                | Error handling (Panic! & Result)                             |                                                              |
-| [chapter12-generic-trait-lifetime](https://github.com/JasonkayZK/rust-learn/tree/chapter12-generic-trait-lifetime) | 2021-06-10                                | Generic & Trait & Lifetime                                   |                                                              |
-| [chapter13-testing](https://github.com/JasonkayZK/rust-learn/tree/chapter13-testing) | 2021-06-12                                | Testing(Write, Run & Organize)                               |                                                              |
-| [chapter14-io-project-grep](https://github.com/JasonkayZK/rust-learn/tree/chapter14-io-project-grep) | 2021-06-13                                | A io project: `mini-grep` written in rust.                   |                                                              |
-| [chapter15-functional-features](https://github.com/JasonkayZK/rust-learn/tree/chapter15-functional-features) | 2021-06-14                                | Functional features(Closure & Iterator) in rust.             |                                                              |
-| [chapter16-cargo](https://github.com/JasonkayZK/rust-learn/tree/chapter16-cargo) | 2021-06-15                                | Cargo(Config, Publish, Install & Extend) & Workspace in rust. |                                                              |
-| [chapter17-smart-pointer](https://github.com/JasonkayZK/rust-learn/tree/chapter17-smart-pointer) | 2021-09-29                                | Smart Pointer(Within double-linked-list accomplishment).     |                                                              |
-| [chapter18-concurrency](https://github.com/JasonkayZK/rust-learn/tree/chapter18-concurrency) | 2021-10-03                                | Concurrency.                                                 |                                                              |
-| [chapter19-oop](https://github.com/JasonkayZK/rust-learn/tree/chapter19-oop) | 2021-11-14                                | Object-Oriented-Programming.                                 |                                                              |
-| [chapter20-match-patterns](https://github.com/JasonkayZK/rust-learn/tree/chapter20-match-patterns) | 2021-11-14                                | The Match Patterns.                                          |                                                              |
-| [chapter21-advanced-features](https://github.com/JasonkayZK/rust-learn/tree/chapter21-advanced-features) | 2021-11-14                                | The advanced features:<br />Unsafe、Lifetime、Trait、Type、Function & Closure |                                                              |
-| [actix-web-demo](https://github.com/JasonkayZK/rust-learn/tree/actix-web-demo) | 2021-10-04                                | RESTful API accomplished by [actix-web](https://github.com/actix/actix-web) framework. |                                                              |
-| [rbatis-demo](https://github.com/JasonkayZK/rust-learn/tree/rbatis-demo) | 2021-10-07                                | A demo to show how to use ORM framework: [rbatis](https://github.com/rbatis/rbatis) |                                                              |
-| [wasm-hello](https://github.com/JasonkayZK/rust-learn/tree/wasm-hello) | 2021-10-09                                | A simple rust-wasm demo.[Use template: [wasm-pack-template](https://github.com/rustwasm/wasm-pack-template)] | [《Rust实现WebAssembly初窥》](https://jasonkayzk.github.io/2021/10/10/Rust实现WebAssembly初窥/) |
-| [feature-phantom](https://github.com/JasonkayZK/rust-learn/tree/feature-phantom) | 2021-10-19                                | A demo to show how to use `PhantomData` beautify your code   | [《Rust中的PhantomType》](https://jasonkayzk.github.io/2021/10/20/Rust中的PhantomType/) |
-| [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs) | 2021-12-04<br />(2021-12-21 Last Updated) | A simple URL Mapper service built                            | [《Building a Web Application with Rust》](https://www.youtube.com/playlist?list=PLz51_WNhdOqv7S5pnycKySU_4PpCagU4Q) |
-| [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm) | 2021-12-22                                | Collect lots of algorithm & data structures(Such as: LinkedList, …) |                                                              |
-| [too-many-lists](https://github.com/JasonkayZK/rust-learn/tree/algorithm/too-many-lists) | 2022-01-05                                | A accomplishment for [Learn Rust With Entirely Too Many Linked Lists](https://github.com/rust-unofficial/too-many-lists) |                                                              |
-| [ffi-demo](https://github.com/JasonkayZK/rust-learn/tree/ffi-demo) | 2022-01-17                                | A FFI(Foreign Function Interface) demo according to:<br />https://nomicon.purewhite.io/ffi.html |                                                              |
-| [hot-reload](https://github.com/JasonkayZK/rust-learn/tree/hot-reload) | 2022-08-10                                | A demo to show hot-reload.<br />Reference: https://robert.kra.hn/posts/hot-reloading-rust/ |                                                              |
-| [tokio](https://github.com/JasonkayZK/rust-learn/tree/tokio) | 2022-11-01                                | A branch to learn [tokio](https://github.com/tokio-rs/tokio) |                                                              |
-| [recover](https://github.com/JasonkayZK/rust-learn/tree/recover) | 2022-11-17                                | A branch to show how rust recovered from panic               | [《Rust从panic中恢复》](https://jasonkayzk.github.io/2022/11/17/Rust从panic中恢复/) |
-| [build-version](https://github.com/JasonkayZK/rust-learn/tree/build-version) | 2022-11-17                                | A branch to use `build.rs` add commit version for binary executable | [《为Cargo编译的可执行文件增加commit版本号》](https://jasonkayzk.github.io/2022/11/17/为Cargo编译的可执行文件增加commit版本号/) |
-| [error](https://github.com/JasonkayZK/rust-learn/tree/error) | 2022-11-18                                | A branch to show error handle                                | [《Rust中的错误处理》](https://jasonkayzk.github.io/2022/11/18/Rust中的错误处理/) |
-| [project-structure](https://github.com/JasonkayZK/rust-learn/tree/project-structure) | 2022-11-19                                | A branch to show how rust project structure organized        | [《Rust模块组织结构》](https://jasonkayzk.github.io/2022/11/19/Rust模块组织结构/) |
-| [default-and-with](https://github.com/JasonkayZK/rust-learn/tree/default-and-with) | 2022-11-19                                | Use Default or With Trait to initiate item                   | [《Rust中的默认初始化和初始化重载》](https://jasonkayzk.github.io/2022/11/19/Rust中的默认初始化和初始化重载/) |
-| [cargo](https://github.com/JasonkayZK/rust-learn/tree/cargo) | 2022-11-23                                | A branch to learn [cargo](https://doc.rust-lang.org/cargo/index.html) | [《Cargo命令及其扩展》](https://jasonkayzk.github.io/2022/11/23/Cargo命令及其扩展/) |
-| [compare](https://github.com/JasonkayZK/rust-learn/tree/compare) | 2022-11-23                                | A branch to show how PartialEq/Ord, Eq/Ord works             | [《Rust中的比较》](https://jasonkayzk.github.io/2022/11/23/Rust中的比较/) |
-| [any](https://github.com/JasonkayZK/rust-learn/tree/any)     | 2022-11-25                                | A branch to show reflection via Any                          | [《Rust反射之Any》](https://jasonkayzk.github.io/2022/11/24/Rust反射之Any/)<br />[《Rust中的向下转型》](https://jasonkayzk.github.io/2023/12/13/Rust中的向下转型/) |
-| [reflection](https://github.com/JasonkayZK/rust-learn/tree/reflection) | 2022-11-25                                | A branch to show reflection via proc-macros                  | [《Rust反射之过程宏》](https://jasonkayzk.github.io/2022/11/25/Rust反射之过程宏/) |
-| [cargo-features](https://github.com/JasonkayZK/rust-learn/tree/cargo-features) | 2022-11-28                                | A branch to show cargo features                              | [《通过一个例子学习Cargo-Features》](https://jasonkayzk.github.io/2022/11/28/通过一个例子学习Cargo-Features/) |
-| [future](https://github.com/JasonkayZK/rust-learn/tree/async/examples/1_future) | 2022-11-29                                | A branch to show how to use future and how it works          | [《Rust中Future执行底层探秘》](https://jasonkayzk.github.io/2022/11/29/Rust中Future执行底层探秘/) |
-| [grpc](https://github.com/JasonkayZK/rust-learn/tree/grpc)   | 2022-12-03                                | A branch to show how to use grpc via [tonic](https://github.com/hyperium/tonic) | [《Rust的GRPC实现Tonic》](https://jasonkayzk.github.io/2022/12/03/Rust的GRPC实现Tonic/) |
-| [sqlite](https://github.com/JasonkayZK/rust-learn/tree/sqlite) | 2023-07-11                                | A branch to show how to use sqlite & migrations in rust.     | [《在Rust中使用SQLite和Migration》](https://jasonkayzk.github.io/2023/07/11/在Rust中使用SQLite和Migration/) |
-| [cr-sqlite](https://github.com/JasonkayZK/rust-learn/tree/cr-sqlite) | 2023-09-07                                | A branch to show how to test [cr-sqlite](https://github.com/vlcn-io/cr-sqlite) |                                                              |
-| [sync](https://github.com/JasonkayZK/rust-learn/tree/sync)   | 2023-09-13                                | A branch to show how to sync data between servers via [tonic](https://github.com/hyperium/tonic) |                                                              |
-| [automerge](https://github.com/JasonkayZK/rust-learn/tree/automerge) | 2023-09-30                                | A repo to learn how to use [autosurgeon](https://github.com/automerge/autosurgeon). |                                                              |
-| [p2panda-demo](https://github.com/JasonkayZK/rust-learn/tree/p2panda-demo) | 2023-11-12                                | A demo to show how to use [p2panda](https://github.com/p2panda/p2panda/tree/main) to create a local-first application. |                                                              |
-| [global-vars](https://github.com/JasonkayZK/rust-learn/tree/global-vars) | 2023-11-27                                | A branch to show how to define a global variable in Rust.    | [《Rust中创建全局变量》](https://jasonkayzk.github.io/2023/11/27/Rust中创建全局变量/) |
-|                                                              |                                           |                                                              |                                                              |
+对于所有的有符号和无符号整数，Rust 提供了四组不同的运算函数，这提供了显式处理整数溢出的方式；
+
+### **`wrapping_` 系列函数：**
+
+examples/1_opt.rs
+
+```rust
+fn wrapping_demo() {
+    println!("{}", (250_u8).wrapping_add(10));     // 4
+    println!("{}", (120_i8).wrapping_add(10));     // -126
+    println!("{}", (300_u16).wrapping_mul(800));   // 43392
+    println!("{}", (-100_i8).wrapping_sub(100));   // 56
+    println!("{}", (8000_i32).wrapping_pow(5000)); // 0
+}
+```
+
+`wrapping_` 系列函数处理整数溢出的方法是回绕，即从整数类型的最大值回绕到最小值（也是我们期望发生的默认情况）；
+
+这种方法确保了在使用这些函数时，无论构建配置文件如何，都不会造成意外的运行时错误；
 
 <br/>
 
-## **Serial Project**
+### **`overflowing_`系列函数：**
 
-### **url-mapper-rs**
+examples/1_opt.rs
 
-Project Space:
+```rust
+fn overflowing_demo() {
+    // 4, true
+    let (result, overflowed) = (250_u8).overflowing_add(10);
 
-- [url-mapper-rs](https://github.com/JasonkayZK/rust-learn/tree/url-mapper-rs)
+    println!(
+        "sum is {} where overflow {} occur",
+        result,
+        if overflowed { "did" } else { "did not" },
+    );
+}
+```
 
-Learning Step:
+这些函数等同于 `wrapping_`，除了返回值会多一个 `bool` 以指明是否有溢出产生；
 
-- [Part I : Configuration](https://github.com/JasonkayZK/rust-learn/commit/12b88b1b5f5e02141ff90716feefea834817c34b)
-- [Part II : Database Setup](https://github.com/JasonkayZK/rust-learn/commit/89327a61a4afda4e2fb9f55171889ee7fa205de5)
-- [Part III - Database Manager: add mapper & tokio-async](https://github.com/JasonkayZK/rust-learn/commit/51120a38865911aa19a5fd4b093d077a40e95cd0)
-- [Part IV: Basic Server & log tracing](https://github.com/JasonkayZK/rust-learn/commit/75267288ec824cd9b65f84245e14b37a9b4d5b4c)
-- [Part V: Server and Database Manager communication](https://github.com/JasonkayZK/rust-learn/commit/cefc2ad7639c8359719cb639b9351c16db9e19d1)
-- [Part VI - UrlMap CRUD API](https://github.com/JasonkayZK/rust-learn/commit/d77521b4c39ca953ef51cc75065f23a487ba6b12)
-- [Part VII - Auth Middleware](https://github.com/JasonkayZK/rust-learn/commit/2da0d7d7ef20cf54bf4d01f4cc927e29ca5a58ea)
-- [Part VIII - Containerization](https://github.com/JasonkayZK/rust-learn/commit/5d5cebcf69dccb809afb46b74dd6479991e511ae)
-- [Part IX - Handling Signals & Deploying to Kubernetes](https://github.com/JasonkayZK/rust-learn/commit/03d3a5c76ad168da2ac3bd850e18bde6780d747f)
-- [Part X - Frontend using Tera](https://github.com/JasonkayZK/rust-learn/commit/ad3828f69af89ea25092d8319bb6099cc357966f)
-- [Part XI - React Front-End](https://github.com/JasonkayZK/rust-learn/commit/bdb21c2bff6ead55ba55554a51e0223e76453c60)
-
-### algorithm
-
-Project Space:
-
-- [algorithm](https://github.com/JasonkayZK/rust-learn/tree/algorithm)
-    - [sorting](https://github.com/JasonkayZK/rust-learn/tree/algorithm/algorithms/src/sorting)
-        - [bubble_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/bubble_sort.rs)
-        - [insertion_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/insertion_sort.rs)
-        - [merge_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/merge_sort.rs)
-        - [quick_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/quick_sort.rs)
-        - [selection_sort.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/algorithms/src/sorting/selection_sort.rs)
-- [collection](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection)
-    - [list](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/list)
-        - [vector.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/vector.rs)
-        - [linked_list.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/list/linked_list.rs)
-    - [tree](https://github.com/JasonkayZK/rust-learn/tree/algorithm/collection/src/tree)
-        - [binary_search_tree.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/collection/src/tree/binary_search_tree.rs)
-- [concurrency](https://github.com/JasonkayZK/rust-learn/tree/algorithm/concurrency)
-    - [my_arc.rs](https://github.com/JasonkayZK/rust-learn/blob/algorithm/concurrency/src/my_arc.rs)
-
-Learning Step:
-
-Not Yet!
+例如：在实现模拟器时可能特别有用，因为许多 CPU 有一个标志，且必须在指令导致溢出时设置；
 
 <br/>
 
-## **More Info**
+### **`checked_`系列函数：**
 
-- https://rust.cc/
-- https://wiki.rust-china.org/
+examples/1_opt.rs
+
+有时我们不想回绕值，而是将溢出作为一种特殊情况处理。可以通过 **`checked_`** 达到这一效果：
+
+```rust
+fn checked_demo() {
+    match (100_u8).checked_add(200) {
+        Some(result) => println!("{result}"),
+        None => panic!("overflowed!"),
+    }
+}
+```
+
+<br/>
+
+### **`saturating_`系列函数：**
+
+examples/1_opt.rs
+
+另一种选择是在**溢出时饱合（saturating）**，而非回绕（即到达最大值或最小时，保持该值）：
+
+```rust
+fn saturating_demo() {
+    println!("{}", (-32768_i16).saturating_sub(10)); // -32768
+    println!("{}", (200_u8).saturating_add(100));    // 255
+}
+```
+
+<br/>
+
+### **执行额外开销**
+
+你可能会担心，每当想执行基本的运算时，多余的函数调用会减慢代码的执行速度；实际上 Rust 可以优化掉多余的函数调用；
+
+我们可以通过使用 [`cargo-show-asm`](https://crates.io/crates/cargo-show-asm) 来查看某个函数编译后的汇编指令；
+
+先看看普通的加法，和编译后的汇编：
+
+```
+pub fn addition(x: u8, y: u8) -> u8 {
+    x + y
+}
+
+$ cargo asm overflow_example::addition --simplify
+
+    Finished release [optimized] target(s) in 0.00s
+
+overflow_example::addition:
+
+    lea eax, [rsi + rdi]
+    ret
+```
+
+编译的结果是单条 `lea` 指令。再来看看 `wrapping_add`：
+
+```
+pub fn addition(x: u8, y: u8) -> u8 {
+    x.wrapping_add(y)
+}
+
+$ cargo asm overflow_example::addition --simplify
+
+    Finished release [optimized] target(s) in 0.00s
+
+overflow_example::addition:
+
+    lea eax, [rsi + rdi]
+    ret
+```
+
+正如我们期望的，编译的结果相同：`wrapping_add` 的调用已经被优化！
+
+<br/>
+
+## **包装类型**
+
+在某些场景中，有许多地方都可能发生整数溢出，那么上述方法就会显得有些冗长，很多时候还容易忘记处理整数溢出；
+
+Rust 也提供了 `Wrapping<T>` 包装类型，这种类型允许使用正常的算术操作符，同时确保在整数溢出时自动回绕！
+
+例如：
+
+examples/2_warpping.rs
+
+```rust
+use std::num::Wrapping;
+
+fn main() {
+    let mut x = Wrapping(125_u8);
+
+    println!("{}", x + Wrapping(200)); // 69
+    println!("{}", x - Wrapping(200)); // 181
+
+    // 如果我们同时更改变量 x, 那么可以直接使用基本数据类型, 不用再套一层
+    // x 现在为 113
+    x *= 5;
+    println!("{}", x);
+
+    // 错误! 注意 - 我们只可以在有赋值操作时使用基本数据类型
+    // (如在使用 += -= 等操作符时)
+    // x / 5;
+}
+```
+
+这比在每个运算时都使用 `wrapping_` 函数显得更清晰！
+
+也有一个类似的 `Saturating<T>`，和 `Wrapping<T>` 类似，但在溢出时饱合而非回绕；
+
+>   **`Saturating<T>` 已于 2023 年 11 月发布的 Rust 1.74.0 中稳定：[#115477**](https://github.com/rust-lang/rust/pull/115477/)
