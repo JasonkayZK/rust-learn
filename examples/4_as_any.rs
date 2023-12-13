@@ -20,6 +20,6 @@ fn main() {
     // println!("age: {}", x.downcast_ref::<Test>().unwrap().age);
     println!("age: {}", (*x).downcast_ref::<Test>().unwrap().age);
 
-    let y: &dyn Custom = &Test { age: 2};
+    let y: &dyn Custom = &Test { age: 2 };
     println!("age: {}", y.downcast_ref::<Test>().unwrap().age)
 }

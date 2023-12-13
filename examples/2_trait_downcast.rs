@@ -28,5 +28,8 @@ impl Custom for Test {
 fn main() {
     let test = Test { age: 1 };
     let custom: Box<dyn Custom> = Box::new(test);
-    println!("age: {}", custom.as_any().downcast_ref::<Test>().unwrap().age)
+    println!(
+        "age: {}",
+        custom.as_any().downcast_ref::<Test>().unwrap().age
+    )
 }

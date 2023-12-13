@@ -67,7 +67,10 @@ fn main() {
             println!("age: {}", any_item.downcast_ref::<Test1>().unwrap().age)
         }
         if any_item.type_id() == TypeId::of::<Test2>() {
-            println!("salary: {}", any_item.downcast_ref::<Test2>().unwrap().salary)
+            println!(
+                "salary: {}",
+                any_item.downcast_ref::<Test2>().unwrap().salary
+            )
         }
     }
 }

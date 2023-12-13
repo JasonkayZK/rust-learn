@@ -36,7 +36,9 @@ fn get_type_name<T>(_: &T) -> String {
 }
 
 fn main() {
-    let p = Person { name: "John".to_string() };
+    let p = Person {
+        name: "John".to_string(),
+    };
     assert!(!is_string(&p));
     assert!(is_string(&p.name));
 
