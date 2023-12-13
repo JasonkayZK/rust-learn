@@ -10,3 +10,6 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
+
+[dev-dependencies]
+boost-rs = { version = "0.0.9", features = ["types"] }
