@@ -206,4 +206,4 @@ fn main() {
 
 也有一个类似的 `Saturating<T>`，和 `Wrapping<T>` 类似，但在溢出时饱合而非回绕；
 
->   **`Saturating<T>` 已于 2023 年 11 月发布的 Rust 1.74.0 中稳定：[#115477**](https://github.com/rust-lang/rust/pull/115477/)
+>   **`Saturating<T>` 已于 2023 年 11 月发布的 Rust 1.74.0 中稳定：[#115477](https://github.com/rust-lang/rust/pull/115477/)**
