@@ -129,6 +129,7 @@ Hello, world!
 | [automerge](https://github.com/JasonkayZK/rust-learn/tree/automerge) | 2023-09-30                                | A repo to learn how to use [autosurgeon](https://github.com/automerge/autosurgeon). |                                                              |
 | [p2panda-demo](https://github.com/JasonkayZK/rust-learn/tree/p2panda-demo) | 2023-11-12                                | A demo to show how to use [p2panda](https://github.com/p2panda/p2panda/tree/main) to create a local-first application. |                                                              |
 | [global-vars](https://github.com/JasonkayZK/rust-learn/tree/global-vars) | 2023-11-27                                | A branch to show how to define a global variable in Rust.    | [《Rust中创建全局变量》](https://jasonkayzk.github.io/2023/11/27/Rust中创建全局变量/) |
+| [overflow](https://github.com/JasonkayZK/rust-learn/tree/overflow) | 2023-12-13                                | A branch to show how to handle arithmetic overflow           | [《在Rust中处理整数溢出》](https://jasonkayzk.github.io/2023/12/13/在Rust中处理整数溢出/) |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
