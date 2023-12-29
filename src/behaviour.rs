@@ -1,23 +1,22 @@
-use libp2p::floodsub::{Floodsub, FloodsubEvent};
-use libp2p::mdns;
+use libp2p::{gossipsub, mdns};
 use libp2p::swarm::NetworkBehaviour;
 
 #[derive(NetworkBehaviour)]
 #[behaviour(to_swarm = "RecipeBehaviourEvent")]
 pub struct RecipeBehaviour {
-    pub(crate) flood_sub: Floodsub,
+    pub(crate) gossip: gossipsub::Behaviour,
     pub(crate) mdns: mdns::tokio::Behaviour,
 }
 
 #[derive(Debug)]
 pub enum RecipeBehaviourEvent {
-    Floodsub(FloodsubEvent),
+    Gossip(gossipsub::Event),
     Mdns(mdns::Event),
 }
 
-impl From<FloodsubEvent> for RecipeBehaviourEvent {
-    fn from(event: FloodsubEvent) -> RecipeBehaviourEvent {
-        RecipeBehaviourEvent::Floodsub(event)
+impl From<gossipsub::Event> for RecipeBehaviourEvent {
+    fn from(event: gossipsub::Event) -> RecipeBehaviourEvent {
+        RecipeBehaviourEvent::Gossip(event)
     }
 }
 

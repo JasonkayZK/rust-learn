@@ -2,8 +2,8 @@ use std::env;
 use std::error::Error;
 use std::time::Duration;
 
-use libp2p::floodsub::Floodsub;
-use libp2p::{mdns, noise, tcp, yamux, Swarm};
+use libp2p::{gossipsub, mdns, noise, Swarm, tcp, yamux};
+use libp2p::gossipsub::{Config, MessageAuthenticity};
 use log::{error, info};
 use tokio::io::AsyncBufReadExt;
 use tokio::sync::mpsc;
@@ -11,8 +11,9 @@ use tokio::sync::mpsc;
 use crate::behaviour::RecipeBehaviour;
 use crate::consts::{KEYS, PEER_ID, TOPIC};
 use crate::dir::init_data;
-use crate::handlers::{handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes, handle_publish_recipe, handle_swarm_event};
+use crate::handlers::{handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes, handle_publish_recipe};
 use crate::models::EventType;
+use crate::swarm::handle_swarm_event;
 
 mod behaviour;
 mod consts;
@@ -21,6 +22,7 @@ mod models;
 mod dir;
 mod sync;
 mod storage;
+mod swarm;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -38,7 +40,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             yamux::Config::default,
         )?
         .with_behaviour(|_key| RecipeBehaviour {
-            flood_sub: Floodsub::new(*PEER_ID),
+            gossip: gossipsub::Behaviour::new(MessageAuthenticity::Signed(KEYS.clone()), Config::default()).unwrap(),
             mdns: mdns::tokio::Behaviour::new(mdns::Config::default(), KEYS.public().to_peer_id())
                 .expect("can create mdns"),
         })?
@@ -50,9 +52,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             .parse()
             .expect("can get a local socket"),
     )
-    .expect("swarm can be started");
+        .expect("swarm can be started");
 
-    swarm.behaviour_mut().flood_sub.subscribe(TOPIC.clone());
+    swarm.behaviour_mut().gossip.subscribe(&TOPIC.clone()).unwrap();
 
     let (response_sender, mut response_rcv) = mpsc::unbounded_channel();
     let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
@@ -71,8 +73,8 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     let json = serde_json::to_string(&resp).expect("can jsonify response");
                     swarm
                         .behaviour_mut()
-                        .flood_sub
-                        .publish(TOPIC.clone(), json.as_bytes());
+                        .gossip
+                        .publish(TOPIC.clone(), json.as_bytes()).unwrap();
                 }
                 EventType::Input(line) => match line.as_str() {
                     "ls p" => handle_list_peers(&mut swarm).await,

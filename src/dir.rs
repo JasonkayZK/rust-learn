@@ -4,11 +4,13 @@ use std::path::PathBuf;
 
 use log::info;
 
-use crate::consts::STORAGE_FILE_NAME;
+use crate::consts::{STORAGE_FILE_NAME, SYNC_LOG_FILE_NAME};
 
 pub fn init_data() {
-    // Base data directory
+    // Create data directory
     fs::create_dir_all(base_dir()).unwrap();
+    fs::create_dir_all(op_log_dir()).unwrap();
+    fs::create_dir_all(sync_log_dir()).unwrap();
 
     // Recipe data
     let data_file = data_file();
@@ -28,6 +30,18 @@ pub fn base_dir() -> PathBuf {
     PathBuf::from(format!("./data/{}", "test"))
 }
 
+pub fn op_log_dir() -> PathBuf {
+    base_dir().join("op_log")
+}
+
+pub fn sync_log_dir() -> PathBuf {
+    base_dir().join("sync_log")
+}
+
 pub fn data_file() -> PathBuf {
     base_dir().join(STORAGE_FILE_NAME)
+}
+
+pub fn sync_log_file() -> PathBuf {
+    sync_log_dir().join(SYNC_LOG_FILE_NAME)
 }

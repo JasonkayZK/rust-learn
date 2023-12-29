@@ -3,17 +3,12 @@ use std::collections::HashSet;
 use std::hash::{Hash, Hasher};
 
 use anyhow::Result;
-use libp2p::floodsub::FloodsubEvent;
-use libp2p::futures::StreamExt;
-use libp2p::mdns::Event;
 use libp2p::Swarm;
-use libp2p::swarm::SwarmEvent;
-use log::{debug, error, info};
-use tokio::sync::mpsc;
+use log::{error, info};
 
-use crate::behaviour::{RecipeBehaviour, RecipeBehaviourEvent};
-use crate::consts::{PEER_ID, TOPIC};
-use crate::models::{ListMode, ListRequest, ListResponse, Recipe};
+use crate::behaviour::RecipeBehaviour;
+use crate::consts::TOPIC;
+use crate::models::{ListMode, ListRequest, Recipe};
 use crate::storage::{read_local_recipes, write_local_recipes};
 use crate::sync::models::OpEnum;
 use crate::sync::oplog::OpLogHandler;
@@ -133,8 +128,8 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
             let json = serde_json::to_string(&req).expect("can jsonify request");
             swarm
                 .behaviour_mut()
-                .flood_sub
-                .publish(TOPIC.clone(), json.as_bytes());
+                .gossip
+                .publish(TOPIC.clone(), json.as_bytes()).unwrap();
         }
         Some(recipes_peer_id) => {
             let req = ListRequest {
@@ -143,8 +138,8 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
             let json = serde_json::to_string(&req).expect("can jsonify request");
             swarm
                 .behaviour_mut()
-                .flood_sub
-                .publish(TOPIC.clone(), json.as_bytes());
+                .gossip
+                .publish(TOPIC.clone(), json.as_bytes()).unwrap();
         }
         None => {
             match read_local_recipes().await {
@@ -155,92 +150,6 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
                 Err(e) => error!("error fetching local recipes: {}", e),
             };
         }
-    };
-}
-
-pub async fn handle_swarm_event(
-    response_sender: mpsc::UnboundedSender<ListResponse>,
-    swarm: &mut Swarm<RecipeBehaviour>,
-) {
-    let event = swarm.select_next_some().await;
-    info!("Income swarm Event: {:?}", event);
-
-    match event {
-        SwarmEvent::Behaviour(recipe_behaviours) => match recipe_behaviours {
-            RecipeBehaviourEvent::Floodsub(flood_sub_event) => match flood_sub_event {
-                FloodsubEvent::Message(msg) => {
-                    if let Ok(resp) = serde_json::from_slice::<ListResponse>(&msg.data) {
-                        if resp.receiver == PEER_ID.to_string() {
-                            info!("Response from {}:", msg.source);
-                            resp.data.iter().for_each(|r| info!("{:?}", r));
-                        }
-                    } else if let Ok(req) = serde_json::from_slice::<ListRequest>(&msg.data) {
-                        match req.mode {
-                            ListMode::All => {
-                                info!("Received ALL req: {:?} from {:?}", req, msg.source);
-                                respond_with_public_recipes(
-                                    response_sender.clone(),
-                                    msg.source.to_string(),
-                                );
-                            }
-                            ListMode::One(ref peer_id) => {
-                                if peer_id == &PEER_ID.to_string() {
-                                    info!("Received req: {:?} from {:?}", req, msg.source);
-                                    respond_with_public_recipes(
-                                        response_sender.clone(),
-                                        msg.source.to_string(),
-                                    );
-                                }
-                            }
-                        }
-                    }
-                }
-                FloodsubEvent::Subscribed { .. } => {}
-                FloodsubEvent::Unsubscribed { .. } => {}
-            },
-            RecipeBehaviourEvent::Mdns(mdns_event) => match mdns_event {
-                Event::Discovered(discovered_list) => {
-                    let behavior_mut = swarm.behaviour_mut();
-                    for (peer, _addr) in discovered_list {
-                        behavior_mut.flood_sub.add_node_to_partial_view(peer);
-                    }
-                }
-                Event::Expired(expired_list) => {
-                    let behavior_mut = swarm.behaviour_mut();
-                    for (peer, _addr) in expired_list {
-                        if !behavior_mut.mdns.has_node(&peer) {
-                            behavior_mut.flood_sub.remove_node_from_partial_view(&peer);
-                        }
-                    }
-                }
-            },
-        },
-        SwarmEvent::ConnectionEstablished {
-            peer_id,
-            connection_id,
-            endpoint,
-            num_established,
-            ..
-        } => {
-            debug!("[Connection established] peer_id: {}, connection_id: {}, endpoint: {:?}, num_established: {:?}", peer_id, connection_id, endpoint, num_established);
-        }
-        SwarmEvent::ConnectionClosed {
-            peer_id,
-            connection_id,
-            endpoint,
-            num_established,
-            ..
-        } => {
-            debug!("[Connection closed] peer_id: {}, connection_id: {}, endpoint: {:?}, num_established: {:?}", peer_id, connection_id, endpoint, num_established);
-        }
-        SwarmEvent::IncomingConnection { .. } => {}
-        SwarmEvent::IncomingConnectionError { .. } => {}
-        SwarmEvent::OutgoingConnectionError { .. } => {}
-        SwarmEvent::NewListenAddr { .. } => {}
-        SwarmEvent::ExpiredListenAddr { .. } => {}
-        SwarmEvent::ListenerClosed { .. } => {}
-        SwarmEvent::ListenerError { .. } => {}
-        SwarmEvent::Dialing { .. } => {}
     };
 }
 
@@ -300,22 +209,4 @@ async fn create_new_recipe(name: &str, ingredients: &str, instructions: &str) ->
     info!("Instructions:: {}", instructions);
 
     Ok(recipe)
-}
-
-fn respond_with_public_recipes(sender: mpsc::UnboundedSender<ListResponse>, receiver: String) {
-    tokio::spawn(async move {
-        match read_local_recipes().await {
-            Ok(recipes) => {
-                let resp = ListResponse {
-                    mode: ListMode::All,
-                    receiver,
-                    data: recipes.into_iter().filter(|r| r.shared).collect(),
-                };
-                if let Err(e) = sender.send(resp) {
-                    error!("error sending response via channel, {}", e);
-                }
-            }
-            Err(e) => error!("error fetching local recipes to answer ALL request, {}", e),
-        }
-    });
 }

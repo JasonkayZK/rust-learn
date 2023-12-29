@@ -11,7 +11,7 @@ repository = "https://github.com/JasonkayZK/rust-learn/"
 authors = ["Jasonkay jasonkayzk@gmail.com"]
 
 [dependencies]
-libp2p = { version = "0.52", features = ["tokio", "floodsub", "noise", "tcp", "yamux", "mdns", "macros", "identify"] }
+libp2p = { version = "0.52", features = ["tokio", "gossipsub", "noise", "tcp", "yamux", "mdns", "macros", "identify"] }
 tokio = { version = "1", features = ["io-util", "io-std", "macros", "rt", "rt-multi-thread", "fs", "time", "sync"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
@@ -23,3 +23,4 @@ hypercore = { version = "0.12.1", features = ["sparse"] }
 random-access-disk = { version = "3.0.0", features = ["libc", "sparse"] }
 roaring = { version = "0.10.2", features = ["serde"] }
 uhlc = "0.6.3"
+redb = "1.4.0"

@@ -5,7 +5,7 @@ use libp2p::futures::executor::block_on;
 use random_access_disk::RandomAccessDisk;
 use tokio::sync::Mutex;
 
-use crate::dir::base_dir;
+use crate::dir::op_log_dir;
 
 static OPLOG_HANDLER: OnceLock<Mutex<OpLogHandler>> = OnceLock::new();
 
@@ -17,7 +17,7 @@ impl OpLogHandler {
     async fn global() -> &'static Mutex<Self> {
         OPLOG_HANDLER.get_or_init(|| {
             block_on(async {
-                let storage = Storage::new_disk(&base_dir(), false).await.unwrap();
+                let storage = Storage::new_disk(&op_log_dir(), false).await.unwrap();
                 let core = HypercoreBuilder::new(storage).build().await.unwrap();
                 Mutex::new(Self {
                     core
