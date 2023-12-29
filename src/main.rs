@@ -10,16 +10,16 @@ use tokio::sync::mpsc;
 
 use crate::behaviour::RecipeBehaviour;
 use crate::consts::{KEYS, PEER_ID, TOPIC};
-use crate::handlers::{
-    handle_create_recipe, handle_list_peers, handle_list_recipes, handle_publish_recipe,
-    handle_swarm_event,
-};
+use crate::dir::init_data;
+use crate::handlers::{handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes, handle_publish_recipe, handle_swarm_event};
 use crate::models::EventType;
 
 mod behaviour;
 mod consts;
 mod handlers;
 mod models;
+mod dir;
+mod sync;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     pretty_env_logger::init();
 
     info!("Peer Id: {}", PEER_ID.clone());
-    let (response_sender, mut response_rcv) = mpsc::unbounded_channel();
+    init_data();
 
     let mut swarm = libp2p::SwarmBuilder::with_existing_identity(KEYS.clone())
         .with_tokio()
@@ -53,6 +53,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     swarm.behaviour_mut().flood_sub.subscribe(TOPIC.clone());
 
+    let (response_sender, mut response_rcv) = mpsc::unbounded_channel();
     let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
     loop {
         let evt = {
@@ -75,6 +76,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 EventType::Input(line) => match line.as_str() {
                     "ls p" => handle_list_peers(&mut swarm).await,
                     cmd if cmd.starts_with("create r") => handle_create_recipe(cmd).await,
+                    cmd if cmd.starts_with("delete r") => handle_delete_recipe(cmd).await,
                     cmd if cmd.starts_with("publish r") => handle_publish_recipe(cmd).await,
                     cmd if cmd.starts_with("ls r") => handle_list_recipes(cmd, &mut swarm).await,
                     _ => error!("unknown command: {:?}", line),

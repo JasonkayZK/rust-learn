@@ -1,8 +1,8 @@
-use libp2p::floodsub::Topic;
 use libp2p::{identity, PeerId};
+use libp2p::floodsub::Topic;
 use once_cell::sync::Lazy;
 
-pub const STORAGE_FILE_PATH: &str = "./recipes.json";
+pub const STORAGE_FILE_NAME: &str = "recipes.json";
 
 /// Key pair enables us to communicate securely with the rest of the network, making sure no one can impersonate
 pub static KEYS: Lazy<identity::Keypair> = Lazy::new(identity::Keypair::generate_ed25519);

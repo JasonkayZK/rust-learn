@@ -19,3 +19,7 @@ once_cell = "1.5"
 log = "0.4"
 pretty_env_logger = "0.4"
 anyhow = "1.0.77"
+hypercore = { version = "0.12.1", features = ["sparse"] }
+random-access-disk = { version = "3.0.0", features = ["libc", "sparse"] }
+roaring = { version = "0.10.2", features = ["serde"] }
+uhlc = "0.6.3"

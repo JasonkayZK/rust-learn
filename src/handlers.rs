@@ -4,14 +4,15 @@ use anyhow::Result;
 use libp2p::floodsub::FloodsubEvent;
 use libp2p::futures::StreamExt;
 use libp2p::mdns::Event;
-use libp2p::swarm::SwarmEvent;
 use libp2p::Swarm;
+use libp2p::swarm::SwarmEvent;
 use log::{debug, error, info};
 use tokio::fs;
 use tokio::sync::mpsc;
 
 use crate::behaviour::{RecipeBehaviour, RecipeBehaviourEvent};
-use crate::consts::{PEER_ID, STORAGE_FILE_PATH, TOPIC};
+use crate::consts::{PEER_ID, TOPIC};
+use crate::dir::data_file;
 use crate::models::{ListMode, ListRequest, ListResponse, Recipe};
 
 pub async fn handle_list_peers(swarm: &mut Swarm<RecipeBehaviour>) {
@@ -30,14 +31,30 @@ pub async fn handle_create_recipe(cmd: &str) {
         let elements: Vec<&str> = rest.split('|').collect();
         if elements.len() < 3 {
             info!("too few arguments - Format: name|ingredients|instructions");
-        } else {
-            let name = elements.first().expect("name is there");
-            let ingredients = elements.get(1).expect("ingredients is there");
-            let instructions = elements.get(2).expect("instructions is there");
-            if let Err(e) = create_new_recipe(name, ingredients, instructions).await {
-                error!("error creating recipe: {}", e);
-            };
+            return;
         }
+
+        let name = elements.first().expect("name is there");
+        let ingredients = elements.get(1).expect("ingredients is there");
+        let instructions = elements.get(2).expect("instructions is there");
+        if let Err(e) = create_new_recipe(name, ingredients, instructions).await {
+            error!("error creating recipe: {}", e);
+        };
+    }
+}
+
+pub async fn handle_delete_recipe(cmd: &str) {
+    if let Some(rest) = cmd.strip_prefix("delete r") {
+        match rest.trim().parse::<usize>() {
+            Ok(id) => {
+                if let Err(e) = delete_recipes(id).await {
+                    info!("error delete recipe with id {}, {}", id, e)
+                } else {
+                    info!("Deleted Recipe with id: {}", id);
+                }
+            }
+            Err(e) => error!("invalid id: {}, {}", rest.trim(), e),
+        };
     }
 }
 
@@ -187,6 +204,13 @@ async fn publish_recipe(id: usize) -> Result<()> {
     Ok(())
 }
 
+async fn delete_recipes(id: usize) -> Result<()> {
+    let mut local_recipes = read_local_recipes().await?;
+    local_recipes.retain(|r| r.id != id);
+    write_local_recipes(&local_recipes).await?;
+    Ok(())
+}
+
 async fn create_new_recipe(name: &str, ingredients: &str, instructions: &str) -> Result<()> {
     let mut local_recipes = read_local_recipes().await?;
     let new_id = match local_recipes.iter().max_by_key(|r| r.id) {
@@ -212,12 +236,12 @@ async fn create_new_recipe(name: &str, ingredients: &str, instructions: &str) ->
 
 async fn write_local_recipes(recipes: &Vec<Recipe>) -> Result<()> {
     let json = serde_json::to_string(&recipes)?;
-    fs::write(STORAGE_FILE_PATH, &json).await?;
+    fs::write(data_file(), &json).await?;
     Ok(())
 }
 
 async fn read_local_recipes() -> Result<Vec<Recipe>> {
-    let content = fs::read(STORAGE_FILE_PATH).await?;
+    let content = fs::read(data_file()).await?;
     let result = serde_json::from_slice(&content)?;
     Ok(result)
 }

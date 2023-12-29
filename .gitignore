@@ -20,3 +20,4 @@ Cargo.lock
 **/*.rs.bk
 
 !/*/Cargo.lock
+data
