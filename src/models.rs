@@ -1,7 +1,9 @@
+use std::hash::Hash;
+
 use serde::{Deserialize, Serialize};
 
 /// The recipe data for cook
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct Recipe {
     pub id: usize,
     pub name: String,

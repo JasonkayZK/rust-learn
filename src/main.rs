@@ -20,6 +20,7 @@ mod handlers;
 mod models;
 mod dir;
 mod sync;
+mod storage;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
