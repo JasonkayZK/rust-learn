@@ -28,7 +28,6 @@ impl GlobalId {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
     use crate::id_generator::GlobalId;
 
     #[tokio::test]

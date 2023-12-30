@@ -1,3 +1,4 @@
+use std::convert::TryFrom;
 use std::str::FromStr;
 
 use chrono::Local;
@@ -9,7 +10,8 @@ use tokio::sync::mpsc;
 use crate::behaviour::RecipeBehaviour;
 use crate::consts::{INIT_SYNC_STR, PEER_ID, RECIPE_TOPIC};
 use crate::models::{InitSyncMessage, ListMode, ListRequest, ListResponse, SyncDataRequest, SyncDataResponse, SyncLogData};
-use crate::storage::{merge_recipes, read_local_recipes};
+use crate::storage::{merge_diff, merge_recipes, read_local_recipes};
+use crate::sync::models::OpEnum;
 use crate::sync::progress_manager::{ProgressManager, SyncStatus};
 
 pub(crate) async fn handle_message(swarm: &mut Swarm<RecipeBehaviour>, propagation_source: PeerId, msg: Message, response_sender: mpsc::UnboundedSender<ListResponse>) {
@@ -82,6 +84,20 @@ pub(crate) async fn handle_message(swarm: &mut Swarm<RecipeBehaviour>, propagati
             }
         } else if let Ok(sync_log_message) = serde_json::from_slice::<SyncLogData>(&msg.data) {
             // When received SyncLogData message, we compute the whole log, and then query for the data
+
+            // Step 1: Compute diff
+            let logs: Vec<Option<OpEnum>> = sync_log_message.logs.into_iter().map(|item| {
+                item.map(|x| OpEnum::try_from(x).unwrap())
+            }).collect();
+            let query_ids = merge_diff(logs).await.unwrap();
+
+            // Step 2: Send sync data request
+            let req = SyncDataRequest {
+                recipe_ids: query_ids,
+                progress_idx: sync_log_message.progress_idx,
+            };
+            let json = serde_json::to_string(&req).expect("can jsonify request");
+            swarm.behaviour_mut().gossip.publish(msg.topic.clone(), json).unwrap();
         } else if let Ok(sync_data_req) = serde_json::from_slice::<SyncDataRequest>(&msg.data) {
             // When received SyncDataRequest, we send all data correspond to the ids, then update sync table and remove the status
 

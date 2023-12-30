@@ -45,7 +45,7 @@ pub struct InitSyncMessage {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncLogData {
-    logs: Vec<Option<Vec<u8>>>,
+    pub logs: Vec<Option<Vec<u8>>>,
     pub progress_idx: u64,
 }
 

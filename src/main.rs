@@ -1,4 +1,4 @@
-use std::env;
+use std::{env, u32};
 use std::error::Error;
 use std::time::Duration;
 
@@ -45,17 +45,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
             gossip: gossipsub::Behaviour::new(
                 MessageAuthenticity::Signed(KEYS.clone()),
                 ConfigBuilder::default()
-                    .idle_timeout(Duration::from_secs(u64::MAX))
+                    .gossip_factor(1.0)
+                    .idle_timeout(Duration::from_nanos(0))
+                    .flood_publish(true)
+                    .do_px()
+                    .support_floodsub()
+                    .heartbeat_interval(Duration::from_secs(10)) // This is set to aid debugging by not cluttering the log space
+                    .validation_mode(gossipsub::ValidationMode::None) // This sets the kind of message validation. The default is Strict (enforce message signing)
                     .build().unwrap(),
             ).unwrap(),
             mdns: mdns::tokio::Behaviour::new(mdns::Config::default(), KEYS.public().to_peer_id())
                 .expect("can create mdns"),
         })?
-        .with_swarm_config(|cfg| cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX)))
         .build();
 
-    swarm.behaviour_mut().gossip.subscribe(&RECIPE_TOPIC.clone()).unwrap();
     swarm.behaviour_mut().gossip.subscribe(&INIT_SYNC_TOPIC.clone()).unwrap();
+    swarm.behaviour_mut().gossip.subscribe(&RECIPE_TOPIC.clone()).unwrap();
     Swarm::listen_on(
         &mut swarm,
         "/ip4/0.0.0.0/tcp/0"

@@ -4,7 +4,7 @@ use std::path::PathBuf;
 
 use log::info;
 
-use crate::consts::{STORAGE_FILE_NAME, SYNC_LOG_FILE_NAME};
+use crate::consts::{PEER_ID, STORAGE_FILE_NAME, SYNC_LOG_FILE_NAME};
 
 pub fn init_data() {
     // Create data directory
@@ -26,8 +26,8 @@ pub fn init_data() {
 }
 
 pub fn base_dir() -> PathBuf {
-    // PathBuf::from(format!("./data/{}", &*PEER_ID))
-    PathBuf::from(format!("./data/{}", "test"))
+    PathBuf::from(format!("./data/{}", &*PEER_ID))
+    // PathBuf::from(format!("./data/{}", "test"))
 }
 
 pub fn op_log_dir() -> PathBuf {
@@ -45,3 +45,5 @@ pub fn data_file() -> PathBuf {
 pub fn sync_log_file() -> PathBuf {
     sync_log_dir().join(SYNC_LOG_FILE_NAME)
 }
+
+// create r name|recipe_ingredients|recipe_instruction

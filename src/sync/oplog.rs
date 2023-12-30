@@ -31,11 +31,6 @@ impl OpLogHandler {
         core.append(data).await
     }
 
-    pub async fn get(idx: u64) -> Result<Option<Vec<u8>>, HypercoreError> {
-        let core = &mut Self::global().await.lock().await.core;
-        core.get(idx).await
-    }
-
     pub async fn get_batch(indexes: &[u64]) -> Result<Vec<Option<Vec<u8>>>, HypercoreError> {
         let core = &mut Self::global().await.lock().await.core;
         let mut ret = vec![];

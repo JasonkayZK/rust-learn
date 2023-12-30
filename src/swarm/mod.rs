@@ -10,7 +10,6 @@ use crate::models::ListResponse;
 use crate::sync::progress_manager::ProgressManager;
 
 mod mdns_event;
-mod swarm_event;
 mod gossip_event;
 
 pub async fn handle_swarm_event(

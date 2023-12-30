@@ -1,6 +1,4 @@
-use std::collections::hash_map::DefaultHasher;
 use std::collections::HashSet;
-use std::hash::{Hash, Hasher};
 
 use anyhow::Result;
 use libp2p::Swarm;
@@ -48,12 +46,9 @@ pub async fn handle_create_recipe(cmd: &str) {
             Ok(recipe) => {
 
                 // Step 2: Write Log:
-                let mut hasher = DefaultHasher::new();
-                recipe.hash(&mut hasher);
-                let hash_value = hasher.finish();
                 let timestamp = GlobalClock::timestamp().await;
-                OpLogHandler::append(OpEnum::Insert(hash_value.to_string(), timestamp).to_string().as_bytes()).await.unwrap();
-                info!("Recipe create log appended: {}", hash_value);
+                OpLogHandler::append(OpEnum::Insert(recipe.id, timestamp).to_string().as_bytes()).await.unwrap();
+                info!("Recipe create log appended: {}", recipe.id);
             }
             Err(e) => {
                 error!("error creating recipe: {}", e);
@@ -71,14 +66,10 @@ pub async fn handle_delete_recipe(cmd: &str) {
                     Ok(recipe) => {
                         if let Some(recipe) = recipe {
                             info!("Deleted Recipe with id: {}", recipe.id);
-
                             // Step 2: Write Log:
-                            let mut hasher = DefaultHasher::new();
-                            recipe.hash(&mut hasher);
-                            let hash_value = hasher.finish();
                             let timestamp = GlobalClock::timestamp().await;
-                            OpLogHandler::append(OpEnum::Delete(hash_value.to_string(), timestamp).to_string().as_bytes()).await.unwrap();
-                            info!("Recipe delete log appended: {}", hash_value);
+                            OpLogHandler::append(OpEnum::Delete(recipe.id, timestamp).to_string().as_bytes()).await.unwrap();
+                            info!("Recipe delete log appended: {}", recipe.id);
                         }
                     }
                     Err(e) => {
@@ -102,15 +93,9 @@ pub async fn handle_publish_recipe(cmd: &str) {
                             info!("Published Recipe with id: {}", id);
 
                             // Step 2: Write Log:
-                            let mut hasher = DefaultHasher::new();
-                            old_recipe.hash(&mut hasher);
-                            let old_hash_value = hasher.finish().to_string();
-                            let mut hasher = DefaultHasher::new();
-                            new_recipe.hash(&mut hasher);
-                            let new_hash_value = hasher.finish().to_string();
-                            info!("Recipe update log appended: {}->{}", old_hash_value, new_hash_value);
+                            info!("Recipe update log appended: {}->{}", old_recipe.id, new_recipe.id);
                             let timestamp = GlobalClock::timestamp().await;
-                            OpLogHandler::append(OpEnum::Update(old_hash_value, new_hash_value, timestamp).to_string().as_bytes()).await.unwrap();
+                            OpLogHandler::append(OpEnum::Update(old_recipe.id, new_recipe.id, timestamp).to_string().as_bytes()).await.unwrap();
                         }
                     }
                     Err(e) => {

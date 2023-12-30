@@ -38,6 +38,12 @@ impl ProgressManager {
         PROGRESS_MANAGER.get_or_init(|| {
             block_on(async {
                 let db = Database::create(sync_log_file()).unwrap();
+                let write_txn = db.begin_write().unwrap();
+                {
+                    let mut table = write_txn.open_table(TABLE).unwrap();
+                    table.insert("init", &0).unwrap();
+                }
+                write_txn.commit().unwrap();
                 Mutex::new(Self {
                     db,
                     status_table: HashMap::new(),
