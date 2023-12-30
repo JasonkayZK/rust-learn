@@ -6,6 +6,8 @@ pub const STORAGE_FILE_NAME: &str = "recipes.json";
 
 pub const SYNC_LOG_FILE_NAME: &str = "sync.redb";
 
+pub const INIT_SYNC_STR: &str = "init-sync";
+
 /// Key pair enables us to communicate securely with the rest of the network, making sure no one can impersonate
 pub static KEYS: Lazy<identity::Keypair> = Lazy::new(identity::Keypair::generate_ed25519);
 
@@ -14,5 +16,8 @@ pub static KEYS: Lazy<identity::Keypair> = Lazy::new(identity::Keypair::generate
 /// Derive from a key pair to ensure its uniqueness
 pub static PEER_ID: Lazy<PeerId> = Lazy::new(|| PeerId::from(KEYS.public()));
 
-/// A Topic is a concept from Floodsub, which is an implementation of libp2p’s pub/sub interface
-pub static TOPIC: Lazy<IdentTopic> = Lazy::new(|| IdentTopic::new("recipes"));
+/// A Topic is a concept from Gossip, which is an implementation of libp2p’s pub/sub interface
+pub static RECIPE_TOPIC: Lazy<IdentTopic> = Lazy::new(|| IdentTopic::new("recipes"));
+
+/// A topic to announce init sync messages
+pub static INIT_SYNC_TOPIC: Lazy<IdentTopic> = Lazy::new(|| IdentTopic::new(INIT_SYNC_STR));

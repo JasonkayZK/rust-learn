@@ -1,6 +1,6 @@
 use std::sync::OnceLock;
 
-use hypercore::{AppendOutcome, Hypercore, HypercoreBuilder, HypercoreError, Storage};
+use hypercore::{AppendOutcome, Hypercore, HypercoreBuilder, HypercoreError, Info, Storage};
 use libp2p::futures::executor::block_on;
 use random_access_disk::RandomAccessDisk;
 use tokio::sync::Mutex;
@@ -34,5 +34,22 @@ impl OpLogHandler {
     pub async fn get(idx: u64) -> Result<Option<Vec<u8>>, HypercoreError> {
         let core = &mut Self::global().await.lock().await.core;
         core.get(idx).await
+    }
+
+    pub async fn get_batch(indexes: &[u64]) -> Result<Vec<Option<Vec<u8>>>, HypercoreError> {
+        let core = &mut Self::global().await.lock().await.core;
+        let mut ret = vec![];
+
+        for idx in indexes {
+            let v = core.get(*idx).await?;
+            ret.push(v);
+        }
+
+        Ok(ret)
+    }
+
+    pub async fn get_info() -> Info {
+        let core = &mut Self::global().await.lock().await.core;
+        core.info()
     }
 }

@@ -3,13 +3,13 @@ use std::error::Error;
 use std::time::Duration;
 
 use libp2p::{gossipsub, mdns, noise, Swarm, tcp, yamux};
-use libp2p::gossipsub::{Config, MessageAuthenticity};
+use libp2p::gossipsub::{ConfigBuilder, MessageAuthenticity};
 use log::{error, info};
 use tokio::io::AsyncBufReadExt;
 use tokio::sync::mpsc;
 
 use crate::behaviour::RecipeBehaviour;
-use crate::consts::{KEYS, PEER_ID, TOPIC};
+use crate::consts::{INIT_SYNC_TOPIC, KEYS, PEER_ID, RECIPE_TOPIC};
 use crate::dir::init_data;
 use crate::handlers::{handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes, handle_publish_recipe};
 use crate::models::EventType;
@@ -23,6 +23,8 @@ mod dir;
 mod sync;
 mod storage;
 mod swarm;
+mod hlc;
+mod id_generator;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -40,12 +42,20 @@ async fn main() -> Result<(), Box<dyn Error>> {
             yamux::Config::default,
         )?
         .with_behaviour(|_key| RecipeBehaviour {
-            gossip: gossipsub::Behaviour::new(MessageAuthenticity::Signed(KEYS.clone()), Config::default()).unwrap(),
+            gossip: gossipsub::Behaviour::new(
+                MessageAuthenticity::Signed(KEYS.clone()),
+                ConfigBuilder::default()
+                    .idle_timeout(Duration::from_secs(u64::MAX))
+                    .build().unwrap(),
+            ).unwrap(),
             mdns: mdns::tokio::Behaviour::new(mdns::Config::default(), KEYS.public().to_peer_id())
                 .expect("can create mdns"),
         })?
-        .with_swarm_config(|cfg| cfg.with_idle_connection_timeout(Duration::from_secs(5)))
+        .with_swarm_config(|cfg| cfg.with_idle_connection_timeout(Duration::from_secs(u64::MAX)))
         .build();
+
+    swarm.behaviour_mut().gossip.subscribe(&RECIPE_TOPIC.clone()).unwrap();
+    swarm.behaviour_mut().gossip.subscribe(&INIT_SYNC_TOPIC.clone()).unwrap();
     Swarm::listen_on(
         &mut swarm,
         "/ip4/0.0.0.0/tcp/0"
@@ -54,7 +64,6 @@ async fn main() -> Result<(), Box<dyn Error>> {
     )
         .expect("swarm can be started");
 
-    swarm.behaviour_mut().gossip.subscribe(&TOPIC.clone()).unwrap();
 
     let (response_sender, mut response_rcv) = mpsc::unbounded_channel();
     let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
@@ -74,7 +83,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                     swarm
                         .behaviour_mut()
                         .gossip
-                        .publish(TOPIC.clone(), json.as_bytes()).unwrap();
+                        .publish(RECIPE_TOPIC.clone(), json.as_bytes()).unwrap();
                 }
                 EventType::Input(line) => match line.as_str() {
                     "ls p" => handle_list_peers(&mut swarm).await,

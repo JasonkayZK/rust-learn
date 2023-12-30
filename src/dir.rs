@@ -20,7 +20,7 @@ pub fn init_data() {
         // 文件不存在，创建新文件
         let mut file = fs::File::create(&data_file).unwrap();
         // 将空数组内容写入文件
-        file.write_all("[]".as_bytes()).unwrap();
+        file.write_all("{}".as_bytes()).unwrap();
         info!("数据文件创建成功");
     }
 }

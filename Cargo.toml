@@ -24,3 +24,5 @@ random-access-disk = { version = "3.0.0", features = ["libc", "sparse"] }
 roaring = { version = "0.10.2", features = ["serde"] }
 uhlc = "0.6.3"
 redb = "1.4.0"
+chrono = "0.4.31"
+sonyflake = "0.2.0"

@@ -7,7 +7,9 @@ use libp2p::Swarm;
 use log::{error, info};
 
 use crate::behaviour::RecipeBehaviour;
-use crate::consts::TOPIC;
+use crate::consts::RECIPE_TOPIC;
+use crate::hlc::GlobalClock;
+use crate::id_generator::GlobalId;
 use crate::models::{ListMode, ListRequest, Recipe};
 use crate::storage::{read_local_recipes, write_local_recipes};
 use crate::sync::models::OpEnum;
@@ -49,7 +51,8 @@ pub async fn handle_create_recipe(cmd: &str) {
                 let mut hasher = DefaultHasher::new();
                 recipe.hash(&mut hasher);
                 let hash_value = hasher.finish();
-                OpLogHandler::append(OpEnum::Insert(hash_value.to_string()).to_string().as_bytes()).await.unwrap();
+                let timestamp = GlobalClock::timestamp().await;
+                OpLogHandler::append(OpEnum::Insert(hash_value.to_string(), timestamp).to_string().as_bytes()).await.unwrap();
                 info!("Recipe create log appended: {}", hash_value);
             }
             Err(e) => {
@@ -61,7 +64,7 @@ pub async fn handle_create_recipe(cmd: &str) {
 
 pub async fn handle_delete_recipe(cmd: &str) {
     if let Some(rest) = cmd.strip_prefix("delete r") {
-        match rest.trim().parse::<usize>() {
+        match rest.trim().parse::<u64>() {
             Ok(id) => {
                 // Step 1: Delete element
                 match delete_recipes(id).await {
@@ -73,7 +76,8 @@ pub async fn handle_delete_recipe(cmd: &str) {
                             let mut hasher = DefaultHasher::new();
                             recipe.hash(&mut hasher);
                             let hash_value = hasher.finish();
-                            OpLogHandler::append(OpEnum::Delete(hash_value.to_string()).to_string().as_bytes()).await.unwrap();
+                            let timestamp = GlobalClock::timestamp().await;
+                            OpLogHandler::append(OpEnum::Delete(hash_value.to_string(), timestamp).to_string().as_bytes()).await.unwrap();
                             info!("Recipe delete log appended: {}", hash_value);
                         }
                     }
@@ -89,7 +93,7 @@ pub async fn handle_delete_recipe(cmd: &str) {
 
 pub async fn handle_publish_recipe(cmd: &str) {
     if let Some(rest) = cmd.strip_prefix("publish r") {
-        match rest.trim().parse::<usize>() {
+        match rest.trim().parse::<u64>() {
             Ok(id) => {
                 // Step 1: Update element
                 match publish_recipe(id).await {
@@ -105,7 +109,8 @@ pub async fn handle_publish_recipe(cmd: &str) {
                             new_recipe.hash(&mut hasher);
                             let new_hash_value = hasher.finish().to_string();
                             info!("Recipe update log appended: {}->{}", old_hash_value, new_hash_value);
-                            OpLogHandler::append(OpEnum::Update(old_hash_value, new_hash_value).to_string().as_bytes()).await.unwrap();
+                            let timestamp = GlobalClock::timestamp().await;
+                            OpLogHandler::append(OpEnum::Update(old_hash_value, new_hash_value, timestamp).to_string().as_bytes()).await.unwrap();
                         }
                     }
                     Err(e) => {
@@ -129,7 +134,7 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
             swarm
                 .behaviour_mut()
                 .gossip
-                .publish(TOPIC.clone(), json.as_bytes()).unwrap();
+                .publish(RECIPE_TOPIC.clone(), json.as_bytes()).unwrap();
         }
         Some(recipes_peer_id) => {
             let req = ListRequest {
@@ -139,7 +144,7 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
             swarm
                 .behaviour_mut()
                 .gossip
-                .publish(TOPIC.clone(), json.as_bytes()).unwrap();
+                .publish(RECIPE_TOPIC.clone(), json.as_bytes()).unwrap();
         }
         None => {
             match read_local_recipes().await {
@@ -153,13 +158,14 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
     };
 }
 
-async fn publish_recipe(id: usize) -> Result<Option<(Recipe, Recipe)>> {
+async fn publish_recipe(id: u64) -> Result<Option<(Recipe, Recipe)>> {
     let mut local_recipes = read_local_recipes().await?;
     let mut ret_recipes = None;
-    for x in local_recipes.iter_mut() {
+    for (_, x) in local_recipes.iter_mut() {
         if x.id == id {
             let origin_recipe = x.clone();
             x.shared = true;
+            x.id = GlobalId::next_id().await;
             let new_recipe = x.clone();
             ret_recipes = Some((origin_recipe, new_recipe));
             break;
@@ -170,28 +176,25 @@ async fn publish_recipe(id: usize) -> Result<Option<(Recipe, Recipe)>> {
     Ok(ret_recipes)
 }
 
-async fn delete_recipes(id: usize) -> Result<Option<Recipe>> {
+async fn delete_recipes(id: u64) -> Result<Option<Recipe>> {
     let mut local_recipes = read_local_recipes().await?;
 
     let mut ret = None;
-    for x in local_recipes.iter() {
+    for (_, x) in local_recipes.iter() {
         if x.id == id {
             ret = Some(x.clone());
             break;
         }
     }
 
-    local_recipes.retain(|r| r.id != id);
+    local_recipes.retain(|_, r| r.id != id);
     write_local_recipes(&local_recipes).await?;
     Ok(ret)
 }
 
 async fn create_new_recipe(name: &str, ingredients: &str, instructions: &str) -> Result<Recipe> {
     let mut local_recipes = read_local_recipes().await?;
-    let new_id = match local_recipes.iter().max_by_key(|r| r.id) {
-        Some(v) => v.id + 1,
-        None => 0,
-    };
+    let new_id = GlobalId::next_id().await;
 
     let recipe = Recipe {
         id: new_id,
@@ -200,10 +203,11 @@ async fn create_new_recipe(name: &str, ingredients: &str, instructions: &str) ->
         instructions: instructions.to_owned(),
         shared: false,
     };
-    local_recipes.push(recipe.clone());
+    local_recipes.insert(new_id, recipe.clone());
     write_local_recipes(&local_recipes).await?;
 
     info!("Created recipe:");
+    info!("Id: {}", new_id);
     info!("Name: {}", name);
     info!("Ingredients: {}", ingredients);
     info!("Instructions:: {}", instructions);
