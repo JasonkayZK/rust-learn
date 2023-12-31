@@ -131,6 +131,7 @@ Hello, world!
 | [global-vars](https://github.com/JasonkayZK/rust-learn/tree/global-vars) | 2023-11-27                                | A branch to show how to define a global variable in Rust.    | [《Rust中创建全局变量》](https://jasonkayzk.github.io/2023/11/27/Rust中创建全局变量/) |
 | [overflow](https://github.com/JasonkayZK/rust-learn/tree/overflow) | 2023-12-13                                | A branch to show how to handle arithmetic overflow           | [《在Rust中处理整数溢出》](https://jasonkayzk.github.io/2023/12/13/在Rust中处理整数溢出/) |
 | [proj/p2p-demo](https://github.com/JasonkayZK/rust-learn/tree/proj/p2p-demo) | 2023-12-27                                | A branch to show how to use [libp2p](https://github.com/libp2p/rust-libp2p/) | [《Rust中使用libp2p》](https://jasonkayzk.github.io/2023/12/27/Rust中使用libp2p/) |
+| [proj/p2p-sync](https://github.com/JasonkayZK/rust-learn/tree/proj/p2p-sync) | 2023-12-31                                | A branch to show how to use gossip and append-log sync data in p2p network | [《使用AppendLog和Gossip在P2P网络中同步状态》](https://jasonkayzk.github.io/2023/12/31/使用AppendLog和Gossip在P2P网络中同步状态/) |
 |                                                              |                                           |                                                              |                                                              |
 
 <br/>
