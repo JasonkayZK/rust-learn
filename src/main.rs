@@ -5,7 +5,7 @@ use log::{error, info};
 use tokio::io::AsyncBufReadExt;
 use tokio::sync::mpsc;
 
-use crate::consts::{INIT_SYNC_TOPIC, PEER_ID, RECIPE_TOPIC};
+use crate::consts::{BROADCAST_OPT_TOPIC, INIT_SYNC_TOPIC, PEER_ID, RECIPE_TOPIC};
 use crate::dir::init_data;
 use crate::handlers::{
     handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes,
@@ -38,6 +38,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
         .await
         .unwrap();
     SwarmHandler::subscribe(&RECIPE_TOPIC.clone())
+        .await
+        .unwrap();
+    SwarmHandler::subscribe(&BROADCAST_OPT_TOPIC.clone())
         .await
         .unwrap();
 

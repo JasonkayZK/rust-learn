@@ -21,7 +21,7 @@ static PROGRESS_MANAGER: OnceLock<Mutex<ProgressManager>> = OnceLock::new();
 
 #[derive(Debug, Clone)]
 pub enum SyncStatus {
-    // Start timestamp
+    /// The peer's sync progress snapshot when start sync
     Start(SyncProgress),
     // Finished status will not be used, since the entry will be removed when finished
     // Finished,
@@ -108,8 +108,9 @@ impl ProgressManager {
         let mut progress = table.get(k)?.map(|val| val.value()).unwrap_or_default();
 
         match v {
-            SyncEnum::SyncRange(range) => progress.set_range(range),
-            SyncEnum::SyncVec(v) => progress.set_values(v),
+            SyncEnum::Range(range) => progress.set_range(range),
+            SyncEnum::Vec(v) => progress.set_values(v),
+            SyncEnum::Single(x) => progress.set_value(x),
         }
 
         warn!("Set progress start: {:?}", progress);
@@ -200,7 +201,7 @@ impl ProgressManager {
         );
         let json = serde_json::to_string(&SyncLogData {
             logs,
-            progress_indexes: SyncEnum::SyncVec(indexes),
+            progress_indexes: SyncEnum::Vec(indexes),
             snapshot_progress_idx,
         })
         .expect("can jsonify send_sync_data message");

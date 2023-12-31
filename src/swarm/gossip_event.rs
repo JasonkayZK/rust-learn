@@ -6,12 +6,12 @@ use libp2p::PeerId;
 use log::{error, info};
 use tokio::sync::mpsc;
 
-use crate::consts::{INIT_SYNC_STR, PEER_ID, RECIPE_TOPIC};
+use crate::consts::{BROADCAST_OPT_STR, INIT_SYNC_STR, PEER_ID, RECIPE_TOPIC};
 use crate::models::{
-    InitSyncMessage, ListMode, ListRequest, ListResponse, SyncDataRequest, SyncDataResponse,
-    SyncLogData,
+    BroadcastOptMessage, InitSyncMessage, ListMode, ListRequest, ListResponse, SyncDataRequest,
+    SyncDataResponse, SyncLogData,
 };
-use crate::storage::{merge_diff, merge_recipes, read_local_recipes};
+use crate::storage::{apply_opt, merge_diff, merge_recipes, read_local_recipes};
 use crate::swarm::handler::SwarmHandler;
 use crate::sync::models::OpEnum;
 use crate::sync::progress_manager::{ProgressManager, SyncStatus};
@@ -21,10 +21,10 @@ pub(crate) async fn handle_message(
     msg: Message,
     response_sender: mpsc::UnboundedSender<ListResponse>,
 ) {
-    let topic_id = msg.topic.to_string();
+    let topic_name = msg.topic.to_string();
     info!("Got swarm message: {:?}", msg);
 
-    if topic_id.eq(&RECIPE_TOPIC.to_string()) {
+    if topic_name.eq(&RECIPE_TOPIC.to_string()) {
         if let Ok(resp) = serde_json::from_slice::<ListResponse>(&msg.data) {
             if resp.receiver == PEER_ID.to_string() {
                 info!("Response from {}:", propagation_source);
@@ -56,7 +56,7 @@ pub(crate) async fn handle_message(
                 &RECIPE_TOPIC.to_string()
             );
         }
-    } else if topic_id.eq(INIT_SYNC_STR) {
+    } else if topic_name.eq(INIT_SYNC_STR) {
         // We received the INIT_SYNC message, this means that we are the follow peer
         if let Ok(init_sync_msg) = serde_json::from_slice::<InitSyncMessage>(&msg.data) {
             // Step 1: Subscribe to the `sync-follow-initiate` topic to listen sync data from initiate here!
@@ -85,19 +85,7 @@ pub(crate) async fn handle_message(
                 msg, INIT_SYNC_STR
             );
         }
-    } else if topic_id.starts_with("sync-") {
-        // If we received the InitSyncMessage in the `sync-old-new` topic, which means that the new peer joined into the topic
-        //  and is announcing its sync progress
-        // if let Ok(sync_message) = serde_json::from_slice::<InitSyncMessage>(&msg.data) {
-        //     // Received a new sync request sent from new server
-        //     if sync_message.initiate_peer.eq(&PEER_ID.to_string()) {
-        //         // Subscribe to the corresponding topic, and begin to send the un-synced data
-        //         let sync_topic_id = ProgressManager::get_sync_topic_id(&sync_message.initiate_peer, &sync_message.follow_peer);
-        //         let sync_topic = IdentTopic::new(sync_topic_id.clone());
-        //         // Subscribe the topic to receive the old server sent data
-        //         SwarmHandler::subscribe(&sync_topic).await.unwrap();
-        //     }
-        // } else if let Ok(sync_log_message) = serde_json::from_slice::<SyncLogData>(&msg.data) {
+    } else if topic_name.starts_with("sync-") {
         if let Ok(sync_log_message) = serde_json::from_slice::<SyncLogData>(&msg.data) {
             // When received SyncLogData message, we compute the whole log, and then query for the data
 
@@ -151,10 +139,24 @@ pub(crate) async fn handle_message(
             .await
             .unwrap();
         }
+    } else if topic_name.eq(BROADCAST_OPT_STR) {
+        // When received message in BROADCAST_OPT topic, there has a peer do the operation, we just apply the same log
+        if let Ok(broadcast_opt_message) = serde_json::from_slice::<BroadcastOptMessage>(&msg.data)
+        {
+            // When received SyncLogData message, we compute the whole log, and then query for the data
+            apply_opt(&propagation_source.to_string(), broadcast_opt_message)
+                .await
+                .unwrap();
+        } else {
+            error!(
+                "unhandled message from topic: BROADCAST_OPT_STR, peer: {:?}",
+                msg.source
+            );
+        }
     } else {
         error!(
             "Unable to serialize message: {:?} from type: {}",
-            msg, topic_id
+            msg, topic_name
         );
     }
 }

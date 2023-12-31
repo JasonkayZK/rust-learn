@@ -19,8 +19,9 @@ pub struct SyncProgress {
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum SyncEnum {
-    SyncRange(Range<u64>),
-    SyncVec(Vec<u64>),
+    Range(Range<u64>),
+    Vec(Vec<u64>),
+    Single(u64),
 }
 
 impl SyncProgress {
@@ -72,6 +73,10 @@ impl SyncProgress {
         mask.insert_range(0..peer_log_length);
         let xor = mask.bitxor(&self.bitmap);
         xor.iter().collect()
+    }
+
+    pub fn set_value(&mut self, v: u64) {
+        self.bitmap.insert(v);
     }
 
     pub fn set_range(&mut self, v: Range<u64>) {

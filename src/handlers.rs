@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use log::{error, info};
+use log::{error, info, warn};
 
-use crate::consts::RECIPE_TOPIC;
+use crate::consts::{BROADCAST_OPT_TOPIC, RECIPE_TOPIC};
 use crate::hlc::GlobalClock;
 use crate::id_generator::GlobalId;
-use crate::models::{ListMode, ListRequest, Recipe};
+use crate::models::{BroadcastOptMessage, ListMode, ListRequest, Recipe};
 use crate::storage::{read_local_recipes, write_local_recipes};
 use crate::swarm::handler::SwarmHandler;
 use crate::sync::models::OpEnum;
@@ -69,10 +69,22 @@ pub async fn handle_create_recipe(cmd: &str) {
             Ok(recipe) => {
                 // Step 2: Write Log:
                 let timestamp = GlobalClock::timestamp().await;
-                OpLogHandler::append(OpEnum::Insert(recipe.id, timestamp).to_string().as_bytes())
+                let opt = OpEnum::Insert(recipe.id, timestamp);
+                let log_info = OpLogHandler::append(opt.to_string().as_bytes())
                     .await
                     .unwrap();
                 info!("Recipe create log appended: {}", recipe.id);
+
+                let msg = BroadcastOptMessage {
+                    opt,
+                    data: Some(recipe),
+                    log_idx: log_info.length - 1,
+                };
+                let json = serde_json::to_string(&msg).expect("can jsonify request");
+                match SwarmHandler::publish(BROADCAST_OPT_TOPIC.clone(), json).await {
+                    Ok(_) => info!("Recipe Insert opt broadcast!"),
+                    Err(e) => warn!("Recipe Insert opt broadcast err: {}", e),
+                };
             }
             Err(e) => {
                 error!("error creating recipe: {}", e);
@@ -92,12 +104,22 @@ pub async fn handle_delete_recipe(cmd: &str) {
                             info!("Deleted Recipe with id: {}", recipe.id);
                             // Step 2: Write Log:
                             let timestamp = GlobalClock::timestamp().await;
-                            OpLogHandler::append(
-                                OpEnum::Delete(recipe.id, timestamp).to_string().as_bytes(),
-                            )
-                            .await
-                            .unwrap();
+                            let opt = OpEnum::Delete(recipe.id, timestamp);
+                            let log_info = OpLogHandler::append(opt.to_string().as_bytes())
+                                .await
+                                .unwrap();
                             info!("Recipe delete log appended: {}", recipe.id);
+
+                            let msg = BroadcastOptMessage {
+                                opt,
+                                data: None,
+                                log_idx: log_info.length - 1,
+                            };
+                            let json = serde_json::to_string(&msg).expect("can jsonify request");
+                            match SwarmHandler::publish(BROADCAST_OPT_TOPIC.clone(), json).await {
+                                Ok(_) => info!("Recipe Delete opt broadcast!"),
+                                Err(e) => warn!("Recipe Update opt broadcast err: {}", e),
+                            };
                         }
                     }
                     Err(e) => {
@@ -122,17 +144,26 @@ pub async fn handle_publish_recipe(cmd: &str) {
 
                             // Step 2: Write Log:
                             info!(
-                                "Recipe update log appended: {}->{}",
+                                "Recipe update log append begin: {}->{}",
                                 old_recipe.id, new_recipe.id
                             );
                             let timestamp = GlobalClock::timestamp().await;
-                            OpLogHandler::append(
-                                OpEnum::Update(old_recipe.id, new_recipe.id, timestamp)
-                                    .to_string()
-                                    .as_bytes(),
-                            )
-                            .await
-                            .unwrap();
+                            let opt = OpEnum::Update(old_recipe.id, new_recipe.id, timestamp);
+                            let log_info = OpLogHandler::append(opt.to_string().as_bytes())
+                                .await
+                                .unwrap();
+                            info!("Recipe Update log appended!");
+
+                            let msg = BroadcastOptMessage {
+                                opt,
+                                data: Some(new_recipe),
+                                log_idx: log_info.length - 1,
+                            };
+                            let json = serde_json::to_string(&msg).expect("can jsonify request");
+                            match SwarmHandler::publish(BROADCAST_OPT_TOPIC.clone(), json).await {
+                                Ok(_) => info!("Recipe Update opt broadcast!"),
+                                Err(e) => warn!("Recipe Update opt broadcast err: {}", e),
+                            };
                         }
                     }
                     Err(e) => {

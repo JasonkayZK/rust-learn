@@ -2,11 +2,12 @@ use std::convert::TryFrom;
 use std::fmt::Display;
 use std::str::FromStr;
 
+use serde::{Deserialize, Serialize};
 use uhlc::Timestamp;
 
 use crate::sync::models::OpEnum::{Delete, Insert, Update};
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub enum OpEnum {
     Insert(u64, Timestamp),
     Update(u64, u64, Timestamp),
@@ -117,7 +118,7 @@ mod tests {
             i,
             Insert(
                 1,
-                Timestamp::from_str("1970-01-01T00:00:00.000000000Z/1").unwrap()
+                Timestamp::from_str("1970-01-01T00:00:00.000000000Z/1").unwrap(),
             )
         );
 
@@ -127,7 +128,7 @@ mod tests {
             Update(
                 1,
                 2,
-                Timestamp::from_str("1970-01-01T00:00:00.000000000Z/1").unwrap()
+                Timestamp::from_str("1970-01-01T00:00:00.000000000Z/1").unwrap(),
             )
         );
 
@@ -136,7 +137,7 @@ mod tests {
             d,
             Delete(
                 1,
-                Timestamp::from_str("1970-01-01T00:00:00.000000000Z/1").unwrap()
+                Timestamp::from_str("1970-01-01T00:00:00.000000000Z/1").unwrap(),
             )
         );
     }

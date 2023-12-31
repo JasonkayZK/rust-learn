@@ -4,8 +4,38 @@ use tokio::fs;
 
 use crate::dir::data_file;
 use crate::hlc::GlobalClock;
-use crate::models::Recipe;
+use crate::models::{BroadcastOptMessage, Recipe};
 use crate::sync::models::OpEnum;
+use crate::sync::progress::SyncEnum;
+use crate::sync::progress_manager::ProgressManager;
+
+pub async fn apply_opt(
+    peer_id: &str,
+    broadcast_opt_message: BroadcastOptMessage,
+) -> anyhow::Result<()> {
+    // Step 1: Apply the opt
+    let mut data = read_local_recipes().await?;
+    match broadcast_opt_message.opt {
+        OpEnum::Insert(item_id, _) => {
+            data.insert(item_id, broadcast_opt_message.data.unwrap());
+        }
+        OpEnum::Update(old_item_id, new_item_id, _) => {
+            data.remove(&old_item_id);
+            data.insert(new_item_id, broadcast_opt_message.data.unwrap());
+        }
+        OpEnum::Delete(item_id, _) => {
+            data.remove(&item_id);
+        }
+    }
+    write_local_recipes(&data).await.unwrap();
+
+    // Step 2: update sync progress
+    ProgressManager::set_sync_progress(peer_id, SyncEnum::Single(broadcast_opt_message.log_idx))
+        .await
+        .unwrap();
+
+    Ok(())
+}
 
 pub async fn merge_diff(logs: Vec<Option<OpEnum>>) -> anyhow::Result<Vec<u64>> {
     let mut data = read_local_recipes().await?;

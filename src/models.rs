@@ -3,6 +3,7 @@ use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
 
+use crate::sync::models::OpEnum;
 use crate::sync::progress::{SyncEnum, SyncProgress};
 
 /// The recipe data for cook
@@ -67,6 +68,13 @@ pub struct SyncDataRequest {
 pub struct SyncDataResponse {
     pub recipes: HashMap<u64, Recipe>,
     pub progress_indexes: SyncEnum,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BroadcastOptMessage {
+    pub opt: OpEnum,
+    pub data: Option<Recipe>,
+    pub log_idx: u64,
 }
 
 pub enum EventType {
