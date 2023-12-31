@@ -4,7 +4,7 @@ use std::str::FromStr;
 use chrono::Local;
 use libp2p::gossipsub::Message;
 use libp2p::PeerId;
-use log::{error, info, warn};
+use log::{error, info};
 use tokio::sync::mpsc;
 
 use crate::consts::{INIT_SYNC_STR, PEER_ID, RECIPE_TOPIC};
@@ -23,7 +23,7 @@ pub(crate) async fn handle_message(
     response_sender: mpsc::UnboundedSender<ListResponse>,
 ) {
     let topic_id = msg.topic.to_string();
-    warn!("Got swarm message: {:?}", msg);
+    info!("Got swarm message: {:?}", msg);
 
     if topic_id.eq(&RECIPE_TOPIC.to_string()) {
         if let Ok(resp) = serde_json::from_slice::<ListResponse>(&msg.data) {

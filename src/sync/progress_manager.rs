@@ -178,9 +178,9 @@ impl ProgressManager {
             progress_idx: snapshot_progress_idx,
         })
         .expect("can jsonify send_sync_data message");
-        warn!("Send sync data: topic: {}, range: {:?}", topic, range);
+        info!("Send sync data: topic: {}, range: {:?}", topic, range);
         SwarmHandler::publish(topic, json).await.unwrap();
-        warn!("Send sync data successfully!");
+        info!("Send sync data successfully!");
     }
 
     pub fn get_sync_topics(

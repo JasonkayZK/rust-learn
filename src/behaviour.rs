@@ -1,3 +1,5 @@
+#![allow(clippy::large_enum_variant)]
+
 use libp2p::swarm::NetworkBehaviour;
 use libp2p::{gossipsub, mdns};
 

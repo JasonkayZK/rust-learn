@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
@@ -8,7 +10,7 @@ use libp2p::gossipsub::{
 };
 use libp2p::swarm::{SwarmEvent, THandlerErr};
 use libp2p::{gossipsub, mdns, noise, tcp, yamux, PeerId, Swarm};
-use log::warn;
+use log::info;
 use tokio::sync::Mutex;
 
 use crate::behaviour::{RecipeBehaviour, RecipeBehaviourEvent};
@@ -61,7 +63,7 @@ impl SwarmHandler {
         topic: impl Into<TopicHash>,
         json: impl Into<Vec<u8>>,
     ) -> Result<MessageId, PublishError> {
-        warn!("incoming publish");
+        info!("incoming publish");
 
         let handler = SwarmHandler::global().await.clone();
         let swarm = &mut handler.lock().await.swarm;
