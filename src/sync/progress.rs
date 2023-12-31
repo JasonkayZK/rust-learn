@@ -140,7 +140,7 @@ mod tests {
     #[test]
     fn test_serialize() {
         let x = SyncProgress::new();
-        let data: Vec<u8> = x.try_into().unwrap();
+        let data: Vec<u8> = (&x).try_into().unwrap();
         assert_eq!(data.len(), x.bitmap.serialized_size());
 
         let y = SyncProgress::try_from(data).unwrap();
