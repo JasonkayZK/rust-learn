@@ -1,5 +1,5 @@
 use std::convert::{TryFrom, TryInto};
-use std::ops::Range;
+use std::ops::{BitXor, Range};
 
 use redb::{RedbValue, TypeName};
 use roaring::RoaringTreemap;
@@ -33,7 +33,29 @@ impl SyncProgress {
     pub fn get_first_checkpoint(&self) -> u64 {
         match self.bitmap.max() {
             None => 0,
-            Some(right_bound) => right_bound + 1,
+            Some(right_bound) => {
+                // All data is fully synced!
+                if self.bitmap.len() == right_bound + 1 {
+                    return right_bound + 1;
+                }
+
+                let mut mask = RoaringTreemap::new();
+                mask.insert_range(0..=right_bound);
+                let xor = mask.bitxor(&self.bitmap);
+                xor.min().unwrap_or_default()
+            }
+        }
+    }
+
+    pub fn get_all_unsynced_indexes(&self) -> Vec<u64> {
+        match self.bitmap.max() {
+            None => vec![],
+            Some(right_bound) => {
+                let mut mask = RoaringTreemap::new();
+                mask.insert_range(0..=right_bound);
+                let xor = mask.bitxor(&self.bitmap);
+                xor.iter().collect()
+            }
         }
     }
 
@@ -114,16 +136,16 @@ impl RedbValue for SyncProgress {
     }
 
     fn from_bytes<'a>(data: &'a [u8]) -> Self::SelfType<'a>
-    where
-        Self: 'a,
+        where
+            Self: 'a,
     {
         Self::try_from(data).unwrap()
     }
 
     fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a>
-    where
-        Self: 'a,
-        Self: 'b,
+        where
+            Self: 'a,
+            Self: 'b,
     {
         let v: Vec<u8> = value.try_into().unwrap();
         v
@@ -151,5 +173,35 @@ mod tests {
     }
 
     #[test]
-    fn test_set_range() {}
+    fn test_get_first_checkpoint() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+        x.set_values(vec![13, 15, 17]);
+
+        assert_eq!(x.get_first_checkpoint(), 10);
+    }
+
+    #[test]
+    fn test_get_first_checkpoint_2() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+
+        assert_eq!(x.get_first_checkpoint(), 10);
+    }
+
+    #[test]
+    fn test_get_all_unsynced_indexes() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+        x.set_values(vec![13, 15, 17]);
+
+        assert_eq!(x.get_all_unsynced_indexes(), vec![10, 11, 12, 14, 16]);
+    }
+
+    #[test]
+    fn test_get_all_unsynced_indexes_2() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+        assert!(x.get_all_unsynced_indexes().is_empty());
+    }
 }
