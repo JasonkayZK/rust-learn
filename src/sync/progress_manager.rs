@@ -100,7 +100,7 @@ impl ProgressManager {
     }
 
     pub async fn set_sync_progress(k: &str, v: SyncEnum) -> Result<(), Error> {
-        warn!("[set_sync_progress] topic: {}, value: {:?}", k, v);
+        info!("[set_sync_progress] topic: {}, value: {:?}", k, v);
 
         let db = &mut Self::global().await.lock().await.db;
         let read_txn = db.begin_read()?;
@@ -113,7 +113,7 @@ impl ProgressManager {
             SyncEnum::Single(x) => progress.set_value(x),
         }
 
-        warn!("Set progress start: {:?}", progress);
+        info!("Set progress start: {:?}", progress);
 
         let write_txn = db.begin_write()?;
         {
@@ -122,7 +122,7 @@ impl ProgressManager {
         }
         write_txn.commit()?;
 
-        warn!("Set progress finished!");
+        info!("Set progress finished!");
 
         Ok(())
     }

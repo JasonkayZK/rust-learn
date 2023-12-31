@@ -1,142 +1,170 @@
-# P2p Demo
+# P2p Sync demo
 
-A Branch to show how to use [libp2p](https://github.com/libp2p/rust-libp2p/).
+Use append log to sync data between peers in a p2p network!
 
 ## **How to use**
 
-Start multiple p2p nodes:
+### **Sync old data**
+
+Start a peer:
 
 ```shell
 cargo run
 
-INFO  rust_learn > Peer Id: 12D3KooWA7xhiEmFxikn9aiWcffkhDACDhz1rRPXxkC4yxgnzJCT
-INFO  libp2p_mdns::behaviour::iface > creating instance on iface 192.168.31.22
-INFO  rust_learn::handlers          > Income swarm Event: NewListenAddr { listener_id: ListenerId(1), address: "/ip4/127.0.0.1/tcp/65248" }
-INFO  rust_learn::handlers          > Income swarm Event: NewListenAddr { listener_id: ListenerId(1), address: "/ip4/192.168.31.22/tcp/65248" }
-INFO  libp2p_mdns::behaviour        > discovered: 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7 /ip4/192.168.31.22/tcp/65247
-INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Mdns(Discovered([(PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7"), "/ip4/192.168.31.22/tcp/65247")])))
-INFO  rust_learn::handlers          > Income swarm Event: Dialing { peer_id: Some(PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7")), connection_id: ConnectionId(1) }
-INFO  rust_learn::handlers          > Income swarm Event: ConnectionEstablished { peer_id: PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7"), connection_id: ConnectionId(1), endpoint: Dialer { address: "/ip4/192.168.31.22/tcp/65247/p2p/12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7", role_override: Dialer }, num_established: 1, concurrent_dial_errors: Some([]), established_in: 7.355625ms }
-INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Floodsub(Subscribed { peer_id: PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7"), topic: Topic("recipes") }))
-INFO  libp2p_mdns::behaviour        > discovered: 12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz /ip4/192.168.31.22/tcp/65250
-INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Mdns(Discovered([(PeerId("12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz"), "/ip4/192.168.31.22/tcp/65250")])))
-INFO  rust_learn::handlers          > Income swarm Event: Dialing { peer_id: Some(PeerId("12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz")), connection_id: ConnectionId(2) }
-INFO  rust_learn::handlers          > Income swarm Event: IncomingConnection { connection_id: ConnectionId(3), local_addr: "/ip4/192.168.31.22/tcp/65248", send_back_addr: "/ip4/192.168.31.22/tcp/65253" }
-INFO  rust_learn::handlers          > Income swarm Event: ConnectionEstablished { peer_id: PeerId("12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz"), connection_id: ConnectionId(2), endpoint: Dialer { address: "/ip4/192.168.31.22/tcp/65250/p2p/12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz", role_override: Dialer }, num_established: 1, concurrent_dial_errors: Some([]), established_in: 5.762334ms }
-INFO  rust_learn::handlers          > Income swarm Event: ConnectionEstablished { peer_id: PeerId("12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz"), connection_id: ConnectionId(3), endpoint: Listener { local_addr: "/ip4/192.168.31.22/tcp/65248", send_back_addr: "/ip4/192.168.31.22/tcp/65253" }, num_established: 2, concurrent_dial_errors: None, established_in: 5.212125ms }
-INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Floodsub(Subscribed { peer_id: PeerId("12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz"), topic: Topic("recipes") }))
+[ INFO]: rust_learn - Peer Id: 12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP
+[ INFO]: rust_learn::dir - 数据文件创建成功
+[ INFO]: libp2p_mdns::behaviour::iface - creating instance on iface 192.168.31.22
+[ INFO]: rust_learn::swarm - Income swarm Event: NewListenAddr { listener_id: ListenerId(1), address: "/ip4/127.0.0.1/tcp/50950" }
+[ INFO]: rust_learn::swarm - Income swarm Event: NewListenAddr { listener_id: ListenerId(1), address: "/ip4/192.168.31.22/tcp/50950" }
 ```
 
-Show all peers:
+Insert some data:
 
 ```shell
-ls p
+create r 1|1|1
 
- INFO  rust_learn::handlers          > Discovered Peers:
- INFO  rust_learn::handlers          > 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7
- INFO  rust_learn::handlers          > 12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz
+[ INFO]: rust_learn::handlers - Created recipe:
+[ INFO]: rust_learn::handlers - Id: 7147228881180381185
+[ INFO]: rust_learn::handlers - Name:  1
+[ INFO]: rust_learn::handlers - Ingredients: 1
+[ INFO]: rust_learn::handlers - Instructions:: 1
+[ INFO]: rust_learn::handlers - Recipe create log appended: 7147228881180381185
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ WARN]: rust_learn::handlers - Recipe Insert opt broadcast err: InsufficientPeers
+
+create r 2|2|2
+
+[ INFO]: rust_learn::handlers - Created recipe:
+[ INFO]: rust_learn::handlers - Id: 7147228881180381186
+[ INFO]: rust_learn::handlers - Name:  2
+[ INFO]: rust_learn::handlers - Ingredients: 2
+[ INFO]: rust_learn::handlers - Instructions:: 2
+[ INFO]: rust_learn::handlers - Recipe create log appended: 7147228881180381186
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ WARN]: rust_learn::handlers - Recipe Insert opt broadcast err: InsufficientPeers
 ```
 
-Create Recipe:
+Since there is only one peer right now, we can't broadcast the current operation to the other peers. 
+
+Start another peer:
 
 ```shell
-create r name|recipe_ingredients|recipe_instruction
+cargo run
 
- INFO  rust_learn::handlers          > Created recipe:
- INFO  rust_learn::handlers          > Name:  name
- INFO  rust_learn::handlers          > Ingredients: recipe_ingredients
- INFO  rust_learn::handlers          > Instructions:: recipe_instruction
+[ INFO]: rust_learn - Peer Id: 12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr
+[ INFO]: rust_learn::dir - 数据文件创建成功
+[ INFO]: libp2p_mdns::behaviour::iface - creating instance on iface 192.168.31.22
+[ INFO]: rust_learn::swarm - Income swarm Event: NewListenAddr { listener_id: ListenerId(1), address: "/ip4/127.0.0.1/tcp/50974" }
+[ INFO]: rust_learn::swarm - Income swarm Event: NewListenAddr { listener_id: ListenerId(1), address: "/ip4/192.168.31.22/tcp/50974" }
+[ INFO]: libp2p_mdns::behaviour - discovered: 12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP /ip4/192.168.31.22/tcp/50950
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Mdns(Discovered([(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), "/ip4/192.168.31.22/tcp/50950")])))
+[ INFO]: rust_learn::swarm - Income swarm Event: Dialing { peer_id: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), connection_id: ConnectionId(1) }
+[ INFO]: rust_learn::swarm - Income swarm Event: IncomingConnection { connection_id: ConnectionId(2), local_addr: "/ip4/192.168.31.22/tcp/50974", send_back_addr: "/ip4/192.168.31.22/tcp/50975" }
+[ INFO]: rust_learn::swarm - Income swarm Event: ConnectionEstablished { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), connection_id: ConnectionId(1), endpoint: Dialer { address: "/ip4/192.168.31.22/tcp/50950/p2p/12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP", role_override: Dialer }, num_established: 1, concurrent_dial_errors: Some([]), established_in: 7.302917ms }
+[ INFO]: rust_learn::swarm - [Connection established] peer_id: 12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP, connection_id: 1, endpoint: Dialer { address: "/ip4/192.168.31.22/tcp/50950/p2p/12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP", role_override: Dialer }, num_established: 1
+[ INFO]: rust_learn::swarm - Income swarm Event: ConnectionEstablished { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), connection_id: ConnectionId(2), endpoint: Listener { local_addr: "/ip4/192.168.31.22/tcp/50974", send_back_addr: "/ip4/192.168.31.22/tcp/50975" }, num_established: 2, concurrent_dial_errors: None, established_in: 6.988417ms }
+[ INFO]: rust_learn::swarm - [Connection established] peer_id: 12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP, connection_id: 2, endpoint: Listener { local_addr: "/ip4/192.168.31.22/tcp/50974", send_back_addr: "/ip4/192.168.31.22/tcp/50975" }, num_established: 2
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Subscribed { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), topic: TopicHash { hash: "recipes" } }))
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Subscribed { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), topic: TopicHash { hash: "broadcast-opt" } }))
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Subscribed { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), topic: TopicHash { hash: "init-sync" } }))
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Message { propagation_source: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), message_id: MessageId(313244334b6f6f57527039576952426e634a3168476e77314b75657a476576314b554a59574a65796a6546646f67357237337a5031373034303332313134313333323038303033), message: Message { data: 7b2263757272656e74.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208003), topic: TopicHash { hash: "init-sync" } } }))
+[ INFO]: rust_learn::swarm::gossip_event - Got swarm message: Message { data: 7b2263757272656e74.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208003), topic: TopicHash { hash: "init-sync" } }
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Subscribed { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), topic: TopicHash { hash: "sync-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr" } }))
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Subscribed { peer_id: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), topic: TopicHash { hash: "sync-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP" } }))
+[ INFO]: rust_learn::sync::progress_manager - Sending sync data: topic: sync-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP, indexes: []
+[ INFO]: rust_learn::swarm::handler - incoming publish
 
+[ERROR]: rust_learn - unknown command: ""
+[ INFO]: rust_learn::sync::progress_manager - Send sync data successfully!
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Message { propagation_source: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), message_id: MessageId(313244334b6f6f57527039576952426e634a3168476e77314b75657a476576314b554a59574a65796a6546646f67357237337a5031373034303332313134313333323038303035), message: Message { data: 7b227265636970655f.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208005), topic: TopicHash { hash: "sync-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP" } } }))
+[ INFO]: rust_learn::swarm::gossip_event - Got swarm message: Message { data: 7b227265636970655f.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208005), topic: TopicHash { hash: "sync-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP" } }
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Message { propagation_source: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), message_id: MessageId(313244334b6f6f57527039576952426e634a3168476e77314b75657a476576314b554a59574a65796a6546646f67357237337a5031373034303332313134313333323038303034), message: Message { data: 7b226c6f6773223a5b.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208004), topic: TopicHash { hash: "sync-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr" } } }))
+[ INFO]: rust_learn::swarm::gossip_event - Got swarm message: Message { data: 7b226c6f6773223a5b.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208004), topic: TopicHash { hash: "sync-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr" } }
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ INFO]: rust_learn::swarm - Income swarm Event: Behaviour(Gossip(Message { propagation_source: PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP"), message_id: MessageId(313244334b6f6f57527039576952426e634a3168476e77314b75657a476576314b554a59574a65796a6546646f67357237337a5031373034303332313134313333323038303036), message: Message { data: 7b2272656369706573.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208006), topic: TopicHash { hash: "sync-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr" } } }))
+[ INFO]: rust_learn::swarm::gossip_event - Got swarm message: Message { data: 7b2272656369706573.., source: Some(PeerId("12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP")), sequence_number: Some(1704032114133208006), topic: TopicHash { hash: "sync-12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP-12D3KooWDnCSmYtn1joJdVtgajuurJkHyp6PP1ZSWuuSeVGauWkr" } }
+[ WARN]: rust_learn::sync::progress_manager - [set_sync_progress] topic: 12D3KooWRp9WiRBncJ1hGnw1KuezGev1KUJYWJeyjeFdog5r73zP, value: Vec([0, 1])
+[ WARN]: rust_learn::sync::progress_manager - Set progress start: SyncProgress { bitmap: RoaringTreemap<[0, 1]> }
+[ WARN]: rust_learn::sync::progress_manager - Set progress finished!
 ```
 
-List local recipes:
+> Because of the `tokio:select!` halt, a `Enter` should be input.
+
+The data will be synced:
 
 ```shell
 ls r
 
- INFO  rust_learn::handlers          > Local Recipes (6)
- INFO  rust_learn::handlers          > Recipe { id: 0, name: " Coffee", ingredients: "Coffee", instructions: "Make Coffee", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 1, name: " Tea", ingredients: "Tea, Water", instructions: "Boil Water, add tea", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 2, name: " Carrot Cake", ingredients: "Carrots, Cake", instructions: "Make Carrot Cake", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 3, name: " Name", ingredients: "Ingredients", instructions: "Instructions", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 4, name: " name", ingredients: "recipeIngredients", instructions: "instruction", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 5, name: " name", ingredients: "recipe_ingredients", instructions: "recipe_instruction", shared: false }
+[ INFO]: rust_learn::handlers - Local Recipes (2)
+[ INFO]: rust_learn::handlers - (7147228881180381186, Recipe { id: 7147228881180381186, name: " 2", ingredients: "2", instructions: "2", shared: false })
+[ INFO]: rust_learn::handlers - (7147228881180381185, Recipe { id: 7147228881180381185, name: " 1", ingredients: "1", instructions: "1", shared: false })
 ```
 
-List all remote recipes:
+### **Sync new data**
+
+Add a new entry:
 
 ```shell
-ls r all
+create r new|new|new
 
- INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Floodsub(Message(FloodsubMessage { source: PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7"), data: [123, 34, 109, 111,...
- INFO  rust_learn::handlers          > Response from 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7:
- INFO  rust_learn::handlers          > Recipe { id: 0, name: " Coffee", ingredients: "Coffee", instructions: "Make Coffee", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 1, name: " Tea", ingredients: "Tea, Water", instructions: "Boil Water, add tea", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 2, name: " Carrot Cake", ingredients: "Carrots, Cake", instructions: "Make Carrot Cake", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 3, name: " Name", ingredients: "Ingredients", instructions: "Instructions", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 4, name: " name", ingredients: "recipeIngredients", instructions: "instruction", shared: true }
- INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Floodsub(Message(FloodsubMessage { source: PeerId("12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz"), data: [123, 34, 109....
- INFO  rust_learn::handlers          > Response from 12D3KooWCWesVZsAoDaFs7UZYXV6gTNd56UPMoiWfxWFgvLCJZhz:
- INFO  rust_learn::handlers          > Recipe { id: 0, name: " Coffee", ingredients: "Coffee", instructions: "Make Coffee", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 1, name: " Tea", ingredients: "Tea, Water", instructions: "Boil Water, add tea", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 2, name: " Carrot Cake", ingredients: "Carrots, Cake", instructions: "Make Carrot Cake", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 3, name: " Name", ingredients: "Ingredients", instructions: "Instructions", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 4, name: " name", ingredients: "recipeIngredients", instructions: "instruction", shared: true }
+[ INFO]: rust_learn::handlers - Created recipe:
+[ INFO]: rust_learn::handlers - Id: 7147228881180381187
+[ INFO]: rust_learn::handlers - Name:  new
+[ INFO]: rust_learn::handlers - Ingredients: new
+[ INFO]: rust_learn::handlers - Instructions:: new
+[ INFO]: rust_learn::handlers - Recipe create log appended: 7147228881180381187
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ INFO]: rust_learn::handlers - Recipe Insert opt broadcast!
 ```
 
-List corresponding peer's recipes:
+The operation has been broadcast!
+
+And the operation has been synced:
 
 ```shell
-ls r 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7
+ls r
 
- INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Floodsub(Message(FloodsubMessage { source: PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7"), data: [123, 34, 109, ...
- INFO  rust_learn::handlers          > Response from 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7:
- INFO  rust_learn::handlers          > Recipe { id: 0, name: " Coffee", ingredients: "Coffee", instructions: "Make Coffee", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 1, name: " Tea", ingredients: "Tea, Water", instructions: "Boil Water, add tea", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 2, name: " Carrot Cake", ingredients: "Carrots, Cake", instructions: "Make Carrot Cake", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 3, name: " Name", ingredients: "Ingredients", instructions: "Instructions", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 4, name: " name", ingredients: "recipeIngredients", instructions: "instruction", shared: true }
+[ INFO]: rust_learn::handlers - Local Recipes (3)
+[ INFO]: rust_learn::handlers - (7147228881180381185, Recipe { id: 7147228881180381185, name: " 1", ingredients: "1", instructions: "1", shared: false })
+[ INFO]: rust_learn::handlers - (7147228881180381187, Recipe { id: 7147228881180381187, name: " new", ingredients: "new", instructions: "new", shared: false })
+[ INFO]: rust_learn::handlers - (7147228881180381186, Recipe { id: 7147228881180381186, name: " 2", ingredients: "2", instructions: "2", shared: false })
 ```
 
-You could see that unshared recipes are not shown!
-
-Publish recipe:
+Try update:
 
 ```shell
-publish r 5
+publish r 7147228881180381187
 
- INFO  rust_learn::handlers          > Published Recipe with id: 5
+[ INFO]: rust_learn::handlers - Published Recipe with id: 7147228881180381187
+[ INFO]: rust_learn::handlers - Recipe update log append begin: 7147228881180381187->7147228881180381188
+[ INFO]: rust_learn::handlers - Recipe Update log appended!
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ INFO]: rust_learn::handlers - Recipe Update opt broadcast!
+
+# Other peer
+ls r
+
+[ INFO]: rust_learn::handlers - Local Recipes (3)
+[ INFO]: rust_learn::handlers - (7147228881180381185, Recipe { id: 7147228881180381185, name: " 1", ingredients: "1", instructions: "1", shared: false })
+[ INFO]: rust_learn::handlers - (7147228881180381186, Recipe { id: 7147228881180381186, name: " 2", ingredients: "2", instructions: "2", shared: false })
+[ INFO]: rust_learn::handlers - (7147228881180381188, Recipe { id: 7147228881180381188, name: " new", ingredients: "new", instructions: "new", shared: true })
 ```
 
-List remote recipes again:
+Delete:
 
 ```shell
-ls r 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7
+delete r 7147228881180381188
 
- INFO  rust_learn::handlers          > Income swarm Event: Behaviour(Floodsub(Message(FloodsubMessage { source: PeerId("12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7"), data: [123, 34, 109, ...
- INFO  rust_learn::handlers          > Response from 12D3KooWGEGJQhFaR4ZzJ15CUvMVVu1wcaGd3i7yzvHHYFexbfT7:
- INFO  rust_learn::handlers          > Recipe { id: 0, name: " Coffee", ingredients: "Coffee", instructions: "Make Coffee", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 1, name: " Tea", ingredients: "Tea, Water", instructions: "Boil Water, add tea", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 2, name: " Carrot Cake", ingredients: "Carrots, Cake", instructions: "Make Carrot Cake", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 3, name: " Name", ingredients: "Ingredients", instructions: "Instructions", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 4, name: " name", ingredients: "recipeIngredients", instructions: "instruction", shared: true }
- INFO  rust_learn::handlers          > Recipe { id: 5, name: " name", ingredients: "recipe_ingredients", instructions: "recipe_instruction", shared: true }
+[ INFO]: rust_learn::handlers - Deleted Recipe with id: 7147228881180381188
+[ INFO]: rust_learn::handlers - Recipe delete log appended: 7147228881180381188
+[ INFO]: rust_learn::swarm::handler - incoming publish
+[ INFO]: rust_learn::handlers - Recipe Delete opt broadcast!
+
+ls r
+
+[ INFO]: rust_learn::handlers - Local Recipes (2)
+[ INFO]: rust_learn::handlers - (7147228881180381185, Recipe { id: 7147228881180381185, name: " 1", ingredients: "1", instructions: "1", shared: false })
+[ INFO]: rust_learn::handlers - (7147228881180381186, Recipe { id: 7147228881180381186, name: " 2", ingredients: "2", instructions: "2", shared: false })
 ```
-
-As you can see the recipe that we just published shown!
-
-
-## **Reference**
-
-Blog:
-
-- [《Rust中使用libp2p》](https://jasonkayzk.github.io/2023/12/27/Rust中使用libp2p/)
-
-B: A -> Subscribed Event: SyncInit Topic
-B: Send InitSyncMessage: A->B to SyncInit Topic
-A: B -> Subscribed Event: Sync-A-B Topic, wait until receive InitSyncMessage
-A: Receive InitSyncMessage: A->B from SyncInit Topic, change status to start: B-Start
-
-A: B -> Subscribed Event: SyncInit Topic
-B: Send InitSyncMessage: A->B to SyncInit Topic
-
