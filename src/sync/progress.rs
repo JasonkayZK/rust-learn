@@ -136,16 +136,16 @@ impl RedbValue for SyncProgress {
     }
 
     fn from_bytes<'a>(data: &'a [u8]) -> Self::SelfType<'a>
-        where
-            Self: 'a,
+    where
+        Self: 'a,
     {
         Self::try_from(data).unwrap()
     }
 
     fn as_bytes<'a, 'b: 'a>(value: &'a Self::SelfType<'b>) -> Self::AsBytes<'a>
-        where
-            Self: 'a,
-            Self: 'b,
+    where
+        Self: 'a,
+        Self: 'b,
     {
         let v: Vec<u8> = value.try_into().unwrap();
         v
