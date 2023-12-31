@@ -1,5 +1,5 @@
-use libp2p::{gossipsub, mdns};
 use libp2p::swarm::NetworkBehaviour;
+use libp2p::{gossipsub, mdns};
 
 #[derive(NetworkBehaviour)]
 #[behaviour(to_swarm = "RecipeBehaviourEvent")]

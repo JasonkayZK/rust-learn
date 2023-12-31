@@ -1,5 +1,5 @@
-use libp2p::{identity, PeerId};
 use libp2p::gossipsub::IdentTopic;
+use libp2p::{identity, PeerId};
 use once_cell::sync::Lazy;
 
 pub const STORAGE_FILE_NAME: &str = "recipes.json";

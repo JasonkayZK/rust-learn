@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 use libp2p::futures::executor::block_on;
 use tokio::sync::Mutex;
-use uhlc::{HLC, HLCBuilder, ID, Timestamp};
+use uhlc::{HLCBuilder, Timestamp, HLC, ID};
 
 use crate::consts::PEER_ID;
 
@@ -22,7 +22,13 @@ impl GlobalClock {
     }
 
     pub async fn update_with_timestamp(timestamp: &Timestamp) {
-        Self::global().await.lock().await.clock.update_with_timestamp(timestamp).unwrap()
+        Self::global()
+            .await
+            .lock()
+            .await
+            .clock
+            .update_with_timestamp(timestamp)
+            .unwrap()
     }
 
     async fn global() -> &'static Mutex<Self> {

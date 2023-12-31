@@ -1,10 +1,13 @@
 use std::sync::{Arc, OnceLock};
 use std::time::Duration;
 
-use libp2p::{gossipsub, mdns, noise, PeerId, Swarm, tcp, yamux};
 use libp2p::futures::StreamExt;
-use libp2p::gossipsub::{ConfigBuilder, IdentTopic, MessageAuthenticity, MessageId, PublishError, SubscriptionError, TopicHash};
+use libp2p::gossipsub::{
+    ConfigBuilder, IdentTopic, MessageAuthenticity, MessageId, PublishError, SubscriptionError,
+    TopicHash,
+};
 use libp2p::swarm::{SwarmEvent, THandlerErr};
+use libp2p::{gossipsub, mdns, noise, tcp, yamux, PeerId, Swarm};
 use log::warn;
 use tokio::sync::Mutex;
 
@@ -36,7 +39,8 @@ impl SwarmHandler {
         swarm.behaviour_mut().gossip.add_explicit_peer(peer_id)
     }
 
-    pub async fn select_next_some() -> SwarmEvent<RecipeBehaviourEvent, THandlerErr<RecipeBehaviour>> {
+    pub async fn select_next_some() -> SwarmEvent<RecipeBehaviourEvent, THandlerErr<RecipeBehaviour>>
+    {
         let handler = SwarmHandler::global().await.clone();
         let swarm = &mut handler.lock().await.swarm;
         swarm.select_next_some().await
@@ -45,10 +49,18 @@ impl SwarmHandler {
     pub async fn discovered_nodes() -> Vec<PeerId> {
         let handler = SwarmHandler::global().await.clone();
         let swarm = &mut handler.lock().await.swarm;
-        swarm.behaviour().mdns.discovered_nodes().copied().collect::<Vec<PeerId>>()
+        swarm
+            .behaviour()
+            .mdns
+            .discovered_nodes()
+            .copied()
+            .collect::<Vec<PeerId>>()
     }
 
-    pub async fn publish(topic: impl Into<TopicHash>, json: impl Into<Vec<u8>>) -> Result<MessageId, PublishError> {
+    pub async fn publish(
+        topic: impl Into<TopicHash>,
+        json: impl Into<Vec<u8>>,
+    ) -> Result<MessageId, PublishError> {
         warn!("incoming publish");
 
         let handler = SwarmHandler::global().await.clone();
@@ -76,7 +88,8 @@ impl SwarmHandler {
                     tcp::Config::default(),
                     noise::Config::new,
                     yamux::Config::default,
-                ).unwrap()
+                )
+                .unwrap()
                 .with_behaviour(|_key| RecipeBehaviour {
                     gossip: gossipsub::Behaviour::new(
                         MessageAuthenticity::Signed(KEYS.clone()),
@@ -87,11 +100,17 @@ impl SwarmHandler {
                             .support_floodsub()
                             // .heartbeat_interval(Duration::from_secs(10)) // This is set to aid debugging by not cluttering the log space
                             .validation_mode(gossipsub::ValidationMode::Strict) // This sets the kind of message validation. The default is Strict (enforce message signing)
-                            .build().unwrap(),
-                    ).unwrap(),
-                    mdns: mdns::tokio::Behaviour::new(mdns::Config::default(), KEYS.public().to_peer_id())
-                        .expect("can create mdns"),
-                }).unwrap()
+                            .build()
+                            .unwrap(),
+                    )
+                    .unwrap(),
+                    mdns: mdns::tokio::Behaviour::new(
+                        mdns::Config::default(),
+                        KEYS.public().to_peer_id(),
+                    )
+                    .expect("can create mdns"),
+                })
+                .unwrap()
                 .build();
 
             Swarm::listen_on(
@@ -100,11 +119,9 @@ impl SwarmHandler {
                     .parse()
                     .expect("can get a local socket"),
             )
-                .expect("swarm can be started");
+            .expect("swarm can be started");
 
-            Arc::new(Mutex::new(Self {
-                swarm,
-            }))
+            Arc::new(Mutex::new(Self { swarm }))
         })
     }
 }

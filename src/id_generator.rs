@@ -12,7 +12,13 @@ pub struct GlobalId {
 
 impl GlobalId {
     pub async fn next_id() -> u64 {
-        Self::global().await.lock().await.generator.next_id().unwrap()
+        Self::global()
+            .await
+            .lock()
+            .await
+            .generator
+            .next_id()
+            .unwrap()
     }
 
     async fn global() -> &'static Mutex<Self> {

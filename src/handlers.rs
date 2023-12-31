@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use std::collections::HashSet;
 
 use anyhow::Result;
@@ -43,10 +45,11 @@ pub async fn handle_create_recipe(cmd: &str) {
         let instructions = elements.get(2).expect("instructions is there");
         match create_new_recipe(name, ingredients, instructions).await {
             Ok(recipe) => {
-
                 // Step 2: Write Log:
                 let timestamp = GlobalClock::timestamp().await;
-                OpLogHandler::append(OpEnum::Insert(recipe.id, timestamp).to_string().as_bytes()).await.unwrap();
+                OpLogHandler::append(OpEnum::Insert(recipe.id, timestamp).to_string().as_bytes())
+                    .await
+                    .unwrap();
                 info!("Recipe create log appended: {}", recipe.id);
             }
             Err(e) => {
@@ -67,7 +70,11 @@ pub async fn handle_delete_recipe(cmd: &str) {
                             info!("Deleted Recipe with id: {}", recipe.id);
                             // Step 2: Write Log:
                             let timestamp = GlobalClock::timestamp().await;
-                            OpLogHandler::append(OpEnum::Delete(recipe.id, timestamp).to_string().as_bytes()).await.unwrap();
+                            OpLogHandler::append(
+                                OpEnum::Delete(recipe.id, timestamp).to_string().as_bytes(),
+                            )
+                            .await
+                            .unwrap();
                             info!("Recipe delete log appended: {}", recipe.id);
                         }
                     }
@@ -92,9 +99,18 @@ pub async fn handle_publish_recipe(cmd: &str) {
                             info!("Published Recipe with id: {}", id);
 
                             // Step 2: Write Log:
-                            info!("Recipe update log appended: {}->{}", old_recipe.id, new_recipe.id);
+                            info!(
+                                "Recipe update log appended: {}->{}",
+                                old_recipe.id, new_recipe.id
+                            );
                             let timestamp = GlobalClock::timestamp().await;
-                            OpLogHandler::append(OpEnum::Update(old_recipe.id, new_recipe.id, timestamp).to_string().as_bytes()).await.unwrap();
+                            OpLogHandler::append(
+                                OpEnum::Update(old_recipe.id, new_recipe.id, timestamp)
+                                    .to_string()
+                                    .as_bytes(),
+                            )
+                            .await
+                            .unwrap();
                         }
                     }
                     Err(e) => {
@@ -115,14 +131,18 @@ pub async fn handle_list_recipes(cmd: &str) {
                 mode: ListMode::All,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes()).await.unwrap();
+            SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes())
+                .await
+                .unwrap();
         }
         Some(recipes_peer_id) => {
             let req = ListRequest {
                 mode: ListMode::One(recipes_peer_id.to_owned()),
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes()).await.unwrap();
+            SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes())
+                .await
+                .unwrap();
         }
         None => {
             match read_local_recipes().await {

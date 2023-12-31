@@ -1,7 +1,7 @@
 use std::time::Duration;
 
-use libp2p::{gossipsub, mdns};
 use libp2p::swarm::SwarmEvent;
+use libp2p::{gossipsub, mdns};
 use log::info;
 use tokio::sync::mpsc;
 
@@ -11,9 +11,9 @@ use crate::models::ListResponse;
 use crate::swarm::handler::SwarmHandler;
 use crate::sync::progress_manager::ProgressManager;
 
+mod gossip_event;
 pub mod handler;
 mod mdns_event;
-mod gossip_event;
 
 pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListResponse>) {
     let event = SwarmHandler::select_next_some().await;
@@ -22,7 +22,13 @@ pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListRespo
     match event {
         SwarmEvent::Behaviour(recipe_behaviours) => match recipe_behaviours {
             RecipeBehaviourEvent::Gossip(gossip_event) => match gossip_event {
-                gossipsub::Event::Message { propagation_source, message, .. } => gossip_event::handle_message(propagation_source, message, response_sender).await,
+                gossipsub::Event::Message {
+                    propagation_source,
+                    message,
+                    ..
+                } => {
+                    gossip_event::handle_message(propagation_source, message, response_sender).await
+                }
                 gossipsub::Event::Subscribed { peer_id, topic } => {
                     let topic_id = topic.to_string();
 
@@ -39,9 +45,17 @@ pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListRespo
                             for _ in 0..3 {
                                 ProgressManager::list_keys().await;
                                 // We've received the INIT_SYNC message, and update the progress, then sync the data!
-                                if let Some(_sync_status) = ProgressManager::get_status(peer_id).await {
-                                    progress = ProgressManager::get_key(&peer_id.to_string()).await.unwrap().unwrap_or_default();
-                                    info!("Get synced progress success: {}, progress: {}", peer_id, progress);
+                                if let Some(_sync_status) =
+                                    ProgressManager::get_status(peer_id).await
+                                {
+                                    progress = ProgressManager::get_key(&peer_id.to_string())
+                                        .await
+                                        .unwrap()
+                                        .unwrap_or_default();
+                                    info!(
+                                        "Get synced progress success: {}, progress: {}",
+                                        peer_id, progress
+                                    );
                                     break;
                                 }
                                 tokio::time::sleep(Duration::from_secs(2)).await;
@@ -59,11 +73,15 @@ pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListRespo
                     }
                 }
                 gossipsub::Event::GossipsubNotSupported { .. } => {}
-            }
+            },
 
             RecipeBehaviourEvent::Mdns(mdns_event) => match mdns_event {
-                mdns::Event::Discovered(discovered_list) => mdns_event::handle_discovered(discovered_list).await,
-                mdns::Event::Expired(expired_list) => mdns_event::handle_expired(expired_list).await,
+                mdns::Event::Discovered(discovered_list) => {
+                    mdns_event::handle_discovered(discovered_list).await
+                }
+                mdns::Event::Expired(expired_list) => {
+                    mdns_event::handle_expired(expired_list).await
+                }
             },
         },
         // Because bi-directional connection will be established, so we will get two ConnectionEstablished events when one peer joined!

@@ -8,13 +8,20 @@ use log::{error, info, warn};
 use tokio::sync::mpsc;
 
 use crate::consts::{INIT_SYNC_STR, PEER_ID, RECIPE_TOPIC};
-use crate::models::{InitSyncMessage, ListMode, ListRequest, ListResponse, SyncDataRequest, SyncDataResponse, SyncLogData};
+use crate::models::{
+    InitSyncMessage, ListMode, ListRequest, ListResponse, SyncDataRequest, SyncDataResponse,
+    SyncLogData,
+};
 use crate::storage::{merge_diff, merge_recipes, read_local_recipes};
 use crate::swarm::handler::SwarmHandler;
 use crate::sync::models::OpEnum;
 use crate::sync::progress_manager::{ProgressManager, SyncStatus};
 
-pub(crate) async fn handle_message(propagation_source: PeerId, msg: Message, response_sender: mpsc::UnboundedSender<ListResponse>) {
+pub(crate) async fn handle_message(
+    propagation_source: PeerId,
+    msg: Message,
+    response_sender: mpsc::UnboundedSender<ListResponse>,
+) {
     let topic_id = msg.topic.to_string();
     warn!("Got swarm message: {:?}", msg);
 
@@ -44,27 +51,42 @@ pub(crate) async fn handle_message(propagation_source: PeerId, msg: Message, res
                 }
             }
         } else {
-            error!("Unable to serialize message: {:?} from type: {}", msg, &RECIPE_TOPIC.to_string());
+            error!(
+                "Unable to serialize message: {:?} from type: {}",
+                msg,
+                &RECIPE_TOPIC.to_string()
+            );
         }
     } else if topic_id.eq(INIT_SYNC_STR) {
         // We received the INIT_SYNC message, this means that we are the follow peer
         if let Ok(init_sync_msg) = serde_json::from_slice::<InitSyncMessage>(&msg.data) {
             // Step 1: Subscribe to the `sync-follow-initiate` topic to listen sync data from initiate here!
-            let (send_sync_topic, receive_sync_topic) = ProgressManager::get_sync_topics(&init_sync_msg.follow_peer.to_string(), &init_sync_msg.initiate_peer.to_string());
+            let (send_sync_topic, receive_sync_topic) = ProgressManager::get_sync_topics(
+                &init_sync_msg.follow_peer.to_string(),
+                &init_sync_msg.initiate_peer.to_string(),
+            );
             SwarmHandler::subscribe(&send_sync_topic).await.unwrap();
             SwarmHandler::subscribe(&receive_sync_topic).await.unwrap();
 
             // Step 2: Add Status to the ProgressManager
             // This will trigger the sync-initiate-follow topic to start send sync data!
-            ProgressManager::set_status(PeerId::from_str(&init_sync_msg.initiate_peer).unwrap(), SyncStatus::Start(Local::now().timestamp_millis())).await;
+            ProgressManager::set_status(
+                PeerId::from_str(&init_sync_msg.initiate_peer).unwrap(),
+                SyncStatus::Start(Local::now().timestamp_millis()),
+            )
+            .await;
 
             // Step 3: Save peer sync progress
-            ProgressManager::set_key(&propagation_source.to_string(), init_sync_msg.progress).await.unwrap();
+            ProgressManager::set_key(&propagation_source.to_string(), init_sync_msg.progress)
+                .await
+                .unwrap();
         } else {
-            error!("Unable to serialize message: {:?} from type: {}", msg, INIT_SYNC_STR);
+            error!(
+                "Unable to serialize message: {:?} from type: {}",
+                msg, INIT_SYNC_STR
+            );
         }
     } else if topic_id.starts_with("sync-") {
-
         // If we received the InitSyncMessage in the `sync-old-new` topic, which means that the new peer joined into the topic
         //  and is announcing its sync progress
         // if let Ok(sync_message) = serde_json::from_slice::<InitSyncMessage>(&msg.data) {
@@ -81,9 +103,11 @@ pub(crate) async fn handle_message(propagation_source: PeerId, msg: Message, res
             // When received SyncLogData message, we compute the whole log, and then query for the data
 
             // Step 1: Compute diff
-            let logs: Vec<Option<OpEnum>> = sync_log_message.logs.into_iter().map(|item| {
-                item.map(|x| OpEnum::try_from(x).unwrap())
-            }).collect();
+            let logs: Vec<Option<OpEnum>> = sync_log_message
+                .logs
+                .into_iter()
+                .map(|item| item.map(|x| OpEnum::try_from(x).unwrap()))
+                .collect();
             let query_ids = merge_diff(logs).await.unwrap();
 
             // Step 2: Send sync data request
@@ -92,7 +116,9 @@ pub(crate) async fn handle_message(propagation_source: PeerId, msg: Message, res
                 progress_idx: sync_log_message.progress_idx,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            SwarmHandler::publish(msg.topic.clone(), json).await.unwrap();
+            SwarmHandler::publish(msg.topic.clone(), json)
+                .await
+                .unwrap();
         } else if let Ok(sync_data_req) = serde_json::from_slice::<SyncDataRequest>(&msg.data) {
             // When received SyncDataRequest, we send all data correspond to the ids, then update sync table and remove the status
 
@@ -104,10 +130,14 @@ pub(crate) async fn handle_message(propagation_source: PeerId, msg: Message, res
                 progress_idx: sync_data_req.progress_idx,
             };
             let json = serde_json::to_string(&resp).expect("can jsonify request");
-            SwarmHandler::publish(msg.topic.clone(), json).await.unwrap();
+            SwarmHandler::publish(msg.topic.clone(), json)
+                .await
+                .unwrap();
 
             // Step 2: Update sync progress table
-            ProgressManager::set_key(&propagation_source.to_string(), sync_data_req.progress_idx).await.unwrap();
+            ProgressManager::set_key(&propagation_source.to_string(), sync_data_req.progress_idx)
+                .await
+                .unwrap();
 
             // Step 3: Remove sync status
             ProgressManager::remove_status(propagation_source).await;
@@ -118,13 +148,18 @@ pub(crate) async fn handle_message(propagation_source: PeerId, msg: Message, res
             merge_recipes(sync_data_resp.recipes).await.unwrap();
 
             // Step 2: Update sync progress table
-            ProgressManager::set_key(&propagation_source.to_string(), sync_data_resp.progress_idx).await.unwrap();
+            ProgressManager::set_key(&propagation_source.to_string(), sync_data_resp.progress_idx)
+                .await
+                .unwrap();
 
             // Step 3: Remove sync status
             ProgressManager::remove_status(propagation_source).await;
         }
     } else {
-        error!("Unable to serialize message: {:?} from type: {}", msg, topic_id);
+        error!(
+            "Unable to serialize message: {:?} from type: {}",
+            msg, topic_id
+        );
     }
 }
 

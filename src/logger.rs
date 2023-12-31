@@ -55,10 +55,12 @@ pub fn init(level: Option<LogLevel>) {
 }
 
 fn get_log_level(level: Option<LogLevel>) -> LogLevel {
-    level.unwrap_or_else(|| env::var(LOG_LEVEL)
-        .unwrap_or_else(|_| "Info".to_string())
-        .as_str()
-        .into())
+    level.unwrap_or_else(|| {
+        env::var(LOG_LEVEL)
+            .unwrap_or_else(|_| "Info".to_string())
+            .as_str()
+            .into()
+    })
 }
 
 impl Log for Logger {

@@ -7,22 +7,25 @@ use tokio::sync::mpsc;
 
 use crate::consts::{INIT_SYNC_TOPIC, PEER_ID, RECIPE_TOPIC};
 use crate::dir::init_data;
-use crate::handlers::{handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes, handle_publish_recipe};
+use crate::handlers::{
+    handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes,
+    handle_publish_recipe,
+};
 use crate::models::EventType;
 use crate::swarm::handle_swarm_event;
 use crate::swarm::handler::SwarmHandler;
 
 mod behaviour;
 mod consts;
-mod handlers;
-mod models;
 mod dir;
-mod sync;
-mod storage;
-mod swarm;
+mod handlers;
 mod hlc;
 mod id_generator;
 mod logger;
+mod models;
+mod storage;
+mod swarm;
+mod sync;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
@@ -31,8 +34,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     info!("Peer Id: {}", PEER_ID.clone());
     init_data();
 
-    SwarmHandler::subscribe(&INIT_SYNC_TOPIC.clone()).await.unwrap();
-    SwarmHandler::subscribe(&RECIPE_TOPIC.clone()).await.unwrap();
+    SwarmHandler::subscribe(&INIT_SYNC_TOPIC.clone())
+        .await
+        .unwrap();
+    SwarmHandler::subscribe(&RECIPE_TOPIC.clone())
+        .await
+        .unwrap();
 
     let (response_sender, mut response_rcv) = mpsc::unbounded_channel();
     let mut stdin = tokio::io::BufReader::new(tokio::io::stdin()).lines();
@@ -49,7 +56,9 @@ async fn main() -> Result<(), Box<dyn Error>> {
             match event {
                 EventType::Response(resp) => {
                     let json = serde_json::to_string(&resp).expect("can jsonify response");
-                    SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes()).await.unwrap();
+                    SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes())
+                        .await
+                        .unwrap();
                 }
                 EventType::Input(line) => match line.as_str() {
                     "ls p" => handle_list_peers().await,

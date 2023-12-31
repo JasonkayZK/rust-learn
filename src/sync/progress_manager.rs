@@ -23,7 +23,6 @@ static PROGRESS_MANAGER: OnceLock<Mutex<ProgressManager>> = OnceLock::new();
 pub enum SyncStatus {
     // Start timestamp
     Start(i64),
-
     // Finished status will not be used, since the entry will be removed when finished
     // Finished,
 }
@@ -108,7 +107,10 @@ impl ProgressManager {
     }
 
     pub async fn init_sync_data(new_peer_id: PeerId) {
-        let progress = Self::get_key(&new_peer_id.to_string()).await.unwrap().unwrap_or_default();
+        let progress = Self::get_key(&new_peer_id.to_string())
+            .await
+            .unwrap()
+            .unwrap_or_default();
         let mut manager = Self::global().await.lock().await;
 
         if let Some(status) = manager.status_table.get(&new_peer_id) {
@@ -117,12 +119,16 @@ impl ProgressManager {
         }
 
         // Step 1: Create and subscribe a new topic for the two peers: sync-old-new
-        let (send_sync_topic, receive_sync_topic) = Self::get_sync_topics(&PEER_ID.to_string(), &new_peer_id.to_string());
+        let (send_sync_topic, receive_sync_topic) =
+            Self::get_sync_topics(&PEER_ID.to_string(), &new_peer_id.to_string());
         SwarmHandler::subscribe(&send_sync_topic).await.unwrap();
         SwarmHandler::subscribe(&receive_sync_topic).await.unwrap();
 
         // Step 2: Add sync status to the table
-        manager.status_table.insert(new_peer_id, SyncStatus::Start(Local::now().timestamp_millis()));
+        manager.status_table.insert(
+            new_peer_id,
+            SyncStatus::Start(Local::now().timestamp_millis()),
+        );
 
         // Step 3: Send sync message to the follow peer
         let req = InitSyncMessage {
@@ -131,7 +137,9 @@ impl ProgressManager {
             follow_peer: new_peer_id.to_string(),
         };
         let json = serde_json::to_string(&req).expect("can jsonify SyncMessage request");
-        SwarmHandler::publish(INIT_SYNC_TOPIC.clone(), json.as_bytes()).await.unwrap();
+        SwarmHandler::publish(INIT_SYNC_TOPIC.clone(), json.as_bytes())
+            .await
+            .unwrap();
     }
 
     /// For peer node exit the network, that will unsubscribe the init-sync topic
@@ -148,9 +156,12 @@ impl ProgressManager {
                 warn!("Data sync is undergoing: {:?}, now stop!", status);
 
                 // Step 1: Unsubscribe the sync topic
-                let (send_sync_topic, receive_sync_topic) = Self::get_sync_topics(&PEER_ID.to_string(), &new_peer_id.to_string());
+                let (send_sync_topic, receive_sync_topic) =
+                    Self::get_sync_topics(&PEER_ID.to_string(), &new_peer_id.to_string());
                 SwarmHandler::unsubscribe(&send_sync_topic).await.unwrap();
-                SwarmHandler::unsubscribe(&receive_sync_topic).await.unwrap();
+                SwarmHandler::unsubscribe(&receive_sync_topic)
+                    .await
+                    .unwrap();
 
                 // Step 2: Remove sync status entry in the table
                 manager.status_table.remove(&new_peer_id);
@@ -165,13 +176,17 @@ impl ProgressManager {
         let json = serde_json::to_string(&SyncLogData {
             logs,
             progress_idx: snapshot_progress_idx,
-        }).expect("can jsonify send_sync_data message");
+        })
+        .expect("can jsonify send_sync_data message");
         warn!("Send sync data: topic: {}, range: {:?}", topic, range);
         SwarmHandler::publish(topic, json).await.unwrap();
         warn!("Send sync data successfully!");
     }
 
-    pub fn get_sync_topics(initiate_peer_id: &str, follow_peer_id: &str) -> (IdentTopic, IdentTopic) {
+    pub fn get_sync_topics(
+        initiate_peer_id: &str,
+        follow_peer_id: &str,
+    ) -> (IdentTopic, IdentTopic) {
         (
             IdentTopic::new(format!("sync-{}-{}", follow_peer_id, initiate_peer_id)),
             IdentTopic::new(format!("sync-{}-{}", initiate_peer_id, follow_peer_id)),

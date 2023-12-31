@@ -19,9 +19,7 @@ impl OpLogHandler {
             block_on(async {
                 let storage = Storage::new_disk(&op_log_dir(), false).await.unwrap();
                 let core = HypercoreBuilder::new(storage).build().await.unwrap();
-                Mutex::new(Self {
-                    core
-                })
+                Mutex::new(Self { core })
             })
         })
     }
