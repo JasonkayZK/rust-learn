@@ -1,32 +1,26 @@
 use std::sync::OnceLock;
 
-use libp2p::futures::executor::block_on;
-use sonyflake::Sonyflake;
+use rand::Rng;
+use snowflake::SnowflakeIdGenerator;
 use tokio::sync::Mutex;
 
 static GLOBAL_ID_GENERATOR: OnceLock<Mutex<GlobalId>> = OnceLock::new();
 
 pub struct GlobalId {
-    generator: Sonyflake,
+    generator: SnowflakeIdGenerator,
 }
 
 impl GlobalId {
     pub async fn next_id() -> u64 {
-        Self::global()
-            .await
-            .lock()
-            .await
-            .generator
-            .next_id()
-            .unwrap()
+        Self::global().lock().await.generator.generate() as u64
     }
 
-    async fn global() -> &'static Mutex<Self> {
+    fn global() -> &'static Mutex<Self> {
         GLOBAL_ID_GENERATOR.get_or_init(|| {
-            block_on(async {
-                Mutex::new(Self {
-                    generator: Sonyflake::new().unwrap(),
-                })
+            let mut rng = rand::thread_rng();
+            let random_number = rng.gen();
+            Mutex::new(Self {
+                generator: SnowflakeIdGenerator::new(1, random_number),
             })
         })
     }

@@ -24,4 +24,5 @@ roaring = { version = "0.10.2", features = ["serde"] }
 uhlc = "0.6.3"
 redb = "1.4.0"
 chrono = "0.4.31"
-sonyflake = "0.2.0"
+rs-snowflake = "0.6.0"
+rand = "0.8.5"
