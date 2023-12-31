@@ -40,7 +40,7 @@ pub async fn handle_list_sync_progress() {
                 info!(
                     "We've sync from peer {} to the log index: {}",
                     x,
-                    p.get_first_checkpoint()
+                    p.get_first_unsynced_index()
                 );
             }
             None => {

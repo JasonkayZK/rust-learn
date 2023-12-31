@@ -9,7 +9,8 @@ use crate::behaviour::RecipeBehaviourEvent;
 use crate::consts::{INIT_SYNC_STR, PEER_ID};
 use crate::models::ListResponse;
 use crate::swarm::handler::SwarmHandler;
-use crate::sync::progress_manager::ProgressManager;
+use crate::sync::progress::SyncProgress;
+use crate::sync::progress_manager::{ProgressManager, SyncStatus};
 
 mod gossip_event;
 pub mod handler;
@@ -41,28 +42,25 @@ pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListRespo
                         // Then start to send the sync data!
                         tokio::spawn(async move {
                             // Send the sync data to the initiate peer
-                            let mut start_checkpoint_idx = 0;
+                            let mut peer_sync_progress_snapshot = SyncProgress::new();
                             for _ in 0..3 {
                                 // ProgressManager::list_keys().await;
                                 // We've received the INIT_SYNC message, and update the progress, then sync the data!
-                                if let Some(_sync_status) =
+                                if let Some(req_peer_sync_progress_snapshot) =
                                     ProgressManager::get_status(peer_id).await
                                 {
-                                    start_checkpoint_idx =
-                                        ProgressManager::get_sync_progress(&peer_id.to_string())
-                                            .await
-                                            .unwrap()
-                                            .unwrap_or_default()
-                                            .get_first_checkpoint();
-                                    info!(
-                                        "Get synced progress success: {}, progress: {}",
-                                        peer_id, start_checkpoint_idx
-                                    );
+                                    match req_peer_sync_progress_snapshot {
+                                        SyncStatus::Start(req_peer_sync_progress_snapshot) => {
+                                            peer_sync_progress_snapshot =
+                                                req_peer_sync_progress_snapshot
+                                        }
+                                    }
                                     break;
                                 }
                                 tokio::time::sleep(Duration::from_secs(2)).await;
                             }
-                            ProgressManager::send_sync_data(topic, start_checkpoint_idx).await;
+                            ProgressManager::send_sync_data(topic, peer_sync_progress_snapshot)
+                                .await;
                         });
                     }
                 }

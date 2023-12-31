@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// The progress will be increased after received `SyncDataResponse` which means we finally progressed all the corresponding logs!
 ///
 /// SyncLogData -> SyncDataRequest -> SyncDataResponse
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone, Serialize, Deserialize)]
 pub struct SyncProgress {
     bitmap: RoaringTreemap,
 }
@@ -30,7 +30,7 @@ impl SyncProgress {
         }
     }
 
-    pub fn get_first_checkpoint(&self) -> u64 {
+    pub fn get_first_unsynced_index(&self) -> u64 {
         match self.bitmap.max() {
             None => 0,
             Some(right_bound) => {
@@ -47,7 +47,8 @@ impl SyncProgress {
         }
     }
 
-    pub fn get_all_unsynced_indexes(&self) -> Vec<u64> {
+    /// Indexes should be continuously!
+    pub fn get_all_unsynced_sparsed_indexes(&self) -> Vec<u64> {
         match self.bitmap.max() {
             None => vec![],
             Some(right_bound) => {
@@ -57,6 +58,20 @@ impl SyncProgress {
                 xor.iter().collect()
             }
         }
+    }
+
+    /// Calculate the log indexes that we haven't synced according to `the peer's log length`!
+    pub fn calculate_unsynced_indexes(&self, peer_log_length: u64) -> Vec<u64> {
+        let max = self.bitmap.max().unwrap_or_default();
+        // The data file has been deleted, here we should reset the sync progress
+        if peer_log_length < max {
+            return (0..peer_log_length).collect();
+        }
+
+        let mut mask = RoaringTreemap::new();
+        mask.insert_range(0..peer_log_length);
+        let xor = mask.bitxor(&self.bitmap);
+        xor.iter().collect()
     }
 
     pub fn set_range(&mut self, v: Range<u64>) {
@@ -178,7 +193,7 @@ mod tests {
         x.set_range(0..10);
         x.set_values(vec![13, 15, 17]);
 
-        assert_eq!(x.get_first_checkpoint(), 10);
+        assert_eq!(x.get_first_unsynced_index(), 10);
     }
 
     #[test]
@@ -186,7 +201,7 @@ mod tests {
         let mut x = SyncProgress::new();
         x.set_range(0..10);
 
-        assert_eq!(x.get_first_checkpoint(), 10);
+        assert_eq!(x.get_first_unsynced_index(), 10);
     }
 
     #[test]
@@ -195,13 +210,39 @@ mod tests {
         x.set_range(0..10);
         x.set_values(vec![13, 15, 17]);
 
-        assert_eq!(x.get_all_unsynced_indexes(), vec![10, 11, 12, 14, 16]);
+        assert_eq!(
+            x.get_all_unsynced_sparsed_indexes(),
+            vec![10, 11, 12, 14, 16]
+        );
     }
 
     #[test]
     fn test_get_all_unsynced_indexes_2() {
         let mut x = SyncProgress::new();
         x.set_range(0..10);
-        assert!(x.get_all_unsynced_indexes().is_empty());
+        assert!(x.get_all_unsynced_sparsed_indexes().is_empty());
+    }
+
+    #[test]
+    fn test_calculate_unsynced_indexes() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+        assert_eq!(x.calculate_unsynced_indexes(15), vec![10, 11, 12, 13, 14]);
+    }
+
+    #[test]
+    fn test_calculate_unsynced_indexes_2() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+        x.set_values(vec![11, 13]);
+        assert_eq!(x.calculate_unsynced_indexes(15), vec![10, 12, 14]);
+    }
+
+    #[test]
+    fn test_calculate_unsynced_indexes_3() {
+        let mut x = SyncProgress::new();
+        x.set_range(0..10);
+        x.set_values(vec![11, 13]);
+        assert_eq!(x.calculate_unsynced_indexes(5), vec![0, 1, 2, 3, 4]);
     }
 }

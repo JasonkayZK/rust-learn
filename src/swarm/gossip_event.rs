@@ -1,7 +1,6 @@
 use std::convert::TryFrom;
 use std::str::FromStr;
 
-use chrono::Local;
 use libp2p::gossipsub::Message;
 use libp2p::PeerId;
 use log::{error, info};
@@ -72,7 +71,7 @@ pub(crate) async fn handle_message(
             // This will trigger the sync-initiate-follow topic to start send sync data!
             ProgressManager::set_status(
                 PeerId::from_str(&init_sync_msg.initiate_peer).unwrap(),
-                SyncStatus::Start(Local::now().timestamp_millis()),
+                SyncStatus::Start(init_sync_msg.current_sync_progress_snapshot),
             )
             .await;
 

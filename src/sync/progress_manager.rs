@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
-use chrono::Local;
 use libp2p::futures::executor::block_on;
 use libp2p::gossipsub::{IdentTopic, TopicHash};
 use libp2p::PeerId;
@@ -23,7 +22,7 @@ static PROGRESS_MANAGER: OnceLock<Mutex<ProgressManager>> = OnceLock::new();
 #[derive(Debug, Clone)]
 pub enum SyncStatus {
     // Start timestamp
-    Start(i64),
+    Start(SyncProgress),
     // Finished status will not be used, since the entry will be removed when finished
     // Finished,
 }
@@ -128,13 +127,11 @@ impl ProgressManager {
     }
 
     pub async fn init_sync_data(new_peer_id: PeerId) {
-        let progress = Self::get_sync_progress(&new_peer_id.to_string())
+        let current_sync_progress = Self::get_sync_progress(&new_peer_id.to_string())
             .await
-            .unwrap();
-        let first_checkpoint = progress
-            .map(|p| p.get_first_checkpoint())
+            .unwrap()
             .unwrap_or_default();
-        let mut manager = Self::global().await.lock().await;
+        let manager = Self::global().await.lock().await;
 
         if let Some(status) = manager.status_map.get(&new_peer_id) {
             warn!("Their has already been a sync progress: {:?}", status);
@@ -148,14 +145,14 @@ impl ProgressManager {
         SwarmHandler::subscribe(&receive_sync_topic).await.unwrap();
 
         // Step 2: Add sync status to the table
-        manager.status_map.insert(
-            new_peer_id,
-            SyncStatus::Start(Local::now().timestamp_millis()),
-        );
+        // manager.status_map.insert(
+        //     new_peer_id,
+        //     SyncStatus::Start(Local::now().timestamp_millis()),
+        // );
 
         // Step 3: Send sync message to the follow peer
         let req = InitSyncMessage {
-            start_checkpoint_idx: first_checkpoint,
+            current_sync_progress_snapshot: current_sync_progress,
             initiate_peer: PEER_ID.to_string(),
             follow_peer: new_peer_id.to_string(),
         };
@@ -193,15 +190,18 @@ impl ProgressManager {
     }
 
     /// In this version we just send all log data in one time!
-    pub async fn send_sync_data(topic: TopicHash, progress_start_idx: u64) {
+    pub async fn send_sync_data(topic: TopicHash, peer_sync_progress_snapshot: SyncProgress) {
         let snapshot_progress_idx = OpLogHandler::get_info().await.length;
-        let range = progress_start_idx..snapshot_progress_idx;
-        let logs = OpLogHandler::get_batch_by_range(&range).await.unwrap();
-        info!("Sending sync data: topic: {}, range: {:?}", topic, range);
+        let indexes = peer_sync_progress_snapshot.calculate_unsynced_indexes(snapshot_progress_idx);
+        let logs = OpLogHandler::get_batch(&indexes).await.unwrap();
+        info!(
+            "Sending sync data: topic: {}, indexes: {:?}",
+            topic, indexes
+        );
         let json = serde_json::to_string(&SyncLogData {
             logs,
-            progress_indexes: SyncEnum::SyncRange(range),
-            total_log_cnt: snapshot_progress_idx,
+            progress_indexes: SyncEnum::SyncVec(indexes),
+            snapshot_progress_idx,
         })
         .expect("can jsonify send_sync_data message");
         SwarmHandler::publish(topic, json).await.unwrap();
