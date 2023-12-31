@@ -55,6 +55,7 @@ impl ProgressManager {
         })
     }
 
+    #[allow(unused)]
     pub async fn remove_status(peer_id: PeerId) {
         let table = &mut Self::global().await.lock().await.status_map;
         table.remove(&peer_id);
@@ -80,6 +81,7 @@ impl ProgressManager {
         table.insert(peer_id, status);
     }
 
+    #[allow(unused)]
     pub async fn list_keys() {
         let db = &mut Self::global().await.lock().await.db;
         let read_txn = db.begin_read().unwrap();
@@ -99,6 +101,8 @@ impl ProgressManager {
     }
 
     pub async fn set_sync_progress(k: &str, v: SyncEnum) -> Result<(), Error> {
+        warn!("[set_sync_progress] topic: {}, value: {:?}", k, v);
+
         let db = &mut Self::global().await.lock().await.db;
         let read_txn = db.begin_read()?;
         let table = read_txn.open_table(TABLE)?;
@@ -109,12 +113,16 @@ impl ProgressManager {
             SyncEnum::SyncVec(v) => progress.set_values(v),
         }
 
+        warn!("Set progress start: {:?}", progress);
+
         let write_txn = db.begin_write()?;
         {
             let mut table = write_txn.open_table(TABLE)?;
             table.insert(k, progress)?;
         }
         write_txn.commit()?;
+
+        warn!("Set progress finished!");
 
         Ok(())
     }
@@ -124,7 +132,7 @@ impl ProgressManager {
             .await
             .unwrap();
         let first_checkpoint = progress
-            .map(|p| p.get_first_checkpoint().unwrap_or_default())
+            .map(|p| p.get_first_checkpoint())
             .unwrap_or_default();
         let mut manager = Self::global().await.lock().await;
 

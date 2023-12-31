@@ -9,7 +9,7 @@ use crate::consts::{INIT_SYNC_TOPIC, PEER_ID, RECIPE_TOPIC};
 use crate::dir::init_data;
 use crate::handlers::{
     handle_create_recipe, handle_delete_recipe, handle_list_peers, handle_list_recipes,
-    handle_publish_recipe,
+    handle_list_sync_progress, handle_publish_recipe,
 };
 use crate::models::EventType;
 use crate::swarm::handle_swarm_event;
@@ -62,6 +62,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 }
                 EventType::Input(line) => match line.as_str() {
                     "ls p" => handle_list_peers().await,
+                    "ls sp" => handle_list_sync_progress().await,
                     cmd if cmd.starts_with("create r") => handle_create_recipe(cmd).await,
                     cmd if cmd.starts_with("delete r") => handle_delete_recipe(cmd).await,
                     cmd if cmd.starts_with("publish r") => handle_publish_recipe(cmd).await,

@@ -30,8 +30,11 @@ impl SyncProgress {
         }
     }
 
-    pub fn get_first_checkpoint(&self) -> Option<u64> {
-        self.bitmap.min()
+    pub fn get_first_checkpoint(&self) -> u64 {
+        match self.bitmap.max() {
+            None => 0,
+            Some(right_bound) => right_bound + 1,
+        }
     }
 
     pub fn set_range(&mut self, v: Range<u64>) {

@@ -41,29 +41,28 @@ pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListRespo
                         // Then start to send the sync data!
                         tokio::spawn(async move {
                             // Send the sync data to the initiate peer
-                            let mut progress = 0;
+                            let mut start_checkpoint_idx = 0;
                             for _ in 0..3 {
-                                ProgressManager::list_keys().await;
+                                // ProgressManager::list_keys().await;
                                 // We've received the INIT_SYNC message, and update the progress, then sync the data!
                                 if let Some(_sync_status) =
                                     ProgressManager::get_status(peer_id).await
                                 {
-                                    progress =
+                                    start_checkpoint_idx =
                                         ProgressManager::get_sync_progress(&peer_id.to_string())
                                             .await
                                             .unwrap()
                                             .unwrap_or_default()
-                                            .get_first_checkpoint()
-                                            .unwrap_or_default();
+                                            .get_first_checkpoint();
                                     info!(
                                         "Get synced progress success: {}, progress: {}",
-                                        peer_id, progress
+                                        peer_id, start_checkpoint_idx
                                     );
                                     break;
                                 }
                                 tokio::time::sleep(Duration::from_secs(2)).await;
                             }
-                            ProgressManager::send_sync_data(topic, progress).await;
+                            ProgressManager::send_sync_data(topic, start_checkpoint_idx).await;
                         });
                     }
                 }

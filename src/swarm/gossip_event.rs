@@ -138,9 +138,6 @@ pub(crate) async fn handle_message(
             // ProgressManager::set_sync_progress(&propagation_source.to_string(), sync_data_req.progress_idx)
             //     .await
             //     .unwrap();
-
-            // Step 3: Remove sync status
-            ProgressManager::remove_status(propagation_source).await;
         } else if let Ok(sync_data_resp) = serde_json::from_slice::<SyncDataResponse>(&msg.data) {
             // When received SyncDataResponse, we just merge the data, then update sync table and remove the status
 
@@ -154,9 +151,6 @@ pub(crate) async fn handle_message(
             )
             .await
             .unwrap();
-
-            // Step 3: Remove sync status
-            ProgressManager::remove_status(propagation_source).await;
         }
     } else {
         error!(

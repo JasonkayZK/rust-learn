@@ -11,6 +11,7 @@ use crate::storage::{read_local_recipes, write_local_recipes};
 use crate::swarm::handler::SwarmHandler;
 use crate::sync::models::OpEnum;
 use crate::sync::oplog::OpLogHandler;
+use crate::sync::progress_manager::ProgressManager;
 
 /// List all peers in P2P network
 ///
@@ -24,6 +25,29 @@ pub async fn handle_list_peers() {
         unique_peers.insert(peer);
     }
     unique_peers.iter().for_each(|p| info!("{}", p));
+}
+
+/// List all peers' sync progresses!
+pub async fn handle_list_sync_progress() {
+    let peers = SwarmHandler::discovered_nodes().await;
+
+    for x in peers {
+        match ProgressManager::get_sync_progress(&x.to_string())
+            .await
+            .unwrap()
+        {
+            Some(p) => {
+                info!(
+                    "We've sync from peer {} to the log index: {}",
+                    x,
+                    p.get_first_checkpoint()
+                );
+            }
+            None => {
+                info!("We haven't sync from peer: {} yet!", x);
+            }
+        };
+    }
 }
 
 /// Create recipe
