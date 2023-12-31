@@ -14,8 +14,9 @@ use crate::dir::sync_log_file;
 use crate::models::{InitSyncMessage, SyncLogData};
 use crate::swarm::handler::SwarmHandler;
 use crate::sync::oplog::OpLogHandler;
+use crate::sync::progress::{SyncEnum, SyncProgress};
 
-const TABLE: TableDefinition<&str, u64> = TableDefinition::new("sync_progress");
+const TABLE: TableDefinition<&str, SyncProgress> = TableDefinition::new("sync_progress");
 
 static PROGRESS_MANAGER: OnceLock<Mutex<ProgressManager>> = OnceLock::new();
 
@@ -28,8 +29,11 @@ pub enum SyncStatus {
 }
 
 pub struct ProgressManager {
+    /// db stores the sync progress
     db: Database,
-    status_table: HashMap<PeerId, SyncStatus>,
+
+    /// status map stores the sync status
+    status_map: HashMap<PeerId, SyncStatus>,
 }
 
 impl ProgressManager {
@@ -40,19 +44,19 @@ impl ProgressManager {
                 let write_txn = db.begin_write().unwrap();
                 {
                     let mut table = write_txn.open_table(TABLE).unwrap();
-                    table.insert("init", &0).unwrap();
+                    table.insert("init", SyncProgress::new()).unwrap();
                 }
                 write_txn.commit().unwrap();
                 Mutex::new(Self {
                     db,
-                    status_table: HashMap::new(),
+                    status_map: HashMap::new(),
                 })
             })
         })
     }
 
     pub async fn remove_status(peer_id: PeerId) {
-        let table = &mut Self::global().await.lock().await.status_table;
+        let table = &mut Self::global().await.lock().await.status_map;
         table.remove(&peer_id);
     }
 
@@ -62,7 +66,7 @@ impl ProgressManager {
             return None;
         }
 
-        let table = &mut Self::global().await.lock().await.status_table;
+        let table = &mut Self::global().await.lock().await.status_map;
         table.get(&peer_id).cloned()
     }
 
@@ -72,7 +76,7 @@ impl ProgressManager {
             return;
         }
 
-        let table = &mut Self::global().await.lock().await.status_table;
+        let table = &mut Self::global().await.lock().await.status_map;
         table.insert(peer_id, status);
     }
 
@@ -82,11 +86,11 @@ impl ProgressManager {
         let table = read_txn.open_table(TABLE).unwrap();
         table.iter().unwrap().for_each(|x| {
             let x = x.unwrap();
-            info!("[Redb] got key: {}, value: {}", x.0.value(), x.1.value());
+            info!("[Redb] got key: {}, value: {:?}", x.0.value(), x.1.value());
         });
     }
 
-    pub async fn get_key(k: &str) -> Result<Option<u64>, Error> {
+    pub async fn get_sync_progress(k: &str) -> Result<Option<SyncProgress>, Error> {
         let db = &mut Self::global().await.lock().await.db;
         let read_txn = db.begin_read()?;
         let table = read_txn.open_table(TABLE)?;
@@ -94,12 +98,21 @@ impl ProgressManager {
         Ok(ret)
     }
 
-    pub async fn set_key(k: &str, v: u64) -> Result<(), Error> {
+    pub async fn set_sync_progress(k: &str, v: SyncEnum) -> Result<(), Error> {
         let db = &mut Self::global().await.lock().await.db;
+        let read_txn = db.begin_read()?;
+        let table = read_txn.open_table(TABLE)?;
+        let mut progress = table.get(k)?.map(|val| val.value()).unwrap_or_default();
+
+        match v {
+            SyncEnum::SyncRange(range) => progress.set_range(range),
+            SyncEnum::SyncVec(v) => progress.set_values(v),
+        }
+
         let write_txn = db.begin_write()?;
         {
             let mut table = write_txn.open_table(TABLE)?;
-            table.insert(k, v)?;
+            table.insert(k, progress)?;
         }
         write_txn.commit()?;
 
@@ -107,13 +120,15 @@ impl ProgressManager {
     }
 
     pub async fn init_sync_data(new_peer_id: PeerId) {
-        let progress = Self::get_key(&new_peer_id.to_string())
+        let progress = Self::get_sync_progress(&new_peer_id.to_string())
             .await
-            .unwrap()
+            .unwrap();
+        let first_checkpoint = progress
+            .map(|p| p.get_first_checkpoint().unwrap_or_default())
             .unwrap_or_default();
         let mut manager = Self::global().await.lock().await;
 
-        if let Some(status) = manager.status_table.get(&new_peer_id) {
+        if let Some(status) = manager.status_map.get(&new_peer_id) {
             warn!("Their has already been a sync progress: {:?}", status);
             return;
         }
@@ -125,14 +140,14 @@ impl ProgressManager {
         SwarmHandler::subscribe(&receive_sync_topic).await.unwrap();
 
         // Step 2: Add sync status to the table
-        manager.status_table.insert(
+        manager.status_map.insert(
             new_peer_id,
             SyncStatus::Start(Local::now().timestamp_millis()),
         );
 
         // Step 3: Send sync message to the follow peer
         let req = InitSyncMessage {
-            progress,
+            start_checkpoint_idx: first_checkpoint,
             initiate_peer: PEER_ID.to_string(),
             follow_peer: new_peer_id.to_string(),
         };
@@ -146,7 +161,7 @@ impl ProgressManager {
     pub async fn stop_sync_data(new_peer_id: PeerId) {
         let mut manager = Self::global().await.lock().await;
 
-        match manager.status_table.get(&new_peer_id) {
+        match manager.status_map.get(&new_peer_id) {
             // No sync task yet
             None => {
                 info!("Data sync has finished, exit sync data");
@@ -164,21 +179,23 @@ impl ProgressManager {
                     .unwrap();
 
                 // Step 2: Remove sync status entry in the table
-                manager.status_table.remove(&new_peer_id);
+                manager.status_map.remove(&new_peer_id);
             }
         }
     }
 
+    /// In this version we just send all log data in one time!
     pub async fn send_sync_data(topic: TopicHash, progress_start_idx: u64) {
         let snapshot_progress_idx = OpLogHandler::get_info().await.length;
-        let range: Vec<u64> = (progress_start_idx..snapshot_progress_idx).collect();
-        let logs = OpLogHandler::get_batch(range.as_slice()).await.unwrap();
+        let range = progress_start_idx..snapshot_progress_idx;
+        let logs = OpLogHandler::get_batch_by_range(&range).await.unwrap();
+        info!("Sending sync data: topic: {}, range: {:?}", topic, range);
         let json = serde_json::to_string(&SyncLogData {
             logs,
-            progress_idx: snapshot_progress_idx,
+            progress_indexes: SyncEnum::SyncRange(range),
+            total_log_cnt: snapshot_progress_idx,
         })
         .expect("can jsonify send_sync_data message");
-        info!("Send sync data: topic: {}, range: {:?}", topic, range);
         SwarmHandler::publish(topic, json).await.unwrap();
         info!("Send sync data successfully!");
     }

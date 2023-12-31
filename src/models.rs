@@ -3,6 +3,8 @@ use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
 
+use crate::sync::progress::SyncEnum;
+
 /// The recipe data for cook
 #[derive(Debug, Hash, Clone, Serialize, Deserialize)]
 pub struct Recipe {
@@ -42,27 +44,29 @@ pub struct ListResponse {
 ///  - sync-{follow_peer}-{initiate_peer}: follow_peer send sync data to initiate_peer
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InitSyncMessage {
-    pub progress: u64,
+    pub start_checkpoint_idx: u64,
     pub initiate_peer: String,
     pub follow_peer: String,
 }
 
+/// The synced logs data
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncLogData {
     pub logs: Vec<Option<Vec<u8>>>,
-    pub progress_idx: u64,
+    pub progress_indexes: SyncEnum,
+    pub total_log_cnt: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncDataRequest {
     pub recipe_ids: Vec<u64>,
-    pub progress_idx: u64,
+    pub progress_indexes: SyncEnum,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct SyncDataResponse {
     pub recipes: HashMap<u64, Recipe>,
-    pub progress_idx: u64,
+    pub progress_indexes: SyncEnum,
 }
 
 pub enum EventType {

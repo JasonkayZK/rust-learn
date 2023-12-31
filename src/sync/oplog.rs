@@ -1,3 +1,4 @@
+use std::ops::Range;
 use std::sync::OnceLock;
 
 use hypercore::{AppendOutcome, Hypercore, HypercoreBuilder, HypercoreError, Info, Storage};
@@ -29,12 +30,14 @@ impl OpLogHandler {
         core.append(data).await
     }
 
-    pub async fn get_batch(indexes: &[u64]) -> Result<Vec<Option<Vec<u8>>>, HypercoreError> {
+    pub async fn get_batch_by_range(
+        indexes: &Range<u64>,
+    ) -> Result<Vec<Option<Vec<u8>>>, HypercoreError> {
         let core = &mut Self::global().await.lock().await.core;
         let mut ret = vec![];
 
-        for idx in indexes {
-            let v = core.get(*idx).await?;
+        for idx in indexes.start..indexes.end {
+            let v = core.get(idx).await?;
             ret.push(v);
         }
 

@@ -48,10 +48,13 @@ pub async fn handle_swarm_event(response_sender: mpsc::UnboundedSender<ListRespo
                                 if let Some(_sync_status) =
                                     ProgressManager::get_status(peer_id).await
                                 {
-                                    progress = ProgressManager::get_key(&peer_id.to_string())
-                                        .await
-                                        .unwrap()
-                                        .unwrap_or_default();
+                                    progress =
+                                        ProgressManager::get_sync_progress(&peer_id.to_string())
+                                            .await
+                                            .unwrap()
+                                            .unwrap_or_default()
+                                            .get_first_checkpoint()
+                                            .unwrap_or_default();
                                     info!(
                                         "Get synced progress success: {}, progress: {}",
                                         peer_id, progress

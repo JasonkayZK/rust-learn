@@ -77,9 +77,9 @@ pub(crate) async fn handle_message(
             .await;
 
             // Step 3: Save peer sync progress
-            ProgressManager::set_key(&propagation_source.to_string(), init_sync_msg.progress)
-                .await
-                .unwrap();
+            // ProgressManager::set_sync_progress(&propagation_source.to_string(), init_sync_msg.start_checkpoint_idx)
+            //     .await
+            //     .unwrap();
         } else {
             error!(
                 "Unable to serialize message: {:?} from type: {}",
@@ -113,7 +113,7 @@ pub(crate) async fn handle_message(
             // Step 2: Send sync data request
             let req = SyncDataRequest {
                 recipe_ids: query_ids,
-                progress_idx: sync_log_message.progress_idx,
+                progress_indexes: sync_log_message.progress_indexes,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
             SwarmHandler::publish(msg.topic.clone(), json)
@@ -127,7 +127,7 @@ pub(crate) async fn handle_message(
             all_data.retain(|x, _| sync_data_req.recipe_ids.contains(x));
             let resp = SyncDataResponse {
                 recipes: all_data,
-                progress_idx: sync_data_req.progress_idx,
+                progress_indexes: sync_data_req.progress_indexes,
             };
             let json = serde_json::to_string(&resp).expect("can jsonify request");
             SwarmHandler::publish(msg.topic.clone(), json)
@@ -135,9 +135,9 @@ pub(crate) async fn handle_message(
                 .unwrap();
 
             // Step 2: Update sync progress table
-            ProgressManager::set_key(&propagation_source.to_string(), sync_data_req.progress_idx)
-                .await
-                .unwrap();
+            // ProgressManager::set_sync_progress(&propagation_source.to_string(), sync_data_req.progress_idx)
+            //     .await
+            //     .unwrap();
 
             // Step 3: Remove sync status
             ProgressManager::remove_status(propagation_source).await;
@@ -148,9 +148,12 @@ pub(crate) async fn handle_message(
             merge_recipes(sync_data_resp.recipes).await.unwrap();
 
             // Step 2: Update sync progress table
-            ProgressManager::set_key(&propagation_source.to_string(), sync_data_resp.progress_idx)
-                .await
-                .unwrap();
+            ProgressManager::set_sync_progress(
+                &propagation_source.to_string(),
+                sync_data_resp.progress_indexes,
+            )
+            .await
+            .unwrap();
 
             // Step 3: Remove sync status
             ProgressManager::remove_status(propagation_source).await;
