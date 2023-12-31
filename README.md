@@ -168,3 +168,10 @@ ls r
 [ INFO]: rust_learn::handlers - (7147228881180381185, Recipe { id: 7147228881180381185, name: " 1", ingredients: "1", instructions: "1", shared: false })
 [ INFO]: rust_learn::handlers - (7147228881180381186, Recipe { id: 7147228881180381186, name: " 2", ingredients: "2", instructions: "2", shared: false })
 ```
+
+
+# **Reference**
+
+Blog:
+
+- [《使用AppendLog和Gossip在P2P网络中同步状态》](https://jasonkayzk.github.io/2023/12/31/使用AppendLog和Gossip在P2P网络中同步状态/)
