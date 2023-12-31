@@ -1,24 +1,23 @@
 use std::collections::HashSet;
 
 use anyhow::Result;
-use libp2p::Swarm;
 use log::{error, info};
 
-use crate::behaviour::RecipeBehaviour;
 use crate::consts::RECIPE_TOPIC;
 use crate::hlc::GlobalClock;
 use crate::id_generator::GlobalId;
 use crate::models::{ListMode, ListRequest, Recipe};
 use crate::storage::{read_local_recipes, write_local_recipes};
+use crate::swarm::handler::SwarmHandler;
 use crate::sync::models::OpEnum;
 use crate::sync::oplog::OpLogHandler;
 
 /// List all peers in P2P network
 ///
 /// Command: `ls p`
-pub async fn handle_list_peers(swarm: &mut Swarm<RecipeBehaviour>) {
+pub async fn handle_list_peers() {
     info!("Discovered Peers:");
-    let nodes = swarm.behaviour().mdns.discovered_nodes();
+    let nodes = SwarmHandler::discovered_nodes().await;
 
     let mut unique_peers = HashSet::new();
     for peer in nodes {
@@ -108,7 +107,7 @@ pub async fn handle_publish_recipe(cmd: &str) {
     }
 }
 
-pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) {
+pub async fn handle_list_recipes(cmd: &str) {
     let rest = cmd.strip_prefix("ls r ");
     match rest {
         Some("all") => {
@@ -116,20 +115,14 @@ pub async fn handle_list_recipes(cmd: &str, swarm: &mut Swarm<RecipeBehaviour>) 
                 mode: ListMode::All,
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm
-                .behaviour_mut()
-                .gossip
-                .publish(RECIPE_TOPIC.clone(), json.as_bytes()).unwrap();
+            SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes()).await.unwrap();
         }
         Some(recipes_peer_id) => {
             let req = ListRequest {
                 mode: ListMode::One(recipes_peer_id.to_owned()),
             };
             let json = serde_json::to_string(&req).expect("can jsonify request");
-            swarm
-                .behaviour_mut()
-                .gossip
-                .publish(RECIPE_TOPIC.clone(), json.as_bytes()).unwrap();
+            SwarmHandler::publish(RECIPE_TOPIC.clone(), json.as_bytes()).await.unwrap();
         }
         None => {
             match read_local_recipes().await {

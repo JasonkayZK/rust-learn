@@ -1,19 +1,17 @@
-use libp2p::{Multiaddr, PeerId, Swarm};
+use libp2p::{Multiaddr, PeerId};
 
-use crate::behaviour::RecipeBehaviour;
+use crate::swarm::handler::SwarmHandler;
 
-pub(crate) async fn handle_discovered(swarm: &mut Swarm<RecipeBehaviour>, discovered_list: Vec<(PeerId, Multiaddr)>) {
-    let behavior_mut = swarm.behaviour_mut();
+pub(crate) async fn handle_discovered(discovered_list: Vec<(PeerId, Multiaddr)>) {
     for (peer, _addr) in discovered_list {
-        behavior_mut.gossip.add_explicit_peer(&peer);
+        SwarmHandler::add_explicit_peer(&peer).await;
     }
 }
 
-pub(crate) async fn handle_expired(swarm: &mut Swarm<RecipeBehaviour>, expired_list: Vec<(PeerId, Multiaddr)>) {
-    let behavior_mut = swarm.behaviour_mut();
+pub(crate) async fn handle_expired(expired_list: Vec<(PeerId, Multiaddr)>) {
     for (peer, _addr) in expired_list {
-        if !behavior_mut.mdns.has_node(&peer) {
-            behavior_mut.gossip.remove_explicit_peer(&peer);
+        if !SwarmHandler::has_node(&peer).await {
+            SwarmHandler::remove_explicit_peer(&peer).await;
         }
     }
 }

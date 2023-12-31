@@ -35,12 +35,16 @@ pub struct ListResponse {
     pub receiver: String,
 }
 
-/// Old server request sync action actively to the new server
+/// Initiate server request sync data from the follow server
+///
+/// This will generate two topics:
+///  - sync-{initiate_peer}-{follow_peer}: initiate_peer send sync data to follow_peer
+///  - sync-{follow_peer}-{initiate_peer}: follow_peer send sync data to initiate_peer
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct InitSyncMessage {
     pub progress: u64,
-    pub old_peer: String,
-    pub new_peer: String,
+    pub initiate_peer: String,
+    pub follow_peer: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]

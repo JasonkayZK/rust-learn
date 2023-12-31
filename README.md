@@ -132,3 +132,11 @@ Blog:
 
 - [《Rust中使用libp2p》](https://jasonkayzk.github.io/2023/12/27/Rust中使用libp2p/)
 
+B: A -> Subscribed Event: SyncInit Topic
+B: Send InitSyncMessage: A->B to SyncInit Topic
+A: B -> Subscribed Event: Sync-A-B Topic, wait until receive InitSyncMessage
+A: Receive InitSyncMessage: A->B from SyncInit Topic, change status to start: B-Start
+
+A: B -> Subscribed Event: SyncInit Topic
+B: Send InitSyncMessage: A->B to SyncInit Topic
+
