@@ -253,6 +253,8 @@ async fn create_new_recipe(name: &str, ingredients: &str, instructions: &str) ->
         ingredients: ingredients.to_owned(),
         instructions: instructions.to_owned(),
         shared: false,
+        deleted: false,
+        opt_timestamp: GlobalClock::timestamp().await,
     };
     local_recipes.insert(new_id, recipe.clone());
     write_local_recipes(&local_recipes).await?;

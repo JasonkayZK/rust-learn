@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use log::warn;
 use tokio::fs;
 
 use crate::dir::data_file;
@@ -16,14 +17,30 @@ pub async fn apply_opt(
     // Step 1: Apply the opt
     let mut data = read_local_recipes().await?;
     match broadcast_opt_message.opt {
-        OpEnum::Insert(item_id, _) => {
-            data.insert(item_id, broadcast_opt_message.data.unwrap());
+        OpEnum::Insert(item_id, _timestamp) => {
+            match data.get(&item_id) {
+                None => {
+                    data.insert(item_id, broadcast_opt_message.data.unwrap());
+                }
+                Some(current_item) => {
+                    warn!("Filter duplicate insert!");
+                    return Ok(());
+                }
+            }
         }
-        OpEnum::Update(old_item_id, new_item_id, _) => {
-            data.remove(&old_item_id);
-            data.insert(new_item_id, broadcast_opt_message.data.unwrap());
+        OpEnum::Update(old_item_id, new_item_id, timestamp) => {
+            // Here we operate delete after the peer's update, just leave it as deleted!
+            if let Some(current_item) = data.get(&old_item_id) {
+                if current_item.opt_timestamp.gt(new_item_id) {}
+            } else if let Some(current_item) = data.get(&new_item_id) {
+
+            } else {
+                // We got no logs about the current log!
+                data.remove(&old_item_id);
+                data.insert(new_item_id, broadcast_opt_message.data.unwrap());
+            }
         }
-        OpEnum::Delete(item_id, _) => {
+        OpEnum::Delete(item_id, timestamp) => {
             data.remove(&item_id);
         }
     }

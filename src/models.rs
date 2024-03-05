@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::hash::Hash;
 
 use serde::{Deserialize, Serialize};
+use uhlc::Timestamp;
 
 use crate::sync::models::OpEnum;
 use crate::sync::progress::{SyncEnum, SyncProgress};
@@ -14,6 +15,8 @@ pub struct Recipe {
     pub ingredients: String,
     pub instructions: String,
     pub shared: bool,
+    pub deleted: bool,
+    pub opt_timestamp: Timestamp,
 }
 
 /// Fetch data mode

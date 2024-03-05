@@ -6,7 +6,7 @@ use std::sync::OnceLock;
 
 use libp2p::futures::executor::block_on;
 use tokio::sync::Mutex;
-use uhlc::{HLCBuilder, Timestamp, HLC, ID};
+use uhlc::{HLC, HLCBuilder, ID, Timestamp};
 
 use crate::consts::PEER_ID;
 
@@ -42,5 +42,22 @@ impl GlobalClock {
                 })
             })
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::hlc::GlobalClock;
+
+    #[tokio::test]
+    async fn test_generate() {
+
+    }
+
+    #[tokio::test]
+    async fn test_compare() {
+        let t1 = GlobalClock::timestamp().await;
+        let t2 = GlobalClock::timestamp().await;
+        assert!(t1.lt(&t2));
     }
 }
